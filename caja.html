@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Caja - Terminal Calama</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="caja.css">
+</head>
+
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <!-- Header -->
+    <header class="app-header sticky-top">
+        <div class="container py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="#" id="volver" class="volver-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Volver al Dashboard
+                        </a>
+                        <h1 class="h4 mb-0 text-white">
+                            <i class="fas fa-cash-register me-2"></i>
+                            Control de Caja
+                        </h1>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div id="cajaStatus" class="caja-status caja-cerrada">
+                        <i class="fas fa-circle"></i>
+                        <span>Caja Cerrada</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-wallet fa-2x text-primary"></i>
+                <div class="stat-value" id="statMontoInicial">$0.00</div>
+                <div class="stat-label">Monto Inicial</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-restroom fa-2x text-info"></i>
+                <div class="stat-value" id="statBanos">$0.00</div>
+                <div class="stat-label">Baños</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-shield-alt fa-2x text-warning"></i>
+                <div class="stat-value" id="statCustodia">$0.00</div>
+                <div class="stat-label">Custodia</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-car fa-2x text-success"></i>
+                <div class="stat-value" id="statParking">$0.00</div>
+                <div class="stat-label">Parking</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-bus fa-2x text-secondary"></i>
+                <div class="stat-value" id="statAndenes">$0.00</div>
+                <div class="stat-label">Andenes</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-chart-line fa-2x text-danger"></i>
+                <div class="stat-value" id="statTotal">$0.00</div>
+                <div class="stat-label">Total General</div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted">Progreso del Turno</span>
+                    <span class="text-muted" id="progressTime">--:--:--</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" id="turnProgress" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-play-circle me-2"></i>
+                    Acciones de Caja
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group w-100" role="group">
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalInicio" id="btnAbrirCaja">
+                        <i class="fas fa-lock-open me-2"></i>
+                        Abrir Caja
+                    </button>
+                    <button id="btnCerrarCaja" class="btn btn-danger" disabled>
+                        <i class="fas fa-lock me-2"></i>
+                        Cerrar Caja
+                    </button>
+                    <button id="btnImprimir" class="btn btn-secondary" disabled>
+                        <i class="fas fa-print me-2"></i>
+                        Imprimir Resumen
+                    </button>
+                    <button id="btnRefresh" class="btn btn-outline-secondary">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        Actualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Resumen de Caja
+                </h5>
+                <span class="badge bg-secondary" id="registrosCount">0 registros</span>
+            </div>
+            <div class="table-container">
+                <table class="table table-dark table-hover mb-0" id="tablaCaja">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-calendar me-2"></i>Fecha</th>
+                            <th><i class="fas fa-clock me-2"></i>Hora Inicio</th>
+                            <th><i class="fas fa-clock me-2"></i>Hora Cierre</th>
+                            <th><i class="fas fa-money-bill me-2"></i>Monto Inicial</th>
+                            <th><i class="fas fa-restroom me-2"></i>Baños</th>
+                            <th><i class="fas fa-shield-alt me-2"></i>Custodia</th>
+                            <th><i class="fas fa-car me-2"></i>Parking</th>
+                            <th><i class="fas fa-bus me-2"></i>Andenes</th>
+                            <th><i class="fas fa-chart-line me-2"></i>Total</th>
+                            <th><i class="fas fa-info-circle me-2"></i>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="noDataRow">
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <br>
+                                No hay datos de caja disponibles
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumen para Impresión -->
+        <div id="resumenCaja" class="resumen-caja no-print" style="display: none;"></div>
+    </main>
+
+    <!-- Modal Inicio -->
+    <div class="modal fade" id="modalInicio" tabindex="-1" aria-labelledby="modalInicioLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="modalInicioLabel">
+                        <i class="fas fa-lock-open me-2"></i>
+                        Iniciar Caja
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formInicioCaja">
+                        <div class="mb-3">
+                            <label for="monto_inicial_modal" class="form-label">Monto Inicial</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-gray-700 border-gray-600 text-white">$</span>
+                                <!-- Cambiar step a "1" para números enteros -->
+                                <input type="number" step="1" class="form-control" id="monto_inicial_modal" 
+                                    name="monto_inicial" placeholder="0" required min="1">
+                            </div>
+                            <div class="form-text text-gray-400">
+                                Ingrese el monto inicial en pesos chilenos (sin decimales).
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg" id="btnSubmitAbrir">
+                                <i class="fas fa-play-circle me-2"></i>
+                                Iniciar Caja
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="caja.js"></script>
+</body>
+</html>
