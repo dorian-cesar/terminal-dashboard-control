@@ -104,7 +104,13 @@ async function generarQRParaServicio(tipoServicio) {
   const contenedorQR = document.getElementById("contenedorQR");
   const contenedorContador = document.getElementById("keycont");
 
-  const id_caja = "12345";
+  const id_caja = localStorage.getItem("id_caja");
+  if (!id_caja) {
+    alert(
+      "Por favor, primero debe abrir la caja antes de generar un código de barras."
+    );
+    return;
+  }
 
   const fechaHoraAct = new Date();
   const horaStr =
