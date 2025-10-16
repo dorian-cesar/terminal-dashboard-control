@@ -3,11 +3,11 @@ const ENV = "prod"; // Cambia a "dev" o "prod" según corresponda
 
 const URLS = {
   dev: {
-    FRONT: "http://localhost/parkingCalama/",
+    FRONT: "http://localhost/terminal-dashboard-control/dashboard.html",
     API: "http://localhost/caja-calama/"
   },
   prod: {
-    FRONT: "https://andenes.terminal-calama.com/parkingCalama/",
+    FRONT: "http://localhost/terminal-dashboard-control/dashboard.html",
     API: "https://andenes.terminal-calama.com/caja-calama/"
   }
 };
@@ -15,6 +15,11 @@ const URLS = {
 // --- URLs dinámicas según entorno ---
 const VOLVER_URL = URLS[ENV].FRONT;
 const API_URL = URLS[ENV].API;
+
+$(document).ready(function() {
+  const VOLVER_URL = URLS[ENV].FRONT;
+  $('#volver').attr('href', VOLVER_URL);
+});
 
 // --- Sistema de Notificaciones ---
 class ToastSystem {
@@ -476,7 +481,7 @@ $('#btnRefresh').on('click', function () {
 });
 
 // --- Inicialización ---
-$(document).ready(function () {
+$(document).ready(function() {
     // Cargar estado inicial de la caja
     cargarEstadoCaja();
     
