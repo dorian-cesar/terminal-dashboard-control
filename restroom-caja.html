@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1366, initial-scale=1.0" />
+    <title>Generar QR - Baños</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QR Code -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+      defer
+    ></script>
+    <!-- jQuery (para compatibilidad con tu código anterior) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Scripts con tu lógica -->
+    <script defer src="valores.js"></script>
+    <script defer src="appRestroom.js"></script>
+    <style>
+      :root {
+        --gray-50: #fafafa;
+        --gray-100: #f5f5f5;
+        --gray-200: #e5e5e5;
+        --gray-300: #d4d4d4;
+        --gray-400: #a3a3a3;
+        --gray-500: #737373;
+        --gray-600: #525252;
+        --gray-700: #404040;
+        --gray-800: #262626;
+        --gray-900: #171717;
+        --accent-success: #22c55e;
+        --accent-warning: #eab308;
+        --accent-danger: #ef4444;
+        --accent-info: #3b82f6;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 1366px;
+        height: 768px;
+        overflow: hidden;
+        background-color: var(--gray-900);
+        color: var(--gray-200);
+        font-family: "Inter", system-ui, sans-serif;
+      }
+      .btn {
+        background-color: var(--accent-info);
+        color: white;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        transition: 0.2s;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-align: center;
+      }
+      .btn:hover {
+        background-color: #2563eb;
+      }
+      .btn-secondary {
+        background-color: var(--gray-700);
+      }
+      .btn-secondary:hover {
+        background-color: var(--gray-600);
+      }
+      .btn-success {
+        background-color: var(--accent-success);
+      }
+      .btn-success:hover {
+        background-color: #16a34a;
+      }
+      .btn.disabled {
+        background-color: var(--gray-600) !important;
+        cursor: not-allowed;
+      }
+      /* Estilos para los botones de servicio */
+      .button-group {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1rem;
+        width: 100%;
+      }
+      .service-button {
+        flex: 1;
+        background-color: var(--gray-800);
+        border: 2px solid var(--gray-600);
+        border-radius: 0.75rem;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+      }
+      .service-button:hover {
+        border-color: var(--accent-info);
+        background-color: rgba(59, 130, 246, 0.1);
+        transform: scale(1.02);
+      }
+      .service-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .service-button-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+      .service-button-title {
+        font-weight: 600;
+        color: var(--gray-200);
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .service-button-price {
+        color: var(--accent-info);
+        font-size: 1.6rem;
+        font-weight: bold;
+      }
+      .service-icon {
+        width: 36px;
+        height: 36px;
+      }
+      /* QR Container */
+      .qr-container {
+        background: var(--gray-800);
+        border: 2px solid var(--gray-600);
+        border-radius: 1rem;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Alert styles */
+      .alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--gray-600);
+        background-color: var(--gray-800);
+      }
+      .alert-success {
+        border-color: var(--accent-success);
+        background-color: rgba(34, 197, 94, 0.1);
+        color: var(--gray-200);
+      }
+      .alert-warning {
+        border-color: var(--accent-warning);
+        background-color: rgba(234, 179, 8, 0.1);
+        color: var(--gray-200);
+      }
+      .alert-danger {
+        border-color: var(--accent-danger);
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--gray-200);
+      }
+      .loading {
+        color: var(--gray-400);
+        text-align: center;
+        padding: 1rem;
+      }
+      .qr-container {
+        background: var(--gray-800);
+        border: 2px solid var(--gray-600);
+        border-radius: 1rem;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .qr-container canvas,
+      .qr-container img {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 180px;
+      }
+      .qr-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        height: 100%;
+      }
+      /* Layout optimizado para 1366x768 - AJUSTADO PERFECTO */
+      .app-container {
+        width: 1366px;
+        height: 768px;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        height: 70px;
+        flex-shrink: 0;
+        padding: 0.75rem 1rem;
+      }
+      main {
+        flex: 1;
+        overflow: hidden;
+        padding: 0.5rem;
+        height: calc(768px - 70px);
+      }
+      .content-box {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .service-section {
+        margin-bottom: 1rem;
+        width: 100%;
+      }
+      .qr-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+      .service-title {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+      }
+      .form-section {
+        margin-bottom: 0.5rem;
+      }
+      .buttons-section {
+        margin-top: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="bg-gray-800 border-b border-gray-700">
+        <div class="flex justify-between items-center h-full">
+          <div>
+            <h1 class="text-xl font-bold text-white">Administrador de Baños</h1>
+            <a
+              href="http://localhost/parkingCalama/"
+              class="inline-block mt-1 text-blue-400 hover:text-blue-300 text-sm"
+              >← Volver al Panel</a
+            >
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="btn btn-secondary text-sm"
+              onclick="location.reload()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                ></path>
+                <path d="M21 3v5h-5"></path>
+                <path
+                  d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+                ></path>
+                <path d="M8 16H3v5"></path>
+              </svg>
+              Actualizar
+            </button>
+            <button
+              class="btn btn-secondary text-sm"
+              onclick="window.location.href='restroom-estadisticas.html'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 3v18h18"></path>
+                <path d="m19 9-5 5-4-4-3 3"></path>
+              </svg>
+              Ver Estadísticas
+            </button>
+          </div>
+        </div>
+      </header>
+      <main class="flex items-center justify-center">
+        <div class="content-box bg-gray-800 border border-gray-700 rounded-2xl">
+          <!-- BOTONES DE SERVICIO -->
+          <div class="service-section">
+            <h2 class="service-title font-semibold text-white text-center">
+              Seleccionar Servicio
+            </h2>
+            <div class="button-group">
+              <button id="btnBaño" class="service-button">
+                <div class="service-button-content">
+                  <div class="service-button-title">
+                    <svg
+                      class="service-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"
+                      />
+                      <line x1="10" y1="5" x2="8" y2="7" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M7 12v4" />
+                      <path d="M17 12v4" />
+                    </svg>
+                    Baño
+                  </div>
+                  <div class="service-button-price" id="valorBaño">$500</div>
+                </div>
+              </button>
+              <button id="btnDucha" class="service-button">
+                <div class="service-button-content">
+                  <div class="service-button-title">
+                    <svg
+                      class="service-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"
+                      />
+                      <path
+                        d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"
+                      />
+                    </svg>
+                    Ducha
+                  </div>
+                  <div class="service-button-price" id="valorDucha">$1000</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- GENERACIÓN DE QR -->
+          <div class="qr-section">
+            <div class="form-section">
+              <form id="formulario">
+                <input
+                  type="text"
+                  id="keycont"
+                  class="w-full text-center bg-gray-700 border border-gray-600 rounded-lg py-2 text-gray-200 text-base font-mono mb-2"
+                  disabled
+                  placeholder="Código QR aparecerá aquí"
+                />
+                <button
+                  id="generar"
+                  type="button"
+                  class="btn w-full py-2 text-base"
+                  style="display: none"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect
+                      x="3"
+                      y="3"
+                      width="18"
+                      height="18"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <path d="M8 7v10"></path>
+                    <path d="M12 7v10"></path>
+                    <path d="M17 7v10"></path>
+                  </svg>
+                  Generar QR
+                </button>
+              </form>
+            </div>
+            <div id="contenedorQR" class="qr-container flex-1">
+              <div id="qrPlaceholder" class="text-gray-500 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="mx-auto mb-2"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <path d="M8 7v10"></path>
+                  <path d="M12 7v10"></path>
+                  <path d="M17 7v10"></path>
+                </svg>
+                <p class="text-sm">
+                  Presiona un servicio para imprimir ticket QR
+                </p>
+              </div>
+            </div>
+            <div class="buttons-section">
+              <button
+                class="btn btn-success w-full py-2 text-base"
+                onclick="printQR()"
+                style="display: none"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path
+                    d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+                  ></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Imprimir QR
+              </button>
+            </div>
+          </div>
+          <div id="resultado" class="mt-2 text-sm"></div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

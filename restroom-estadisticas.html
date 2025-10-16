@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1366, initial-scale=1.0" />
+    <title>Estadísticas - Baños y Duchas</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- jQuery (para compatibilidad con tu código anterior) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Scripts con tu lógica -->
+    <script defer src="valores.js"></script>
+    <script defer src="appRestroom.js"></script>
+
+    <style>
+      :root {
+        --gray-50: #fafafa;
+        --gray-100: #f5f5f5;
+        --gray-200: #e5e5e5;
+        --gray-300: #d4d4d4;
+        --gray-400: #a3a3a3;
+        --gray-500: #737373;
+        --gray-600: #525252;
+        --gray-700: #404040;
+        --gray-800: #262626;
+        --gray-900: #171717;
+        --accent-success: #22c55e;
+        --accent-warning: #eab308;
+        --accent-danger: #ef4444;
+        --accent-info: #3b82f6;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 1366px;
+        height: 768px;
+        overflow: hidden;
+        background-color: var(--gray-900);
+        color: var(--gray-200);
+        font-family: "Inter", system-ui, sans-serif;
+      }
+
+      .btn {
+        background-color: var(--accent-info);
+        color: white;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        transition: 0.2s;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-align: center;
+      }
+
+      .btn:hover {
+        background-color: #2563eb;
+      }
+
+      .btn-secondary {
+        background-color: var(--gray-700);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--gray-600);
+      }
+
+      input[type="text"],
+      input[type="date"],
+      select {
+        background-color: var(--gray-800);
+        border: 1px solid var(--gray-600);
+        color: var(--gray-200);
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--gray-600);
+        padding: 0.4rem;
+        text-align: center;
+      }
+
+      th {
+        background-color: var(--gray-800);
+        color: var(--gray-300);
+        position: sticky;
+        top: 0;
+        font-weight: 600;
+      }
+
+      td {
+        background-color: var(--gray-900);
+      }
+
+      /* Estilos para las estadísticas */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .stat-card {
+        background-color: var(--gray-800);
+        border: 1px solid var(--gray-600);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 80px;
+      }
+
+      .stat-info h3 {
+        color: var(--gray-400);
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-value {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--gray-200);
+      }
+
+      .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .icon-green {
+        background-color: rgba(34, 197, 94, 0.1);
+        color: var(--accent-success);
+      }
+      .icon-blue {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: var(--accent-info);
+      }
+      .icon-purple {
+        background-color: rgba(168, 85, 247, 0.1);
+        color: #a855f7;
+      }
+      .icon-yellow {
+        background-color: rgba(234, 179, 8, 0.1);
+        color: var(--accent-warning);
+      }
+
+      #resultado-verificacion {
+        border: 1px solid var(--gray-600);
+        border-radius: 0.5rem;
+        background-color: var(--gray-800);
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      #cerrar-tabla {
+        float: right;
+        color: var(--gray-400);
+        background: none;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 0.25rem;
+      }
+
+      #cerrar-tabla:hover {
+        color: var(--gray-200);
+      }
+
+      .table-container {
+        height: 320px;
+        overflow-y: auto;
+        border: 1px solid var(--gray-600);
+        border-radius: 0.5rem;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      /* Alert styles */
+      .alert {
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--gray-600);
+        background-color: var(--gray-800);
+        font-size: 0.875rem;
+      }
+
+      .alert-success {
+        border-color: var(--accent-success);
+        background-color: rgba(34, 197, 94, 0.1);
+        color: var(--gray-200);
+      }
+
+      .alert-warning {
+        border-color: var(--accent-warning);
+        background-color: rgba(234, 179, 8, 0.1);
+        color: var(--gray-200);
+      }
+
+      .alert-danger {
+        border-color: var(--accent-danger);
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--gray-200);
+      }
+
+      /* Loading styles */
+      .loading {
+        color: var(--gray-400);
+        text-align: center;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+      }
+
+      /* Layout optimizado para 1366x768 */
+      .app-container {
+        width: 1366px;
+        height: 768px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        height: 70px;
+        flex-shrink: 0;
+        padding: 0.75rem 1rem;
+      }
+
+      .stats-section {
+        padding: 0.75rem 1rem 0;
+        background-color: var(--gray-900);
+      }
+
+      main {
+        flex: 1;
+        overflow: hidden;
+        padding: 0 1rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        height: calc(768px - 70px - 120px);
+      }
+
+      .verification-section,
+      .data-section {
+        background-color: var(--gray-800);
+        border: 1px solid var(--gray-700);
+        border-radius: 0.75rem;
+        padding: 1rem;
+      }
+
+      .verification-section {
+        flex: 0 0 auto;
+      }
+
+      .data-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: white;
+      }
+
+      .filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        align-items: center;
+      }
+
+      .filter-input {
+        flex: 1;
+        min-width: 180px;
+      }
+
+      .filter-select {
+        min-width: 120px;
+      }
+
+      .filter-date {
+        min-width: 140px;
+      }
+
+      .verification-result {
+        margin-top: 0.75rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="app-container">
+      <header class="bg-gray-800 border-b border-gray-700">
+        <div class="flex justify-between items-center h-full">
+          <div>
+            <h1 class="text-xl font-bold text-white">
+              Estadísticas y Registros
+            </h1>
+          </div>
+          <div class="header-actions">
+            <button
+              class="btn btn-secondary text-sm"
+              onclick="location.reload()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                ></path>
+                <path d="M21 3v5h-5"></path>
+                <path
+                  d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+                ></path>
+                <path d="M8 16H3v5"></path>
+              </svg>
+              Actualizar
+            </button>
+            <button
+              class="btn btn-secondary text-sm"
+              onclick="window.location.href='restroom-caja.html'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <path d="M8 7v10"></path>
+                <path d="M12 7v10"></path>
+                <path d="M17 7v10"></path>
+              </svg>
+              Generar QR
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- SECCIÓN DE ESTADÍSTICAS -->
+      <section class="stats-section">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-info">
+              <h3>Total del Día</h3>
+              <div class="stat-value" id="totalDay">$0</div>
+            </div>
+            <div class="stat-icon icon-green">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path
+                  d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                ></path>
+              </svg>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <h3>Transacciones</h3>
+              <div class="stat-value" id="totalTransactions">0</div>
+            </div>
+            <div class="stat-icon icon-blue">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 3v18h18"></path>
+                <path d="m19 9-5 5-4-4-3 3"></path>
+              </svg>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <h3>Baños</h3>
+              <div class="stat-value" id="totalBanos">0</div>
+            </div>
+            <div class="stat-icon icon-purple">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"
+                ></path>
+                <line x1="10" y1="5" x2="8" y2="7"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M7 12v4"></path>
+                <path d="M17 12v4"></path>
+              </svg>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-info">
+              <h3>Duchas</h3>
+              <div class="stat-value" id="totalDuchas">0</div>
+            </div>
+            <div class="stat-icon icon-yellow">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"
+                ></path>
+                <path
+                  d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"
+                ></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <main>
+        <!-- VERIFICACIÓN Y FILTROS -->
+        <section class="verification-section">
+          <h2 class="section-title">Verificación y Filtros</h2>
+          <div class="filters-row">
+            <input
+              type="text"
+              id="buscador-codigo"
+              placeholder="Buscar por código"
+              class="filter-input"
+            />
+            <button id="boton-verificar" class="btn text-sm">
+              Verificar Código
+            </button>
+          </div>
+
+          <div
+            id="resultado-verificacion"
+            class="verification-result"
+            style="display: none"
+          >
+            <button id="cerrar-tabla">✖</button>
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Estado</th>
+                  <th>Fecha de uso</th>
+                  <th>Puerta</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-resultados"></tbody>
+            </table>
+          </div>
+
+          <div class="filters-row">
+            <select id="filtro-tipo" class="filter-select">
+              <option value="">Todos</option>
+              <option value="Baño">Baño</option>
+              <option value="Ducha">Ducha</option>
+            </select>
+            <input type="date" id="filtro-fecha" class="filter-date" />
+            <button id="boton-filtrar" class="btn text-sm">Filtrar</button>
+          </div>
+        </section>
+
+        <!-- TABLA DE DATOS -->
+        <section class="data-section">
+          <h2 class="section-title">Registros</h2>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Id</th>
+                  <th>Código</th>
+                  <th>Tipo</th>
+                  <th>Fecha emisión</th>
+                  <th>Hora</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
