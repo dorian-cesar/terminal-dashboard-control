@@ -1,4 +1,7 @@
 const formulario = document.getElementById('formulario');
+const barcodeInput = document.getElementById('barcodeIn');
+const btnConsultar = document.getElementById('btnConsultar');
+const btnLiberarImprimir = document.getElementById('btnLiberarImprimir');
 
 //const urlServer = 'http://localhost'
 const urlServer = 'https://andenes.terminal-calama.com'
@@ -8,20 +11,48 @@ const urlStore = urlServer + '/TerminalCalama/PHP/Custodia/store.php';
 const urlState = urlServer + '/TerminalCalama/PHP/Custodia/reload.php';
 const urlLoad = urlServer + '/TerminalCalama/PHP/Boleta/load.php';
 
+// ---- Reemplazo automático de '-' por '/' mientras escribe ----
+barcodeInput.addEventListener('input', function (e) {
+    // se reemplazan todos los guiones por slash y se eliminan espacios redundantes
+    const cursorPos = this.selectionStart;
+    this.value = this.value.replace(/-/g, '/').replace(/\s+/g, '');
+    // Opcional: podríamos restaurar posición del cursor si es necesario
+    try { this.setSelectionRange(cursorPos, cursorPos); } catch (e) { }
+});
+
+// ---- Manejo de "Consultar Ticket" ----
+btnConsultar.addEventListener('click', function () {
+    let barcodeTxt = barcodeInput.value.trim().replace(/-/g, '/');
+    if (barcodeTxt === "") {
+        alert("Por favor, ingrese un código de barras.");
+        return;
+    }
+    consultarTicket(barcodeTxt);
+});
+
+// ---- Submit del formulario: libera y luego imprime ----
 formulario.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    // proteger botón para evitar doble envío
+    if (btnLiberarImprimir.disabled) return;
+    btnLiberarImprimir.disabled = true;
 
     const id_caja = localStorage.getItem('id_caja');
     if (!id_caja) {
         alert('Por favor, primero debe abrir la caja antes de liberar un casillero.');
-        return; // Detiene la ejecución si no hay id_caja
+        btnLiberarImprimir.disabled = false;
+        return;
     }
-    
-    const barcodeTxt = formulario.barcodeIn.value.trim();
+
+    // Normalizar barcode: reemplazar '-' por '/'
+    const barcodeTxt = formulario.barcodeIn.value.trim().replace(/-/g, '/');
+
     // Separar ID y RUT (formato esperado: idcustodia/rut)
     const barcodeData = barcodeTxt.split('/');
     if (barcodeData.length !== 2) {
         alert("Código de barras inválido. El formato debe ser: idcustodia/rut");
+        btnLiberarImprimir.disabled = false;
         return;
     }
     const idIn = barcodeData[0]; // ID de custodia
@@ -30,8 +61,8 @@ formulario.addEventListener('submit', (e) => {
     // Obtenemos la fecha y hora actual
     const dateAct = new Date();
     const horaStr = dateAct.getHours().toString().padStart(2, '0') + ':' +
-                    dateAct.getMinutes().toString().padStart(2, '0') + ':' +
-                    dateAct.getSeconds().toString().padStart(2, '0');
+        dateAct.getMinutes().toString().padStart(2, '0') + ':' +
+        dateAct.getSeconds().toString().padStart(2, '0');
     const fechaStr = dateAct.toISOString().split('T')[0];
 
     // Llamar a la API para obtener los datos de la custodia
@@ -41,26 +72,21 @@ formulario.addEventListener('submit', (e) => {
                 throw new Error("Este ticket ya fue procesado o inválido.");
             }
 
-            // Verificar si el ticket ya fue marcado como entregado
             if (result.estado === "Entregado") {
                 throw new Error("El ticket ya ha sido escaneado anteriormente.");
             }
 
-            // Calcular la diferencia de tiempo entre la fecha de entrada y la fecha actual
             const dateOld = new Date(result.fecha + 'T' + result.hora);
-            const diffTime = Math.abs(dateAct - dateOld); // Diferencia total en milisegundos
-            const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24)); // Convertir a días completos
+            const diffTime = Math.abs(dateAct - dateOld);
+            const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
 
-            // Obtener el valor del bulto según la talla usando la función de valores.js
-            const valorBulto = getValorBulto(result.talla); // Obtener el valor basado en la talla
+            const valorBulto = getValorBulto(result.talla);
             if (valorBulto === 0) {
                 throw new Error("Error: Talla no válida.");
             }
 
-            // Cálculo del valor total
             const valorTotal = diffDays * valorBulto;
 
-            // Mostrar datos en la tabla
             const filasHTML = `
                 <tr>
                     <td>Casillero</td>
@@ -104,36 +130,45 @@ formulario.addEventListener('submit', (e) => {
                 id_caja: id_caja
             };
 
-            // Actualizar el registro en la base de datos
+            // Actualizar el registro en la base de datos y luego liberar casillero
             return callAPI(datos, urlUpdate).then(() => {
                 console.log("Registro actualizado correctamente.");
-                // Liberar el casillero llamando a cargarEstado
-                const casilla = result.posicion; // Casillero asociado al ticket
+                const casilla = result.posicion;
                 if (casilla) {
-                    return cargarEstado(casilla); // Desbloquear el casillero
+                    return cargarEstado(casilla); // devuelve promesa
                 }
+                // si no hay casilla, resolvemos inmediatamente
+                return Promise.resolve();
             });
         })
         .then(() => {
+            // Si todo OK: imprimir comprobante y limpiar
+            try {
+                printComp();
+            } catch (err) {
+                console.error("Error al imprimir comprobante:", err);
+            }
             alert("El ticket ha sido escaneado exitosamente y el casillero ha sido liberado.");
-            // Limpiar formulario
             formulario.reset();
         })
         .catch(err => {
-            console.error(err.message);
+            console.error(err.message || err);
             alert(err.message || "El ticket ya ha sido escaneado anteriormente o es inválido.");
+        })
+        .finally(() => {
+            btnLiberarImprimir.disabled = false;
         });
 });
 
 
 async function traerDatos(id) {
     let datos = await fetch(urlLoad, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(id)
-        })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(id)
+    })
         .then(response => response.json())
         .then(result => {
             return result;
@@ -147,13 +182,13 @@ async function traerDatos(id) {
 // Función para enviar datos a la API
 async function callAPI(datos, url) {
     let id = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(datos)
-        })
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datos)
+    })
         .then(response => response.json())
         .then(result => {
             console.log('Respuesta del servidor: ', result);
@@ -175,10 +210,8 @@ async function cargarEstado(casilla) {
             return;
         }
 
-        // Extraer y parsear la lista de casilleros bloqueados
         let estadoLista = JSON.parse(data[0].estado || '[]');
 
-        // Verificar si la casilla está en la lista antes de eliminarla
         const index = estadoLista.indexOf(casilla);
         if (index > -1) {
             estadoLista.splice(index, 1);
@@ -186,45 +219,41 @@ async function cargarEstado(casilla) {
             console.warn(`Casillero ${casilla} no estaba bloqueado.`);
         }
 
-        // Obtener fecha y hora actual
         const dateAct = new Date();
         const horaStr = dateAct.getHours().toString().padStart(2, '0') + ':' +
-                        dateAct.getMinutes().toString().padStart(2, '0') + ':' +
-                        dateAct.getSeconds().toString().padStart(2, '0');
+            dateAct.getMinutes().toString().padStart(2, '0') + ':' +
+            dateAct.getSeconds().toString().padStart(2, '0');
         const fechaStr = dateAct.toISOString().split('T')[0];
 
-        // Datos actualizados para enviar a la API
         const datos = {
             estado: JSON.stringify(estadoLista),
             hora: horaStr,
             fecha: fechaStr,
         };
 
-        // Guardar la nueva lista de casilleros bloqueados
         await callAPI(datos, urlStore);
         console.log(`Estado actualizado: Casillero ${casilla} desbloqueado.`);
-        
+
     } catch (error) {
         console.error('Error al actualizar estado:', error);
+        throw error;
     }
 }
 
 function printBol() {
-    // Verifica que el valor total está disponible
     const valorTotal = parseFloat(document.querySelector('#valorTotal').textContent.replace('$', '').trim());
 
-    // Si el valor total no está disponible o es NaN, se muestra un error
     if (!valorTotal || isNaN(valorTotal)) {
         console.error("El valor total no es válido para el servicio:", "Custodia");
         return;
     }
 
-    let servicio = "Custodia"; 
+    let servicio = "Custodia";
 
     let payload = {
         "codigoEmpresa": "89",
         "tipoDocumento": "39",
-        "total": valorTotal.toString(), // Pasar el valor como string
+        "total": valorTotal.toString(),
         "detalleBoleta": `53-${valorTotal}-1-dsa-${servicio}`
     };
 
@@ -245,7 +274,6 @@ function printBol() {
                 if (response.respuesta === "OK") {
                     let pdfUrl = response.rutaAcepta;
 
-                    // Abrir el PDF directamente en una nueva ventana
                     const ventanaImpr = window.open(pdfUrl, '_blank');
                     if (!ventanaImpr) {
                         alert("Por favor, habilite las ventanas emergentes para visualizar el PDF.");
@@ -272,48 +300,42 @@ function printBol() {
 }
 
 const consultarTicket = (barcodeTxt) => {
+    // barcodeTxt ya viene normalizado desde quien lo llame (reemplazo hecho)
     const barcodeData = barcodeTxt.split('/');
     if (barcodeData.length !== 2) {
         alert("Código de barras inválido.");
         return;
     }
-    const idIn = barcodeData[0]; // ID de custodia
-    const rutIn = barcodeData[1]; // RUT
+    const idIn = barcodeData[0];
+    const rutIn = barcodeData[1];
 
-    // Obtener la fecha y hora actual
     const dateAct = new Date();
     const horaStr = dateAct.getHours().toString().padStart(2, '0') + ':' +
-                    dateAct.getMinutes().toString().padStart(2, '0') + ':' +
-                    dateAct.getSeconds().toString().padStart(2, '0');
+        dateAct.getMinutes().toString().padStart(2, '0') + ':' +
+        dateAct.getSeconds().toString().padStart(2, '0');
     const fechaStr = dateAct.toISOString().split('T')[0];
 
-    // Llamar a la API para obtener los datos de la custodia
     traerDatos(idIn)
         .then(result => {
             if (!result || !result.fecha || !result.hora) {
                 throw new Error("El ticket ya ha sido escaneado anteriormente o es inválido.");
             }
 
-            // Verificar si el ticket ya fue marcado como entregado
             if (result.estado === "Entregado") {
                 throw new Error("El ticket ya ha sido marcado como entregado.");
             }
 
-            // Calcular la diferencia de tiempo entre la fecha de entrada y la fecha actual
             const dateOld = new Date(result.fecha + 'T' + result.hora);
-            const diffTime = Math.abs(dateAct - dateOld); // Diferencia total en milisegundos
-            const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24)); // Convertir a días completos
+            const diffTime = Math.abs(dateAct - dateOld);
+            const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
 
-            // Obtener el valor del bulto según la talla usando la función de valores.js
             const valorBulto = getValorBulto(result.talla);
             if (valorBulto === 0) {
                 throw new Error("Error: Talla no válida.");
             }
 
-            // Cálculo del valor total
             let valorTotal = diffDays * valorBulto;
 
-            // Mostrar datos en la tabla
             const filasHTML = `
                 <tr>
                     <td>Casillero</td>
@@ -352,109 +374,111 @@ const consultarTicket = (barcodeTxt) => {
         });
 };
 
-document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("btnConsultar").addEventListener("click", function() {
-        const barcodeTxt = document.getElementById("barcodeIn").value.trim();
-
-        if (barcodeTxt === "") {
-            alert("Por favor, ingrese un código de barras.");
-            return;
-        }
-
-        consultarTicket(barcodeTxt);
-    });
-});
+// Mantengo la función printComp (la misma que tenías), la llamamos desde el submit
 function printComp() {
-    // Obtener datos del DOM
-    const casillero = document.querySelector('#tabla-body tr:nth-child(1) td:nth-child(2)').innerText;
-    const fechaEntrada = document.querySelector('#tabla-body tr:nth-child(2) td:nth-child(2)').innerText;
-    const fechaSalida = document.querySelector('#tabla-body tr:nth-child(3) td:nth-child(2)').innerText;
-    const tiempoOcupado = document.querySelector('#tabla-body tr:nth-child(4) td:nth-child(2)').innerText;
-    const valorPorDia = document.querySelector('#tabla-body tr:nth-child(5) td:nth-child(2)').innerText;
-    const valorTotal = document.querySelector('#tabla-body tr:nth-child(6) td:nth-child(2)').innerText;
-    const talla = document.querySelector('#tabla-body tr:nth-child(7) td:nth-child(2)').innerText;
+    // Normalizar y obtener barcode (id/rut) desde el input
+    const rawBarcode = (barcodeInput && barcodeInput.value) ? barcodeInput.value.trim().replace(/-/g, '/') : '';
+    // Datos visibles en el comprobante tomados de la tabla (si existen)
+    const casillero = document.querySelector('#tabla-body tr:nth-child(1) td:nth-child(2)')?.innerText || '';
+    const fechaEntrada = document.querySelector('#tabla-body tr:nth-child(2) td:nth-child(2)')?.innerText || '';
+    const fechaSalida = document.querySelector('#tabla-body tr:nth-child(3) td:nth-child(2)')?.innerText || '';
+    const tiempoOcupado = document.querySelector('#tabla-body tr:nth-child(4) td:nth-child(2)')?.innerText || '';
+    const valorPorDia = document.querySelector('#tabla-body tr:nth-child(5) td:nth-child(2)')?.innerText || '';
+    const valorTotal = document.querySelector('#tabla-body tr:nth-child(6) td:nth-child(2)')?.innerText || '';
+    const talla = document.querySelector('#tabla-body tr:nth-child(7) td:nth-child(2)')?.innerText || '';
 
-    // Número de comprobante aleatorio
-    const numeroComprobante = Math.floor(100000 + Math.random() * 900000);
+    // Si no hay barcode, pedir confirmación antes de imprimir sin él
+    if (!rawBarcode) {
+        if (!confirm('No se detectó el código (id/rut). ¿Deseas imprimir el comprobante sin código de barras?')) return;
+    }
 
-    // Abrir ventana de impresión
-    const ventanaImpresion = window.open('', '_blank');
+    const dateAct = new Date();
+    const horaStr = dateAct.getHours().toString().padStart(2, '0') + ':' +
+        dateAct.getMinutes().toString().padStart(2, '0') + ':' +
+        dateAct.getSeconds().toString().padStart(2, '0');
+    const fechaStr = dateAct.toISOString().split('T')[0];
 
-    // Contenido HTML optimizado para impresión térmica
-    ventanaImpresion.document.write(`
-        <html>
-        <head>
-            <title>Comprobante de Entrega</title>
-            <style>
-                body { 
-                    font-family: Arial, sans-serif; 
-                    text-align: center;
-                    width: 72mm;
-                    margin: 0 auto;
-                    padding: 2mm;
-                    font-size: 12px;
-                }
-                h1, h2, h3, p { 
-                    margin: 5px 0;
-                    font-weight: normal;
-                }
-                .line { 
-                    border-bottom: 1px dashed #000; 
-                    margin: 8px 0;
-                }
-                .left-align {
-                    text-align: left;
-                    padding-left: 10px;
-                }
-            </style>
-        </head>
-        <body>
-            <h1>Terminal Calama</h1>
-            <p>by WIT</p>
-            <h2>COMPROBANTE DE ENTREGA</h2>
+    const printContent = `
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Imprimir</title>
+<style>
+    @page { margin: 4mm; }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 6mm;
+        text-align: center;
+    }
+    .ticket { width: 100%; padding: 4px 0; page-break-after: avoid; }
+    h1 { font-size: 12px; margin: 0; }
+    .datetime { font-size: 10px; margin: 4px 0 8px; }
+    .left { text-align: left; padding: 0 6mm; font-size: 11px; }
+    .line { border-bottom: 1px dashed #000; margin: 8px 0; }
+    svg { max-width: 100%; height: auto; display: block; margin: 6px auto; }
+    .total { font-weight: bold; font-size: 13px; margin-top: 6px; }
+</style>
+</head>
+<body>
+    <div class="ticket">
+        <h1>Terminal Calama</h1>
+        <div class="datetime">${fechaStr} ${horaStr}</div>
+        <div class="left">
+            <div><strong>Casillero:</strong> ${casillero}</div>
+            <div><strong>Entrada:</strong> ${fechaEntrada}</div>
+            <div><strong>Salida:</strong> ${fechaSalida}</div>
+            <div><strong>Tiempo:</strong> ${tiempoOcupado}</div>
             <div class="line"></div>
-            
-            <h3>N°: ${numeroComprobante}</h3>
-            <p class="left-align"><strong>Casillero:</strong> ${casillero}</p>
-            <p class="left-align"><strong>Entrada:</strong> ${fechaEntrada}</p>
-            <p class="left-align"><strong>Salida:</strong> ${fechaSalida}</p>
-            <p class="left-align"><strong>Tiempo:</strong> ${tiempoOcupado}</p>
-            
+            <div><strong>Valor/día:</strong> ${valorPorDia}</div>
+            <div><strong>Talla:</strong> ${talla}</div>
             <div class="line"></div>
-            
-            <p class="left-align"><strong>Valor/día:</strong> ${valorPorDia}</p>
-            <p class="left-align"><strong>Talla:</strong> ${talla}</p>
-            
-            <div class="line"></div>
-            
-            <h3>TOTAL: ${valorTotal}</h3>
-            
-            <div class="line"></div>
-            <p>Gracias por utilizar nuestros servicios</p>
-            <p>Este es un comprobante válido</p>
-            
-        </body>
-        </html>
-    `);
-    ventanaImpresion.document.close();
+            <div class="total">TOTAL: ${valorTotal}</div>
+        </div>
+        <div id="barcode-wrap" style="margin-top:8px;">
+            <svg id="barcode"></svg>
+        </div>
+    </div>
 
-    // Imprimir después de un breve retraso
-    setTimeout(() => {
-        ventanaImpresion.focus();
-        ventanaImpresion.print();
-
-        // Cerrar la ventana después de imprimir
-        setTimeout(() => {
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script>
+        (function() {
             try {
-                ventanaImpresion.close();
-            } catch (e) {
-                console.error("No se pudo cerrar la ventana:", e);
+                const data = ${JSON.stringify(rawBarcode)};
+                if (data) {
+                    try {
+                        JsBarcode("#barcode", data, { format: "CODE128", displayValue: true, width: 2, height: 50, margin: 10 });
+                    } catch (e) {
+                        console.warn('JsBarcode error', e);
+                        document.getElementById('barcode-wrap').innerHTML = '<div style="font-size:10px;">'+data+'</div>';
+                    }
+                } else {
+                    // No hay barcode: eliminar SVG y mostrar texto
+                    document.getElementById('barcode-wrap').innerHTML = '<div style="font-size:12px;">No hay código disponible</div>';
+                }
+            } catch (err) {
+                console.error('print window init error', err);
             }
-        }, 1000);
-    }, 500);
 
-    // Cerrar si el usuario cancela la impresión
-    ventanaImpresion.onafterprint = () => {
-        ventanaImpresion.close();
-    };
+            // Esperar un poco para que el SVG se renderice, luego imprimir y cerrar
+            setTimeout(() => {
+                try { window.focus(); window.print(); } catch (e) { console.error('print error', e); }
+                setTimeout(() => { try { window.close(); } catch(e){} }, 800);
+            }, 350);
+        })();
+    </script>
+</body>
+</html>
+`;
+
+    const win = window.open('', '_blank', 'width=400,height=700');
+    if (!win) {
+        alert('Permite popups en tu navegador para poder imprimir.');
+        return;
+    }
+    win.document.open();
+    win.document.write(printContent);
+    win.document.close();
 }
+
