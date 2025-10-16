@@ -1,18 +1,18 @@
 :root {
-  /* Grayscale palette */
+  /* Ajustando paleta de grises para ser más oscura y coincidir con la imagen de referencia */
   --gray-50: #fafafa;
   --gray-100: #f5f5f5;
   --gray-200: #e5e5e5;
   --gray-300: #d4d4d4;
   --gray-400: #a3a3a3;
   --gray-500: #737373;
-  --gray-600: #525252;
-  --gray-700: #404040;
-  --gray-800: #262626;
-  --gray-900: #171717;
+  --gray-600: #3f3f3f;
+  --gray-700: #2d2d2d;
+  --gray-800: #242424;
+  --gray-900: #1a1a1a;
 
-  /* Accent colors */
-  --accent-success: #22c55e;
+  /* Ajustando colores de acento para coincidir con la imagen */
+  --accent-success: #10b981;
   --accent-warning: #eab308;
   --accent-danger: #ef4444;
   --accent-info: #3b82f6;
@@ -26,8 +26,8 @@ body {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background-color: var(--gray-900);
-  color: var(--gray-200);
+  background-color: #1a1a1a; /* Fondo más oscuro */
+  color: #e5e5e5; /* Texto más claro para mejor contraste */
   font-family: "Inter", system-ui, sans-serif;
 
   display: flex;
@@ -36,11 +36,12 @@ body {
 }
 
 .app-container {
-  width: 1366px;
-  height: 768px;
+  /* width: 1366px;
+  height: 768px; */
+  width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: var(--gray-900);
+  background-color: #1a1a1a; /* Fondo más oscuro */
 }
 
 /* ---------------- Header & Main ---------------- */
@@ -80,19 +81,19 @@ main {
   background-color: #2563eb;
 }
 .btn-secondary {
-  background-color: var(--gray-700);
+  background-color: #2d2d2d; /* Botón secundario más oscuro */
 }
 .btn-secondary:hover {
-  background-color: var(--gray-600);
+  background-color: #3f3f3f; /* Hover más claro */
 }
 .btn-success {
-  background-color: var(--accent-success);
+  background-color: #10b981; /* Verde más vibrante */
 }
 .btn-success:hover {
-  background-color: #16a34a;
+  background-color: #059669; /* Hover verde más oscuro */
 }
 .btn.disabled {
-  background-color: var(--gray-600) !important;
+  background-color: #3f3f3f !important; /* Deshabilitado más oscuro */
   cursor: not-allowed;
 }
 
@@ -100,9 +101,9 @@ main {
 input[type="text"],
 input[type="date"],
 select {
-  background-color: var(--gray-800);
-  border: 1px solid var(--gray-600);
-  color: var(--gray-200);
+  background-color: #2d2d2d; /* Inputs más oscuros */
+  border: 1px solid #3f3f3f; /* Borde más oscuro */
+  color: #e5e5e5; /* Texto más claro */
   border-radius: 0.375rem;
   padding: 0.5rem;
   font-size: 0.875rem;
@@ -116,26 +117,26 @@ table {
 }
 th,
 td {
-  border: 1px solid var(--gray-600);
+  border: 1px solid #3f3f3f; /* Bordes más oscuros */
   padding: 0.4rem;
   text-align: center;
 }
 th {
-  background-color: var(--gray-800);
-  color: var(--gray-300);
+  background-color: #242424; /* Header más oscuro */
+  color: #d4d4d4; /* Texto más claro */
   position: sticky;
   top: 0;
   font-weight: 600;
 }
 td {
-  background-color: var(--gray-900);
+  background-color: #1a1a1a; /* Celdas más oscuras */
 }
 
 /* Table containers */
 .table-container {
   height: 320px;
   overflow-y: auto;
-  border: 1px solid var(--gray-600);
+  border: 1px solid #3f3f3f; /* Borde más oscuro */
   border-radius: 0.5rem;
 }
 
@@ -152,13 +153,13 @@ td {
 
 .stats-section {
   padding: 0.75rem 1rem 0;
-  background-color: var(--gray-900);
+  background-color: #1a1a1a; /* Fondo más oscuro */
 }
 
 .verification-section,
 .data-section {
-  background-color: var(--gray-800);
-  border: 1px solid var(--gray-700);
+  background-color: #242424; /* Secciones más oscuras */
+  border: 1px solid #2d2d2d; /* Borde más oscuro */
   border-radius: 0.75rem;
   padding: 1rem;
 }
@@ -189,8 +190,8 @@ td {
 }
 
 .stat-card {
-  background-color: var(--gray-800);
-  border: 1px solid var(--gray-600);
+  background-color: #242424; /* Cards más oscuros */
+  border: 1px solid #3f3f3f; /* Borde más oscuro */
   border-radius: 0.75rem;
   padding: 1rem;
   display: flex;
@@ -199,7 +200,7 @@ td {
   height: 80px;
 }
 .stat-info h3 {
-  color: var(--gray-400);
+  color: #a3a3a3; /* Títulos más claros */
   font-size: 0.8rem;
   font-weight: 500;
   margin-bottom: 0.25rem;
@@ -207,7 +208,7 @@ td {
 .stat-value {
   font-size: 1.25rem;
   font-weight: bold;
-  color: var(--gray-200);
+  color: #e5e5e5; /* Valores más claros */
 }
 .stat-icon {
   width: 36px;
@@ -218,19 +219,19 @@ td {
   justify-content: center;
 }
 .icon-green {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: var(--accent-success);
+  background-color: rgba(16, 185, 129, 0.15); /* Fondo verde más vibrante */
+  color: #10b981; /* Verde más vibrante */
 }
 .icon-blue {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(59, 130, 246, 0.15); /* Fondo azul más visible */
   color: var(--accent-info);
 }
 .icon-purple {
-  background-color: rgba(168, 85, 247, 0.1);
+  background-color: rgba(168, 85, 247, 0.15); /* Fondo púrpura más visible */
   color: #a855f7;
 }
 .icon-yellow {
-  background-color: rgba(234, 179, 8, 0.1);
+  background-color: rgba(234, 179, 8, 0.15); /* Fondo amarillo más visible */
   color: var(--accent-warning);
 }
 
@@ -239,11 +240,13 @@ td {
   display: flex;
   gap: 1.5rem;
   margin-top: 1rem;
+  margin-bottom: 1rem;
+  height: 12rem;
 }
 .service-button {
   flex: 1;
-  background-color: var(--gray-800);
-  border: 2px solid var(--gray-600);
+  background-color: #242424; /* Botones más oscuros */
+  border: 2px solid #3f3f3f; /* Borde más oscuro */
   border-radius: 0.75rem;
   padding: 1.5rem 1rem;
   text-align: center;
@@ -273,14 +276,14 @@ td {
 }
 .service-button-title {
   font-weight: 600;
-  color: var(--gray-200);
+  color: #e5e5e5; /* Texto más claro */
   font-size: 1.3rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 .service-button-price {
-  color: var(--accent-info);
+  color: #ffffff; /* Cambiando precio de azul a blanco para coincidir con la imagen de referencia */
   font-size: 1.6rem;
   font-weight: bold;
 }
@@ -291,11 +294,12 @@ td {
 
 /* ---------------- QR ---------------- */
 .qr-container {
-  background: var(--gray-800);
-  border: 2px solid var(--gray-600);
+  background: #242424; /* Contenedor QR más oscuro */
+  border: 2px solid #3f3f3f; /* Borde más oscuro */
   border-radius: 1rem;
   padding: 1rem;
-  margin: 0.5rem 0;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   min-height: 200px;
   display: flex;
   flex-direction: column;
@@ -324,38 +328,38 @@ td {
   padding: 1rem;
   border-radius: 0.5rem;
   margin-bottom: 1rem;
-  border: 1px solid var(--gray-600);
-  background-color: var(--gray-800);
+  border: 1px solid #3f3f3f; /* Borde más oscuro */
+  background-color: #242424; /* Fondo más oscuro */
   font-size: 0.875rem;
 }
 .alert-success {
-  border-color: var(--accent-success);
-  background-color: rgba(34, 197, 94, 0.1);
-  color: var(--gray-200);
+  border-color: #10b981; /* Verde más vibrante */
+  background-color: rgba(16, 185, 129, 0.15); /* Fondo verde más visible */
+  color: #e5e5e5; /* Texto más claro */
 }
 .alert-warning {
   border-color: var(--accent-warning);
-  background-color: rgba(234, 179, 8, 0.1);
-  color: var(--gray-200);
+  background-color: rgba(234, 179, 8, 0.15); /* Fondo amarillo más visible */
+  color: #e5e5e5; /* Texto más claro */
 }
 .alert-danger {
   border-color: var(--accent-danger);
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--gray-200);
+  background-color: rgba(239, 68, 68, 0.15); /* Fondo rojo más visible */
+  color: #e5e5e5; /* Texto más claro */
 }
 
 /* ---------------- Misc ---------------- */
 .loading {
-  color: var(--gray-400);
+  color: #a3a3a3; /* Texto de carga más claro */
   text-align: center;
   padding: 1rem;
   font-size: 0.875rem;
 }
 
 #resultado-verificacion {
-  border: 1px solid var(--gray-600);
+  border: 1px solid #3f3f3f; /* Borde más oscuro */
   border-radius: 0.5rem;
-  background-color: var(--gray-800);
+  background-color: #242424; /* Fondo más oscuro */
   padding: 0.75rem;
   margin-bottom: 0.75rem;
   font-size: 0.875rem;
@@ -363,7 +367,7 @@ td {
 
 #cerrar-tabla {
   float: right;
-  color: var(--gray-400);
+  color: #a3a3a3; /* Color más claro */
   background: none;
   border: none;
   font-size: 1rem;
@@ -371,7 +375,7 @@ td {
   padding: 0.25rem;
 }
 #cerrar-tabla:hover {
-  color: var(--gray-200);
+  color: #e5e5e5; /* Hover más claro */
 }
 
 /* Filters row */

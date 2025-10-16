@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1366, initial-scale=1.0" />
-    <title>Generar QR - Baños</title>
+    <title>Administrador - Baños y Duchas</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="banos.css" rel="stylesheet" />
@@ -21,7 +21,9 @@
   </head>
   <body>
     <div class="app-container">
-      <header class="bg-gray-800 border-b border-gray-700">
+      <header
+        style="background-color: #242424; border-bottom: 1px solid #3f3f3f"
+      >
         <div class="flex justify-between items-center h-full">
           <div>
             <h1 class="text-xl font-bold text-white">
@@ -84,9 +86,16 @@
         </div>
       </header>
       <main class="flex items-center justify-center">
-        <div class="content-box bg-gray-800 border border-gray-700 rounded-2xl">
+        <div
+          class="content-box"
+          style="
+            background-color: #1a1a1a;
+            border: 1px solid #3f3f3f;
+            border-radius: 1rem;
+          "
+        >
           <!-- SECCIÓN DE ESTADÍSTICAS -->
-          <section class="stats-section mb-4">
+          <section class="stats-section">
             <div class="stats-grid">
               <div class="stat-card">
                 <div class="stat-info">
@@ -260,7 +269,15 @@
                 <input
                   type="text"
                   id="keycont"
-                  class="w-full text-center bg-gray-700 border border-gray-600 rounded-lg py-2 text-gray-200 text-base font-mono mb-2 mt-2"
+                  class="w-full text-center font-mono"
+                  style="
+                    background-color: #2d2d2d;
+                    border: 1px solid #3f3f3f;
+                    border-radius: 0.5rem;
+                    padding: 0.5rem;
+                    color: #e5e5e5;
+                    font-size: 1rem;
+                  "
                   disabled
                   placeholder="Código QR aparecerá aquí"
                 />
@@ -298,7 +315,11 @@
               </form>
             </div>
             <div id="contenedorQR" class="qr-container flex-1">
-              <div id="qrPlaceholder" class="text-gray-500 text-center">
+              <div
+                id="qrPlaceholder"
+                class="text-center"
+                style="color: #737373"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="40"
