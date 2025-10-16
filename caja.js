@@ -1,11 +1,20 @@
 // --- Configuración de entorno ---
-const ENV = "prod";
+const ENV = "prod"; // Cambia a "dev" o "prod" según corresponda
+
 const URLS = {
-    dev: "http://localhost/parkingCalama/",
-    prod: "https://andenes.terminal-calama.com/caja-calama/"
+  dev: {
+    FRONT: "http://localhost/parkingCalama/",
+    API: "http://localhost/caja-calama/"
+  },
+  prod: {
+    FRONT: "https://andenes.terminal-calama.com/parkingCalama/",
+    API: "https://andenes.terminal-calama.com/caja-calama/"
+  }
 };
-const VOLVER_URL = URLS[ENV];
-$('#volver').attr('href', VOLVER_URL);
+
+// --- URLs dinámicas según entorno ---
+const VOLVER_URL = URLS[ENV].FRONT;
+const API_URL = URLS[ENV].API;
 
 // --- Sistema de Notificaciones ---
 class ToastSystem {
@@ -165,7 +174,7 @@ class UIStateManager {
 
 // --- Funciones para Movimientos en Tiempo Real ---
 function cargarMovimientosCaja(idCaja) {
-    $.post(VOLVER_URL+'caja.php', { accion: 'obtener_movimientos', id_caja: idCaja })
+    $.post(API_URL+'caja.php', { accion: 'obtener_movimientos', id_caja: idCaja })
         .done(function(res) {
             let data;
             try {
@@ -325,7 +334,7 @@ function cargarEstadoCaja() {
     if (id) {
         UIStateManager.setLoading('#btnRefresh', true);
         
-        $.post(VOLVER_URL+'caja.php', { accion: 'mostrar', id_caja: id })
+        $.post(API_URL+'caja.php', { accion: 'mostrar', id_caja: id })
             .done(function (res) {
                 let data;
                 try {
@@ -374,7 +383,7 @@ $('#formInicioCaja').on('submit', function (e) {
 
     UIStateManager.setLoading('#btnSubmitAbrir', true);
     
-    $.post(VOLVER_URL+'caja.php', { accion: 'abrir', monto_inicial: monto })
+    $.post(API_URL+'caja.php', { accion: 'abrir', monto_inicial: monto })
         .done(function (res) {
             let data;
             try {
@@ -419,7 +428,7 @@ $('#btnCerrarCaja').on('click', function () {
 
     UIStateManager.setLoading('#btnCerrarCaja', true);
     
-    $.post(VOLVER_URL+'caja.php', { accion: 'cerrar', id_caja: id })
+    $.post(API_URL+'caja.php', { accion: 'cerrar', id_caja: id })
         .done(function (res) {
             let data;
             try {
