@@ -201,21 +201,13 @@ function initializeFiltersAndVerification() {
   const cerrarTabla = document.getElementById("cerrar-tabla");
   const buscadorCodigo = document.getElementById("buscador-codigo");
   const filtroTipo = document.getElementById("filtro-tipo");
-  if (botonFiltrar) {
-    botonFiltrar.addEventListener("click", aplicarFiltros);
-  }
-  if (botonVerificar) {
-    botonVerificar.addEventListener("click", verificarCodigo);
-  }
-  if (cerrarTabla) {
-    cerrarTabla.addEventListener("click", cerrarTablaFunc);
-  }
-  if (buscadorCodigo) {
-    buscadorCodigo.addEventListener("input", aplicarFiltros);
-  }
-  if (filtroTipo) {
-    filtroTipo.addEventListener("change", aplicarFiltros);
-  }
+  const filtroFecha = document.getElementById("filtro-fecha");
+  if (botonFiltrar) botonFiltrar.addEventListener("click", aplicarFiltros);
+  if (botonVerificar) botonVerificar.addEventListener("click", verificarCodigo);
+  if (cerrarTabla) cerrarTabla.addEventListener("click", cerrarTablaFunc);
+  if (buscadorCodigo) buscadorCodigo.addEventListener("input", aplicarFiltros);
+  if (filtroTipo) filtroTipo.addEventListener("change", aplicarFiltros);
+  if (filtroFecha) filtroFecha.addEventListener("change", aplicarFiltros);
 }
 
 function initializeBoletaGeneration() {
