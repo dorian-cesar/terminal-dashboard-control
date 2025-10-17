@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
     <link rel="stylesheet" href="boleta.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
 </head>
 
 <body>
@@ -117,6 +121,69 @@
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-dark-custom">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPagoLabel">
+                        <i class="fas fa-credit-card me-2 text-info"></i>
+                        Seleccionar Método de Pago
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Pago en Efectivo -->
+                        <div class="col-md-6">
+                            <div class="card-pago-option text-center p-4 h-100" data-metodo="efectivo">
+                                <div class="mb-3">
+                                    <i class="fas fa-money-bill-wave fa-3x text-success"></i>
+                                </div>
+                                <h6 class="fw-bold">Pago en Efectivo</h6>
+                                <p class="small text-muted mb-0">Pago inmediato con dinero en efectivo</p>
+                            </div>
+                        </div>
+                        <!-- Pago con Tarjeta -->
+                        <div class="col-md-6">
+                            <div class="card-pago-option text-center p-4 h-100" data-metodo="tarjeta">
+                                <div class="mb-3">
+                                    <i class="fas fa-credit-card fa-3x text-primary"></i>
+                                </div>
+                                <h6 class="fw-bold">Pago con Tarjeta</h6>
+                                <p class="small text-muted mb-0">Pago con tarjeta de crédito/débito</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen del Pago -->
+                    <div class="mt-4 p-3 bg-dark rounded">
+                        <h6 class="fw-semibold mb-3">Resumen del Pago</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Valor Total:</span>
+                            <span id="resumenValorTotal" class="fw-bold">$0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Casillero:</span>
+                            <span id="resumenCasillero" class="fw-semibold">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Tiempo:</span>
+                            <span id="resumenTiempo" class="fw-semibold">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-info" id="btnConfirmarPago" disabled>
+                        <i class="fas fa-check me-2"></i>
+                        Confirmar Pago
+                    </button>
                 </div>
             </div>
         </div>

@@ -246,6 +246,12 @@
                 return;
             }
 
+            const id_caja = localStorage.getItem('id_caja');
+            if (!id_caja) {
+                alert('Por favor, primero debe abrir la caja antes de ocupar un casillero.');
+                return;
+            }
+
             const dateAct = new Date();
             const horaStr = `${dateAct.getHours().toString().padStart(2, '0')}:${dateAct.getMinutes().toString().padStart(2, '0')}:${dateAct.getSeconds().toString().padStart(2, '0')}`;
             const fechaStr = dateAct.toISOString().split('T')[0];
@@ -264,7 +270,7 @@
                     rut: rutStr,
                     bulto: bultoStr,
                     tipo: 'Ingresado',
-                    id_caja: "90"
+                    id_caja: id_caja
                 };
 
                 const result = await callAPI(datos, urlSave);
