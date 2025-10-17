@@ -383,7 +383,7 @@ async function printQR() {
     return;
   }
 
-  let tipoSeleccionado = "Baño"; // o cambia según tu selección real
+  let tipoSeleccionado = "Baño";
   const dateAct = new Date();
   const horaStr = dateAct.toLocaleTimeString("es-CL");
   const fechaStr = dateAct.toLocaleDateString("es-CL");
@@ -392,16 +392,28 @@ async function printQR() {
       ? `$${window.restroom[tipoSeleccionado]}`
       : "No definido";
 
-  // Crear contenedor temporal invisible
+  // 🔹 Ticket HTML con QR más grande
   const ticketHTML = `
-    <div id="ticketImpresion" style="width:200px; text-align:center; font-family:'Courier New';">
-      <h3 style="margin:5px 0;">TICKET DE ACCESO</h3>
-      <div>${fechaStr} ${horaStr}</div>
-      <div>SERVICIO: ${tipoSeleccionado}</div>
-      <div>VALOR: ${precio}</div>
-      <div style="margin:5px 0; font-weight:bold;">${codigoQR}</div>
-      <div>${contenedorQR.innerHTML}</div>
-      <div style="margin-top:5px;">¡GRACIAS POR SU PREFERENCIA!</div>
+    <div id="ticketImpresion" style="
+        width:200px;
+        text-align:center;
+        font-family:'Courier New', monospace;
+        color:#000;
+        font-size:14px;
+        line-height:1.3;
+        padding:5px;
+    ">
+      <h3 style="font-size:16px;">TICKET DE ACCESO</h3>
+      <div style="margin:2px 0;">${fechaStr} ${horaStr}</div>
+      <div style="margin:2px 0;">SERVICIO: <b>${tipoSeleccionado}</b></div>
+      <div style="margin:2px 0;">VALOR: <b>${precio}</b></div>
+      <div style="margin:6px 0; font-size:13px; font-weight:bold;">${codigoQR}</div>
+      <div style="margin:10px auto; width:140px;">
+        <div style="transform:scale(1); transform-origin:center;">
+          ${contenedorQR.innerHTML}
+        </div>
+      </div>
+      <div style="margin-top:8px; font-size:12px;">¡GRACIAS POR SU PREFERENCIA!</div>
     </div>`;
 
   const div = document.createElement("div");
@@ -411,8 +423,8 @@ async function printQR() {
   document.body.appendChild(div);
 
   try {
-    // Capturar HTML como imagen
-    const canvas = await html2canvas(div, { scale: 3 });
+    // Capturar el ticket con buena resolución
+    const canvas = await html2canvas(div, { scale: 4 });
     const imgData = canvas.toDataURL("image/png");
 
     // Crear PDF
@@ -420,12 +432,13 @@ async function printQR() {
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
-      format: [58, 100], // tamaño de rollo POS58
+      format: [58, 95], // un poco más alto por el QR más grande
     });
+
     pdf.addImage(imgData, "PNG", 2, 2, 54, 0);
     const pdfBase64 = pdf.output("datauristring").split(",")[1];
 
-    // Llamar API para imprimir
+    // Enviar a API
     const response = await fetch("http://10.5.20.105:3000/api/imprimir", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -437,9 +450,7 @@ async function printQR() {
     });
 
     const data = await response.json();
-    if (data.success) {
-      alert("Imprimiendo ticket...");
-    } else {
+    if (!data.success) {
       alert("Error al imprimir: " + data.message);
     }
   } catch (error) {
