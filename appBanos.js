@@ -423,7 +423,7 @@ async function printQR() {
       format: [58, 100], // tamaño de rollo POS58
     });
     pdf.addImage(imgData, "PNG", 2, 2, 54, 0);
-    const pdfBase64 = pdf.output("datauristring");
+    const pdfBase64 = pdf.output("datauristring").split(",")[1];
 
     // Llamar API para imprimir
     const response = await fetch("http://10.5.20.105:3000/api/imprimir", {
@@ -438,7 +438,7 @@ async function printQR() {
 
     const data = await response.json();
     if (data.success) {
-      alert("Ticket enviado a impresora correctamente.");
+      alert("Imprimiendo ticket...");
     } else {
       alert("Error al imprimir: " + data.message);
     }
