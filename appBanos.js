@@ -74,6 +74,8 @@ function initializePage() {
 
   // Inicializar jQuery para boletas si el elemento existe
   initializeBoletaGeneration();
+
+  generarQRPlaceholder();
 }
 
 // Función para manejar la selección de servicio
@@ -684,3 +686,29 @@ style.textContent = `
 .animate-slide-in { animation: slide-in 0.4s ease forwards; }
 `;
 document.head.appendChild(style);
+
+function generarQRPlaceholder() {
+  const contenedorQR = document.getElementById("contenedorQR");
+  const qrPlaceholder = document.getElementById("qrPlaceholder");
+
+  if (!contenedorQR) return;
+
+  // Ocultar texto e ícono del placeholder
+  if (qrPlaceholder) qrPlaceholder.style.display = "none";
+
+  // Limpiar contenedor
+  contenedorQR.innerHTML = "";
+
+  // Texto ficticio para el QR de placeholder
+  const placeholderCode = "PLACEHOLDER";
+
+  // Crear QR
+  new QRCode(contenedorQR, {
+    text: placeholderCode,
+    width: 256,
+    height: 256,
+    colorDark: "#000000ff", // color gris para diferenciar
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H,
+  });
+}
