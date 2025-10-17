@@ -466,9 +466,31 @@ td {
   font-weight: 500;
   opacity: 0;
   transform: translateX(100%);
-  animation: slide-in 0.5s forwards, fade-out 0.5s forwards;
-  animation-delay: 0s, 2.5s; /* Se queda visible 2.5s antes de desaparecer */
   position: relative;
+  animation: slide-in 0.5s forwards;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 
 .toast span {
@@ -495,24 +517,4 @@ td {
 }
 .toast.info {
   background-color: #2196f3;
-}
-
-@keyframes slide-in {
-  0% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fade-out {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
 }

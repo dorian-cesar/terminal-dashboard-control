@@ -99,7 +99,6 @@ async function manejarSeleccionServicio(tipoServicio) {
     await printQR();
   } catch (error) {
     console.error("Error durante la operación:", error);
-    alert("Ocurrió un error al procesar el servicio.");
   } finally {
     // Rehabilitar botones y restaurar contenido original
     btnBaño.disabled = false;
@@ -119,7 +118,7 @@ function generarQRParaServicio(tipoServicio) {
     const id_caja = localStorage.getItem("id_caja");
     if (!id_caja) {
       showToast(
-        "Por favor, primero debe abrir la caja antes de generar un código de barras.",
+        "Por favor, primero debe abrir la caja antes de generar un código QR.",
         "warning"
       );
       return reject("Caja no abierta");
@@ -648,7 +647,7 @@ async function renderHistory() {
   }
 }
 
-function showToast(message, type = "info", duration = 3000) {
+function showToast(message, type = "info", duration = 4000) {
   const container = document.getElementById("toast-container");
   if (!container) return;
 
@@ -666,26 +665,22 @@ function showToast(message, type = "info", duration = 3000) {
 
   // Cerrar manualmente
   toast.querySelector("button").addEventListener("click", () => {
-    container.removeChild(toast);
+    toast.style.animation = "slide-out 0.5s forwards";
+    setTimeout(() => {
+      if (toast.parentNode) container.removeChild(toast);
+    }, 500);
   });
 
   container.appendChild(toast);
 
-  // Eliminar automáticamente después de duration
+  // Auto-cerrar con animación
   setTimeout(() => {
-    if (toast.parentNode === container) container.removeChild(toast);
+    toast.style.animation = "slide-out 0.5s forwards";
+    setTimeout(() => {
+      if (toast.parentNode) container.removeChild(toast);
+    }, 500);
   }, duration);
 }
-
-const style = document.createElement("style");
-style.textContent = `
-@keyframes slide-in {
-  0% { transform: translateX(100%); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
-}
-.animate-slide-in { animation: slide-in 0.4s ease forwards; }
-`;
-document.head.appendChild(style);
 
 function generarQRPlaceholder() {
   const contenedorQR = document.getElementById("contenedorQR");
