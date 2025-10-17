@@ -104,6 +104,7 @@ async function manejarSeleccionServicio(tipoServicio) {
     btnDucha.disabled = false;
     btnBaño.innerHTML = originalBtnBaño;
     btnDucha.innerHTML = originalBtnDucha;
+    updateStats();
   }
 }
 
@@ -115,8 +116,9 @@ function generarQRParaServicio(tipoServicio) {
 
     const id_caja = localStorage.getItem("id_caja");
     if (!id_caja) {
-      alert(
-        "Por favor, primero debe abrir la caja antes de generar un código de barras."
+      showToast(
+        "Por favor, primero debe abrir la caja antes de generar un código de barras.",
+        "warning"
       );
       return reject("Caja no abierta");
     }
@@ -183,8 +185,9 @@ function generarQRParaServicio(tipoServicio) {
       resolve(numeroT);
     } catch (error) {
       console.error("Error al generar QR:", error);
-      alert(
-        "Ocurrió un error al generar el QR. Por favor, intente nuevamente."
+      showToast(
+        "Ocurrió un error al generar el QR. Por favor, intente nuevamente.",
+        "error"
       );
       reject(error);
     }
@@ -231,9 +234,7 @@ function initializeBoletaGeneration() {
             "El valor no fue encontrado para el servicio:",
             servicio
           );
-          $("#resultado").html(
-            "<div class='alert alert-warning'>Tipo de servicio no válido.</div>"
-          );
+          showToast("Tipo de servicio no válido.", "warning");
           return;
         }
         let payload = {
@@ -385,13 +386,13 @@ async function printQR() {
     !contenedorQR ||
     (qrPlaceholder && qrPlaceholder.style.display !== "none")
   ) {
-    alert("No hay código QR generado para imprimir.");
+    showToast("No hay código QR generado para imprimir.", "warning");
     return;
   }
 
   const codigoQR = keycont.value;
   if (!codigoQR || codigoQR === "Código QR") {
-    alert("No hay código QR generado para imprimir.");
+    showToast("No hay código QR generado para imprimir.", "warning");
     return;
   }
 
@@ -404,7 +405,7 @@ async function printQR() {
       ? `$${window.restroom[tipoSeleccionado]}`
       : "No definido";
 
-  // 🔹 Ticket HTML con QR más grande
+  // Ticket HTML con QR más grande
   const ticketHTML = `
     <div id="ticketImpresion" style="
         width:200px;
@@ -463,7 +464,7 @@ async function printQR() {
 
     const data = await response.json();
     if (!data.success) {
-      alert("Error al imprimir: " + data.message);
+      showToast("Error al imprimir: " + data.message, "error");
     }
   } catch (error) {
     console.error(error);
@@ -515,27 +516,31 @@ async function addUserAccessLevel(token) {
 }
 
 function verificarCodigo() {
+  const botonVerificar = document.getElementById("boton-verificar");
   const buscadorCodigo = document.getElementById("buscador-codigo");
   const resultadoDiv = document.getElementById("resultado-verificacion");
   const tablaResultados = document.getElementById("tabla-resultados");
-  if (!buscadorCodigo || !resultadoDiv || !tablaResultados) return;
+
+  if (!botonVerificar || !buscadorCodigo || !resultadoDiv || !tablaResultados)
+    return;
+
   const codigoInput = buscadorCodigo.value.trim();
   if (!codigoInput || codigoInput.length < 6) {
-    alert("El código debe tener al menos 6 caracteres.");
+    showToast("El código debe tener al menos 6 caracteres.", "warning");
     return;
   }
+
+  const originalContent = botonVerificar.innerHTML;
+  botonVerificar.innerHTML = `Verificando <span class="spinner"></span>`;
+  botonVerificar.disabled = true;
+
   fetch(`${urlBoleto}?userPin=${encodeURIComponent(codigoInput)}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   })
     .then((response) => {
-      if (!response.ok) {
-        throw new Error(
-          `Error en la respuesta del servidor: ${response.status}`
-        );
-      }
+      if (!response.ok)
+        throw new Error(`Error del servidor: ${response.status}`);
       return response.json();
     })
     .then((data) => {
@@ -547,11 +552,11 @@ function verificarCodigo() {
         const fecha = data.eventTime || "N/A";
         const puerta = data.doorName || "N/A";
         tablaResultados.innerHTML = `<tr>
-                <td>${codigoInput}</td>
-                <td>${mensaje}</td>
-                <td>${fecha}</td>
-                <td>${puerta}</td>
-            </tr>`;
+          <td>${codigoInput}</td>
+          <td>${mensaje}</td>
+          <td>${fecha}</td>
+          <td>${puerta}</td>
+        </tr>`;
       }
       resultadoDiv.style.display = "block";
     })
@@ -559,6 +564,10 @@ function verificarCodigo() {
       console.error("Error en la solicitud:", error);
       tablaResultados.innerHTML = `<tr><td colspan="4" style="color: red;">Hubo un problema al verificar el código.</td></tr>`;
       resultadoDiv.style.display = "block";
+    })
+    .finally(() => {
+      botonVerificar.innerHTML = originalContent;
+      botonVerificar.disabled = false;
     });
 }
 
@@ -636,3 +645,44 @@ async function renderHistory() {
     console.error("Error al renderizar historial:", error);
   }
 }
+
+function showToast(message, type = "info", duration = 3000) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const colors = {
+    success: "bg-green-500",
+    error: "bg-red-500",
+    warning: "bg-yellow-400",
+    info: "bg-blue-500",
+  };
+
+  const toast = document.createElement("div");
+  toast.className = `text-white px-4 py-2 rounded shadow-lg flex items-center justify-between ${
+    colors[type] || colors.info
+  } animate-slide-in`;
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button class="ml-2 font-bold">&times;</button>
+  `;
+
+  toast.querySelector("button").addEventListener("click", () => {
+    container.removeChild(toast);
+  });
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    if (toast.parentNode === container) container.removeChild(toast);
+  }, duration);
+}
+
+const style = document.createElement("style");
+style.textContent = `
+@keyframes slide-in {
+  0% { transform: translateX(100%); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in { animation: slide-in 0.4s ease forwards; }
+`;
+document.head.appendChild(style);

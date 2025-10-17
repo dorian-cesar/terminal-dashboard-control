@@ -417,3 +417,25 @@ td {
   margin-bottom: 1rem;
   font-weight: bold;
 }
+
+.spinner {
+  border: 2px solid transparent;
+  border-top: 2px solid #fff;
+  border-right: 2px solid #fff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
