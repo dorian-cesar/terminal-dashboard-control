@@ -80,103 +80,114 @@ async function manejarSeleccionServicio(tipoServicio) {
   const btnBaño = document.getElementById("btnBaño");
   const btnDucha = document.getElementById("btnDucha");
 
-  // Deshabilitar los botones temporalmente durante la generación
+  // Guardar contenido original para no perder iconos/texto
+  const originalBtnBaño = btnBaño.innerHTML;
+  const originalBtnDucha = btnDucha.innerHTML;
+
+  // Deshabilitar botones sin cambiar contenido
   btnBaño.disabled = true;
   btnDucha.disabled = true;
 
-  // Ejecutar generación de QR
-  await generarQRParaServicio(tipoServicio);
+  try {
+    // Generar QR
+    await generarQRParaServicio(tipoServicio);
 
-  // Ejecutar impresión de QR automáticamente
-  setTimeout(() => {
-    printQR();
-
-    // Re-habilitar los botones después de imprimir
-    setTimeout(() => {
-      btnBaño.disabled = false;
-      btnDucha.disabled = false;
-    }, 1000);
-  }, 500);
+    // Imprimir QR
+    await printQR();
+  } catch (error) {
+    console.error("Error durante la operación:", error);
+    alert("Ocurrió un error al procesar el servicio.");
+  } finally {
+    // Rehabilitar botones y restaurar contenido original
+    btnBaño.disabled = false;
+    btnDucha.disabled = false;
+    btnBaño.innerHTML = originalBtnBaño;
+    btnDucha.innerHTML = originalBtnDucha;
+  }
 }
 
 // Nueva función para generar QR específico para servicio
-async function generarQRParaServicio(tipoServicio) {
-  const contenedorQR = document.getElementById("contenedorQR");
-  const contenedorContador = document.getElementById("keycont");
+function generarQRParaServicio(tipoServicio) {
+  return new Promise(async (resolve, reject) => {
+    const contenedorQR = document.getElementById("contenedorQR");
+    const contenedorContador = document.getElementById("keycont");
 
-  const id_caja = localStorage.getItem("id_caja");
-  if (!id_caja) {
-    alert(
-      "Por favor, primero debe abrir la caja antes de generar un código de barras."
-    );
-    return;
-  }
-
-  const fechaHoraAct = new Date();
-  const horaStr =
-    fechaHoraAct.getHours() +
-    ":" +
-    fechaHoraAct.getMinutes() +
-    ":" +
-    fechaHoraAct.getSeconds();
-  const fechaStr = fechaHoraAct.toISOString().split("T")[0];
-  const tipoStr = tipoServicio;
-  const numeroT = generarTokenNumerico();
-
-  const datos = {
-    Codigo: numeroT,
-    hora: horaStr,
-    fecha: fechaStr,
-    tipo: tipoStr,
-    valor: window.restroom[tipoStr] || 0,
-    id_caja: id_caja,
-  };
-
-  try {
-    const res = await callApi(datos);
-    const qrPlaceholder = document.getElementById("qrPlaceholder");
-
-    // Ocultar el placeholder
-    if (qrPlaceholder) {
-      qrPlaceholder.style.display = "none";
+    const id_caja = localStorage.getItem("id_caja");
+    if (!id_caja) {
+      alert(
+        "Por favor, primero debe abrir la caja antes de generar un código de barras."
+      );
+      return reject("Caja no abierta");
     }
 
-    // Limpiar completamente el contenedor
-    contenedorQR.innerHTML = "";
+    const fechaHoraAct = new Date();
+    const horaStr =
+      fechaHoraAct.getHours().toString().padStart(2, "0") +
+      ":" +
+      fechaHoraAct.getMinutes().toString().padStart(2, "0") +
+      ":" +
+      fechaHoraAct.getSeconds().toString().padStart(2, "0");
+    const fechaStr = fechaHoraAct.toISOString().split("T")[0];
+    const tipoStr = tipoServicio;
+    const numeroT = generarTokenNumerico();
 
-    // Crear una NUEVA instancia de QRCode cada vez
-    new QRCode(contenedorQR, {
-      text: numeroT,
-      width: 256,
-      height: 256,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H,
-    });
+    const datos = {
+      Codigo: numeroT,
+      hora: horaStr,
+      fecha: fechaStr,
+      tipo: tipoStr,
+      valor: window.restroom[tipoStr] || 0,
+      id_caja: id_caja,
+    };
 
-    if (contenedorContador) {
-      contenedorContador.value = numeroT;
+    try {
+      await callApi(datos);
+
+      // Ocultar placeholder si existe
+      const qrPlaceholder = document.getElementById("qrPlaceholder");
+      if (qrPlaceholder) qrPlaceholder.style.display = "none";
+
+      // Limpiar contenedor
+      contenedorQR.innerHTML = "";
+
+      // Crear QR
+      new QRCode(contenedorQR, {
+        text: numeroT,
+        width: 256,
+        height: 256,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
+      });
+
+      // Esperar a que el canvas esté listo
+      await new Promise((resCanvas) => {
+        const interval = setInterval(() => {
+          const canvas = contenedorQR.querySelector("canvas");
+          if (canvas) {
+            clearInterval(interval);
+            resCanvas();
+          }
+        }, 50);
+      });
+
+      // Guardar código en el contador
+      if (contenedorContador) contenedorContador.value = numeroT;
+
+      // Otros procesos
+      leerDatosServer();
+      addUser(numeroT);
+      setTimeout(() => addUserAccessLevel(numeroT.substring(0, 6)), 1000);
+
+      resolve(numeroT);
+    } catch (error) {
+      console.error("Error al generar QR:", error);
+      alert(
+        "Ocurrió un error al generar el QR. Por favor, intente nuevamente."
+      );
+      reject(error);
     }
-
-    leerDatosServer();
-    addUser(numeroT);
-
-    setTimeout(() => {
-      let name = numeroT.substring(0, 6);
-      console.log(name);
-      addUserAccessLevel(name);
-    }, 1000);
-  } catch (error) {
-    console.error("Error al generar QR:", error);
-    alert("Ocurrió un error al generar el QR. Por favor, intente nuevamente.");
-    // Re-habilitar los botones en caso de error
-    const btnBaño = document.getElementById("btnBaño");
-    const btnDucha = document.getElementById("btnDucha");
-    if (btnBaño && btnDucha) {
-      btnBaño.disabled = false;
-      btnDucha.disabled = false;
-    }
-  }
+  });
 }
 
 function initializeFiltersAndVerification() {
