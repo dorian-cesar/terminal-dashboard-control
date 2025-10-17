@@ -3,6 +3,7 @@ let datosGlobales = [];
 const urlBase = "https://andenes.terminal-calama.com";
 const urlServer = "https://andenes.terminal-calama.com";
 const urlLoad = urlServer + "/TerminalCalama/PHP/Restroom/load.php";
+const urlLoadToday = urlServer + "/TerminalCalama/PHP/Restroom/loadToday.php";
 const urlSave = urlServer + "/TerminalCalama/PHP/Restroom/save.php";
 const urlAddUser = urlServer + "/TerminalCalama/PHP/Restroom/addUser.php";
 const urlLevelUser =
@@ -583,31 +584,23 @@ async function loadServerData() {
 // Función para actualizar estadísticas con datos del día
 async function updateStats() {
   try {
-    const serverData = await loadServerData();
-    const today = new Date().toISOString().split("T")[0];
-    const todayTransactions = serverData.filter((t) => t.date === today);
-    const totalAmount = todayTransactions.reduce((sum, t) => {
-      const price =
-        t.tipo === "Baño" ? window.restroom.Baño : window.restroom.Ducha;
-      return sum + price;
-    }, 0);
-    const totalBanos = todayTransactions.filter(
-      (t) => t.tipo === "Baño"
-    ).length;
-    const totalDuchas = todayTransactions.filter(
-      (t) => t.tipo === "Ducha"
-    ).length;
+    // Llamar a la API que devuelve los totales del día
+    const response = await fetch(urlLoadToday);
+    if (!response.ok)
+      throw new Error("Error al obtener estadísticas del servidor");
+    const stats = await response.json();
 
     // Actualizar UI solo si los elementos existen
     const totalDay = document.getElementById("totalDay");
     const totalTransactions = document.getElementById("totalTransactions");
     const totalBanosElem = document.getElementById("totalBanos");
     const totalDuchasElem = document.getElementById("totalDuchas");
-    if (totalDay) totalDay.textContent = "$" + totalAmount;
+
+    if (totalDay) totalDay.textContent = `$${stats.totalAmount}`;
     if (totalTransactions)
-      totalTransactions.textContent = todayTransactions.length;
-    if (totalBanosElem) totalBanosElem.textContent = totalBanos;
-    if (totalDuchasElem) totalDuchasElem.textContent = totalDuchas;
+      totalTransactions.textContent = stats.totalTransactions;
+    if (totalBanosElem) totalBanosElem.textContent = stats.totalBanos;
+    if (totalDuchasElem) totalDuchasElem.textContent = stats.totalDuchas;
   } catch (error) {
     console.error("Error al actualizar estadísticas:", error);
   }
