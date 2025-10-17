@@ -650,28 +650,26 @@ function showToast(message, type = "info", duration = 3000) {
   const container = document.getElementById("toast-container");
   if (!container) return;
 
-  const colors = {
-    success: "bg-green-500",
-    error: "bg-red-500",
-    warning: "bg-yellow-400",
-    info: "bg-blue-500",
-  };
+  // Limitar a máximo 5 toasts
+  while (container.children.length >= 5) {
+    container.removeChild(container.firstChild);
+  }
 
   const toast = document.createElement("div");
-  toast.className = `text-white px-4 py-2 rounded shadow-lg flex items-center justify-between ${
-    colors[type] || colors.info
-  } animate-slide-in`;
+  toast.className = `toast ${type}`;
   toast.innerHTML = `
     <span>${message}</span>
-    <button class="ml-2 font-bold">&times;</button>
+    <button>&times;</button>
   `;
 
+  // Cerrar manualmente
   toast.querySelector("button").addEventListener("click", () => {
     container.removeChild(toast);
   });
 
   container.appendChild(toast);
 
+  // Eliminar automáticamente después de duration
   setTimeout(() => {
     if (toast.parentNode === container) container.removeChild(toast);
   }, duration);
