@@ -363,12 +363,11 @@ function aplicarFiltros() {
   tablaBody.innerHTML = filasHTML;
 }
 
-function printQR() {
+async function printQR() {
   const keycont = document.getElementById("keycont");
   const contenedorQR = document.getElementById("contenedorQR");
   const qrPlaceholder = document.getElementById("qrPlaceholder");
 
-  // Verificar si hay un QR generado
   if (
     !keycont ||
     !contenedorQR ||
@@ -379,99 +378,76 @@ function printQR() {
   }
 
   const codigoQR = keycont.value;
-
   if (!codigoQR || codigoQR === "Código QR") {
     alert("No hay código QR generado para imprimir.");
     return;
   }
 
-  // Obtener el tipo de servicio del código QR generado
-  let tipoSeleccionado = "Baño"; // Valor por defecto
-
+  let tipoSeleccionado = "Baño"; // o cambia según tu selección real
   const dateAct = new Date();
-  const horaStr =
-    dateAct.getHours().toString().padStart(2, "0") +
-    ":" +
-    dateAct.getMinutes().toString().padStart(2, "0") +
-    ":" +
-    dateAct.getSeconds().toString().padStart(2, "0");
-  const fechaStr = dateAct.toISOString().split("T")[0];
+  const horaStr = dateAct.toLocaleTimeString("es-CL");
+  const fechaStr = dateAct.toLocaleDateString("es-CL");
   const precio =
-    window.restroom[tipoSeleccionado] !== undefined
+    window.restroom?.[tipoSeleccionado] !== undefined
       ? `$${window.restroom[tipoSeleccionado]}`
       : "No definido";
 
-  // Crear ventana de impresión optimizada para USB
-  const ventanaImpr = window.open("", "_blank");
-  ventanaImpr.document.write(
-    `<html>
-            <head>
-                <title>Imprimir QR</title>
-                <style>
-                    @media print {
-                        @page {
-                            margin: 0;
-                            size: 58mm auto;
-                        }
-                        body {
-                            margin: 0;
-                            padding: 3mm;
-                            font-family: 'Courier New', monospace;
-                            font-size: 14px;
-                            width: 52mm;
-                        }
-                        .ticket {
-                            width: 52mm;
-                            text-align: center;
-                        }
-                        .qr-code img, .qr-code canvas {
-                            width: 40mm !important;
-                            height: 40mm !important;
-                            margin: 3mm auto;
-                            display: block;
-                        }
-                        h1 {
-                            font-size: 18px;
-                            margin: 2mm 0;
-                            font-weight: bold;
-                        }
-                        .info {
-                            font-size: 13px;
-                            margin: 1mm 0;
-                            line-height: 1.3;
-                        }
-                        .codigo {
-                            font-size: 12px;
-                            margin: 2mm 0;
-                            word-break: break-all;
-                            font-weight: bold;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="ticket">
-                    <h1>TICKET DE ACCESO</h1>
-                    <div class="info">${fechaStr} ${horaStr}</div>
-                    <div class="info">SERVICIO: ${tipoSeleccionado}</div>
-                    <div class="info">VALOR: ${precio}</div>
-                    <div class="codigo">${codigoQR}</div>
-                    <div class="qr-code">
-                        ${contenedorQR.innerHTML}
-                    </div>
-                    <div class="info">¡GRACIAS POR SU PREFERENCIA!</div>
-                </div>
-                <script>
-                    // Forzar impresión automática
-                    setTimeout(() => {
-                        window.print();
-                        setTimeout(() => window.close(), 500);
-                    }, 300);
-                </script>
-            </body>
-        </html>`
-  );
-  ventanaImpr.document.close();
+  // Crear contenedor temporal invisible
+  const ticketHTML = `
+    <div id="ticketImpresion" style="width:200px; text-align:center; font-family:'Courier New';">
+      <h3 style="margin:5px 0;">TICKET DE ACCESO</h3>
+      <div>${fechaStr} ${horaStr}</div>
+      <div>SERVICIO: ${tipoSeleccionado}</div>
+      <div>VALOR: ${precio}</div>
+      <div style="margin:5px 0; font-weight:bold;">${codigoQR}</div>
+      <div>${contenedorQR.innerHTML}</div>
+      <div style="margin-top:5px;">¡GRACIAS POR SU PREFERENCIA!</div>
+    </div>`;
+
+  const div = document.createElement("div");
+  div.innerHTML = ticketHTML;
+  div.style.position = "fixed";
+  div.style.left = "-9999px";
+  document.body.appendChild(div);
+
+  try {
+    // Capturar HTML como imagen
+    const canvas = await html2canvas(div, { scale: 3 });
+    const imgData = canvas.toDataURL("image/png");
+
+    // Crear PDF
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: [58, 100], // tamaño de rollo POS58
+    });
+    pdf.addImage(imgData, "PNG", 2, 2, 54, 0);
+    const pdfBase64 = pdf.output("datauristring");
+
+    // Llamar API para imprimir
+    const response = await fetch("http://10.5.20.105:3000/api/imprimir", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pdfData: pdfBase64,
+        printer: "POS58",
+        filename: `voucher_${codigoQR}.pdf`,
+      }),
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert("Ticket enviado a impresora correctamente.");
+    } else {
+      alert("Error al imprimir: " + data.message);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error generando o enviando el ticket.");
+  } finally {
+    document.body.removeChild(div);
+  }
 }
 
 async function addUser(token) {
