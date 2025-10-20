@@ -48,8 +48,11 @@
     }
 
     function redirectToLogin() {
-        window.location.href = 'index.html';
-        alert("su sesión ha expirado, inicie sesión nuevamente");
+        alert("Su sesión ha expirado, inicie sesión nuevamente");
+
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 50);
     }
 
     function checkAuthOnce() {
