@@ -218,7 +218,7 @@ async function procesarPagoEfectivo(tipoServicio) {
     // Generar boleta para efectivo y mostrar folio
     const folio = await generarBoleta(tipoServicio);
     console.log("Folio generado:", folio);
-    // await printQR();
+    await printQR(folio);
 
     showToast("Pago en efectivo registrado correctamente.", "success");
     cerrarModal();
@@ -251,7 +251,7 @@ async function procesarPagoTarjeta(tipoServicio) {
 
     // 3. Generar QR usando el mismo código
     await generarQRParaServicio(tipoServicio, codigoQR);
-    // await printQR();
+    await printQR(resultadoTransbank.autorizacion);
 
     showToast("Pago con tarjeta procesado correctamente.", "success");
     cerrarModal();
@@ -518,7 +518,7 @@ function aplicarFiltros() {
   tablaBody.innerHTML = filasHTML;
 }
 
-async function printQR() {
+async function printQR(voucher) {
   const keycont = document.getElementById("keycont");
   const contenedorQR = document.getElementById("contenedorQR");
   const qrPlaceholder = document.getElementById("qrPlaceholder");
@@ -538,7 +538,6 @@ async function printQR() {
     return;
   }
 
-  // Usar servicioSeleccionado en lugar de valor fijo "Baño"
   let tipoSeleccionado = servicioSeleccionado || "Baño";
   const dateAct = new Date();
   const horaStr = dateAct.toLocaleTimeString("es-CL");
@@ -548,7 +547,7 @@ async function printQR() {
       ? `$${window.restroom[tipoSeleccionado]}`
       : "No definido";
 
-  // Ticket HTML con QR más grande
+  // Ticket HTML con textos agregados
   const ticketHTML = `
     <div id="ticketImpresion" style="
         width:200px;
@@ -569,6 +568,8 @@ async function printQR() {
           ${contenedorQR.innerHTML}
         </div>
       </div>
+      <div style="margin-top:4px; font-size:12px; font-weight:bold;">VÁLIDO COMO BOLETA</div>
+      <div style="margin-top:2px; font-size:12px;">N° de Boleta: <b>${voucher}</b></div>
       <div style="margin-top:8px; font-size:12px;">¡GRACIAS POR SU PREFERENCIA!</div>
     </div>`;
 
@@ -579,22 +580,19 @@ async function printQR() {
   document.body.appendChild(div);
 
   try {
-    // Capturar el ticket con buena resolución
     const canvas = await html2canvas(div, { scale: 4 });
     const imgData = canvas.toDataURL("image/png");
 
-    // Crear PDF
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
-      format: [58, 95], // un poco más alto por el QR más grande
+      format: [58, 100],
     });
 
     pdf.addImage(imgData, "PNG", 2, 2, 54, 0);
     const pdfBase64 = pdf.output("datauristring").split(",")[1];
 
-    // Enviar a API
     const response = await fetch("http://10.5.20.105:3000/api/imprimir", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
