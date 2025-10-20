@@ -1,288 +1,202 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parking - WIT</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Caja Pagadora - Parking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- jQuery + Axios -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 30px;
+    }
+
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      height: 100%;
+    }
+
+    .form-control {
+      background-color: #334155;
+      color: #f8fafc;
+      border: none;
+    }
+
+    .form-control:focus {
+      background-color: #475569;
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+
+    .btn-primary {
+      background-color: #2563eb;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+
+    .result-card {
+      background-color: #f8fafc;
+      color: #000;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      width: 100%;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .btn-pagar {
+      background-color: #9ca3af;
+      border: none;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .btn-pagar:hover {
+      background-color: #6b7280;
+      color: #fff;
+    }
+  </style>
 </head>
-<body class="dashboard-page">
-    <div class="wrapper">
-        <!-- Sidebar -->
-        <nav id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <h3>WIT</h3>
-                <div class="user-info">
-                    <i class="bi bi-x-circle"></i>
-                    <div>
-                        <div class="user-email" id="userEmail"></div>
-                        <div class="user-role" id="userRole"></div>
-                    </div>
-                </div>
-            </div>
 
-            <ul class="list-unstyled components">
-                <li>
-                    <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
-                </li>
-                <li>
-                    <a href="banos.html"><i class="bi bi-droplet"></i> Baños</a>
-                </li>
-                <li>
-                    <a href="custodia.html"><i class="bi bi-shield-check"></i> Custodia</a>
-                </li>
-                <li class="active">
-                    <a href="parking.html"><i class="bi bi-car-front"></i> Parking</a>
-                </li>
-                <li>
-                    <a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a>
-                </li>
-                <li>
-                    <a href="caja.html"><i class="bi bi-cash-coin"></i> Caja</a>
-                </li>
-                <li>
-                    <a href="monitoreo.html"><i class="bi bi-display"></i> Monitoreo</a>
-                </li>
-                <li class="menu-section">CONFIGURACIÓN</li>
-                <li>
-                    <a href="empresas.html"><i class="bi bi-building"></i> Empresas</a>
-                </li>
-                <li>
-                    <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
-                </li>
-                <li>
-                    <a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
-                </li>
-                <li>
-                    <a href="listas-blancas.html"><i class="bi bi-list-check"></i> Listas Blancas</a>
-                </li>
-                <li>
-                    <a href="pagos-diarios.html"><i class="bi bi-currency-dollar"></i> Pagos Diarios</a>
-                </li>
-                <li>
-                    <a href="entradas-salidas.html"><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a>
-                </li>
-                <li>
-                    <a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Log Out</a>
-                </li>
-            </ul>
-        </nav>
+<body>
+  <div class="container">
+    <h2 class="mb-4 text-center">💳 Caja Pagadora - Parking</h2>
 
-        <!-- Page Content -->
-        <div id="content">
-            <div class="top-bar">
-                <h4>Sistema de Control de Terminales Terrestres</h4>
-            </div>
-
-            <div class="container-fluid">
-                <div class="page-header mb-4">
-                    <h2>Parking</h2>
-                    <p class="text-muted">Sistema de gestión de estacionamiento</p>
-                </div>
-
-                <div class="row">
-                    <!-- Vehicle Entry Form -->
-                    <div class="col-md-4">
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h5 class="mb-0">Ingreso de Vehículo</h5>
-                            </div>
-                            <div class="card-body">
-                                <form id="vehicleEntryForm">
-                                    <div class="mb-3">
-                                        <label for="patente" class="form-label">Ingrese su Patente</label>
-                                        <input type="text" class="form-control" id="patente" placeholder="ABCD12" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="empresa" class="form-label">Seleccione Empresa</label>
-                                        <select class="form-select" id="empresa" required>
-                                            <option value="">Seleccione...</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="destino" class="form-label">Seleccione Destino (Opcional)</label>
-                                        <select class="form-select" id="destino">
-                                            <option value="">Sin destino</option>
-                                        </select>
-                                    </div>
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary">Registrar Ingreso</button>
-                                        <button type="button" class="btn btn-outline-secondary" id="consultarBtn">Consultar</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Vehicle Info Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Información del Vehículo</h5>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-muted" id="vehicleInfo">Ingrese una patente para consultar o registrar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Active Vehicles Table -->
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Vehículos Activos</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Patente</th>
-                                                <th>Empresa</th>
-                                                <th>Destino</th>
-                                                <th>Hora Ingreso</th>
-                                                <th>Estado</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="activeVehiclesTable">
-                                            <!-- Data will be loaded here -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="row g-4">
+      <!-- Tarjeta Izquierda -->
+      <div class="col-md-5">
+        <div class="card p-4 text-center">
+          <h5>Consulta de Vehículo</h5>
+          <hr>
+          <input type="text" id="patente" class="form-control mb-3 text-center" placeholder="Ingrese patente (Ej: HHHH11)">
+          <button class="btn btn-primary w-100" id="btnConsultar">Consultar</button>
         </div>
+      </div>
+
+      <!-- Tarjeta Derecha -->
+      <div class="col-md-7">
+        <div class="card p-4">
+          <h5>Información del Vehículo</h5>
+          <hr>
+          <div id="resultado" style="display:none;">
+            <div class="result-card">
+              <h4>Patente: <strong id="infoPatente"></strong></h4>
+              <p>Empresa: <span id="infoEmpresa"></span></p>
+              <p>Fecha de Ingreso: <strong id="infoFechaEnt"></strong></p>
+              <p>Hora Ingreso: <strong id="infoHoraEnt"></strong></p>
+              <p>Hora Salida: <strong id="infoHoraSal"></strong></p>
+              <p>Tiempo de Parking: <strong id="infoTiempo"></strong></p>
+              <p>Valor a Pagar: <strong id="infoValor"></strong></p>
+              <button class="btn btn-pagar" data-bs-toggle="modal" data-bs-target="#modalPago">Pagar</button>
+            </div>
+          </div>
+          <div id="sinDatos" class="text-center text-secondary">
+            <p>Ingrese una patente para consultar.</p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
-    <script>
-        $(document).ready(function() {
-        //   checkAuth();
-            loadUserInfo();
-            loadCompanies();
-            loadDestinations();
-            loadActiveVehicles();
-            
-            $('#logoutBtn').on('click', function(e) {
-                e.preventDefault();
-                logout();
-            });
+  <!-- Modal de Pago -->
+  <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalPagoLabel">Seleccionar Tipo de Pago</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-grid gap-2">
+            <button class="btn btn-success" id="btnEfectivo">💵 Efectivo</button>
+            <button class="btn btn-info text-white" id="btnTarjeta">💳 Tarjeta</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            $('#vehicleEntryForm').on('submit', function(e) {
-                e.preventDefault();
-                registerVehicle();
-            });
+  <script>
+    const API_URL = "http://localhost/parkingCalama/php/movimientos/api.php?patente=";
+    const VALOR_MINUTO = 30;
 
-            $('#consultarBtn').on('click', function() {
-                consultVehicle();
-            });
-        });
+    // Calcular minutos entre dos fechas/horas
+    function calcularMinutos(fechaEnt, horaEnt, fechaSal, horaSal) {
+      const inicio = new Date(`${fechaEnt}T${horaEnt}`);
+      const fin = new Date(`${fechaSal}T${horaSal}`);
+      const diffMs = fin - inicio;
+      return Math.max(1, Math.floor(diffMs / (1000 * 60))); // mínimo 1 min
+    }
 
-        function loadCompanies() {
-            const companies = getCompanies();
-            const select = $('#empresa');
-            companies.forEach(company => {
-                select.append(`<option value="${company.id}">${company.nombre}</option>`);
-            });
+    $("#btnConsultar").on("click", async function() {
+      const patente = $("#patente").val().trim().toUpperCase();
+      if (!patente) {
+        alert("Ingrese una patente válida");
+        return;
+      }
+
+      try {
+        const res = await axios.get(API_URL + patente);
+        const data = res.data;
+
+        let fechaSalida = data.fechasal;
+        let horaSalida = data.horasal;
+
+        // Si no hay salida, usamos la hora actual
+        if (fechaSalida === "0000-00-00" || horaSalida === "00:00:00") {
+          const ahora = new Date();
+          fechaSalida = ahora.toISOString().split("T")[0];
+          horaSalida = ahora.toTimeString().split(" ")[0];
         }
 
-        function loadDestinations() {
-            const destinations = getDestinations();
-            const select = $('#destino');
-            destinations.forEach(dest => {
-                select.append(`<option value="${dest.id}">${dest.ciudad}</option>`);
-            });
-        }
+        const minutos = calcularMinutos(data.fechaent, data.horaent, fechaSalida, horaSalida);
+        const valor = minutos * VALOR_MINUTO;
 
-        function loadActiveVehicles() {
-            const vehicles = getActiveVehicles();
-            const tbody = $('#activeVehiclesTable');
-            tbody.empty();
-            
-            vehicles.forEach(vehicle => {
-                const company = getCompanyById(vehicle.empresaId);
-                const destination = vehicle.destinoId ? getDestinationById(vehicle.destinoId) : null;
-                
-                tbody.append(`
-                    <tr>
-                        <td><strong>${vehicle.patente}</strong></td>
-                        <td>${company ? company.nombre : 'N/A'}</td>
-                        <td>${destination ? destination.ciudad : 'Sin destino'}</td>
-                        <td>${vehicle.horaIngreso}</td>
-                        <td><span class="badge bg-success">Activo</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-danger" onclick="exitVehicle('${vehicle.patente}')">
-                                <i class="bi bi-box-arrow-right"></i> Salida
-                            </button>
-                        </td>
-                    </tr>
-                `);
-            });
-        }
+        // Mostrar datos
+        $("#infoPatente").text(data.patente);
+        $("#infoEmpresa").text(data.empresa);
+        $("#infoFechaEnt").text(data.fechaent);
+        $("#infoHoraEnt").text(data.horaent);
+        $("#infoHoraSal").text(horaSalida);
+        $("#infoTiempo").text(`${minutos} min.`);
+        $("#infoValor").text(`$${valor.toLocaleString("es-CL")}`);
 
-        function registerVehicle() {
-            const patente = $('#patente').val().toUpperCase();
-            const empresaId = $('#empresa').val();
-            const destinoId = $('#destino').val();
-            
-            if(!patente || !empresaId) {
-                alert('Por favor complete los campos requeridos');
-                return;
-            }
+        $("#resultado").fadeIn();
+        $("#sinDatos").hide();
 
-            const vehicle = {
-                patente: patente,
-                empresaId: empresaId,
-                destinoId: destinoId || null,
-                horaIngreso: new Date().toLocaleTimeString('es-CL', {hour: '2-digit', minute: '2-digit'}),
-                estado: 'activo'
-            };
+      } catch (error) {
+        console.error(error);
+        alert("Error al consultar la patente o la API no responde.");
+      }
+    });
 
-            addVehicle(vehicle);
-            $('#vehicleEntryForm')[0].reset();
-            loadActiveVehicles();
-            alert('Vehículo registrado exitosamente');
-        }
+    // Acciones del modal
+    $("#btnEfectivo").on("click", function() {
+      alert("Pago registrado en EFECTIVO ✅");
+      $("#modalPago").modal("hide");
+    });
 
-        function consultVehicle() {
-            const patente = $('#patente').val().toUpperCase();
-            if(!patente) {
-                alert('Ingrese una patente');
-                return;
-            }
-
-            const vehicle = findVehicleByPatente(patente);
-            const infoDiv = $('#vehicleInfo');
-            
-            if(vehicle) {
-                const company = getCompanyById(vehicle.empresaId);
-                const destination = vehicle.destinoId ? getDestinationById(vehicle.destinoId) : null;
-                
-                infoDiv.html(`
-                    <p><strong>Patente:</strong> ${vehicle.patente}</p>
-                    <p><strong>Empresa:</strong> ${company ? company.nombre : 'N/A'}</p>
-                    <p><strong>Destino:</strong> ${destination ? destination.ciudad : 'Sin destino'}</p>
-                    <p><strong>Hora Ingreso:</strong> ${vehicle.horaIngreso}</p>
-                    <p><strong>Estado:</strong> <span class="badge bg-success">Activo</span></p>
-                `);
-            } else {
-                infoDiv.html('<p class="text-warning">Vehículo no encontrado en el sistema</p>');
-            }
-        }
-
-        function exitVehicle(patente) {
-            if(confirm(`¿Confirmar salida del vehículo ${patente}?`)) {
-                removeVehicle(patente);
-                loadActiveVehicles();
-                alert('Salida registrada exitosamente');
-            }
-        }
-    </script>
+    $("#btnTarjeta").on("click", function() {
+      alert("Pago registrado con TARJETA 💳");
+      $("#modalPago").modal("hide");
+    });
+  </script>
 </body>
 </html>
