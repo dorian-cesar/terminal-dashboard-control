@@ -102,16 +102,22 @@ class UIStateManager {
       this.updateStats(data);
       this.startTurnTimer(data.hora_inicio);
     } else {
+      // ESTADO CERRADO - Asegurar que todos los botones se desactiven/activen correctamente
       statusElement.removeClass("caja-abierta").addClass("caja-cerrada");
       statusElement.html('<i class="fas fa-circle"></i> Caja Cerrada');
 
+      // Forzar el estado de los botones
       abrirBtn.prop("disabled", false);
-      cerrarBtn.prop("disabled", true);
+      cerrarBtn.prop("disabled", true);  // Este es el importante
       imprimirBtn.prop("disabled", true);
       refreshBtn.prop("disabled", false);
 
       this.resetStats();
       this.stopTurnTimer();
+      
+      // Limpiar también cualquier loading state
+      this.setLoading("#btnCerrarCaja", false);
+      this.setLoading("#btnRefresh", false);
     }
   }
 
@@ -415,8 +421,19 @@ function limpiarEstadoCaja() {
   // Limpiar localStorage
   localStorage.removeItem("id_caja");
   
-  // Resetear UI
-  UIStateManager.updateCajaStatus(false);
+  // Forzar estado cerrado en la UI
+  $("#btnCerrarCaja").prop("disabled", true);
+  $("#btnImprimir").prop("disabled", true);
+  $("#btnAbrirCaja").prop("disabled", false);
+  
+  $("#cajaStatus").removeClass("caja-abierta").addClass("caja-cerrada")
+                 .html('<i class="fas fa-circle"></i> Caja Cerrada');
+  
+  // Resetear estadísticas
+  UIStateManager.resetStats();
+  UIStateManager.stopTurnTimer();
+  
+  // Mostrar tabla vacía
   $("#noDataRow").show();
   $("#registrosCount").text("0 registros");
   $("#tablaCaja tbody").html(`
@@ -430,100 +447,149 @@ function limpiarEstadoCaja() {
     `);
 }
 
-function cargarEstadoCaja() {
-  const userData = JSON.parse(localStorage.getItem("user")) || {};
-  const id_usuario_actual = userData.iduser || null;
-  const id_caja_local = localStorage.getItem("id_caja");
+// --- Funciones Principales Simplificadas ---
+function mostrarCaja(data) {
+  const monto_bano = parseFloat(data.monto_bano || 0);
+  const monto_custodia = parseFloat(data.monto_custodia || 0);
+  const monto_parking = parseFloat(data.monto_parking || 0);
+  const monto_andenes = parseFloat(data.monto_andenes || 0);
+  const monto_inicial = parseFloat(data.monto_inicial || 0);
+  const total = monto_inicial + monto_bano + monto_custodia + monto_parking + monto_andenes;
 
-  if (!id_usuario_actual) {
-    ToastSystem.show("Error: no hay usuario autenticado.", "error");
+  const estadoBadge = data.estado === "abierta"
+    ? '<span class="badge badge-abierta"><i class="fas fa-play-circle me-1"></i>Abierta</span>'
+    : '<span class="badge badge-cerrada"><i class="fas fa-stop-circle me-1"></i>Cerrada</span>';
+
+  $("#tablaCaja tbody").html(`
+        <tr>
+            <td><i class="fas fa-calendar text-gray-400 me-2"></i>${data.fecha}</td>
+            <td><i class="fas fa-clock text-gray-400 me-2"></i>${data.hora_inicio}</td>
+            <td><i class="fas fa-clock text-gray-400 me-2"></i>${data.hora_cierre || "-"}</td>
+            <td><strong>$${UIStateManager.formatCurrency(monto_inicial)}</strong></td>
+            <td>$${UIStateManager.formatCurrency(monto_bano)}</td>
+            <td>$${UIStateManager.formatCurrency(monto_custodia)}</td>
+            <td>$${UIStateManager.formatCurrency(monto_parking)}</td>
+            <td>$${UIStateManager.formatCurrency(monto_andenes)}</td>
+            <td><strong class="text-success">$${UIStateManager.formatCurrency(total)}</strong></td>
+            <td>${estadoBadge}</td>
+        </tr>
+    `);
+
+  $("#noDataRow").hide();
+  $("#registrosCount").text("1 registro");
+
+  // Actualizar resumen para impresión
+  $("#resumenCaja").html(`
+        <div class="text-center mb-4">
+            <h3 class="mb-1">Terminal de Buses Calama</h3>
+            <p class="text-muted mb-0">Resumen de Caja - ${data.fecha}</p>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <p><strong>Hora Inicio:</strong> ${data.hora_inicio}</p>
+                ${data.hora_cierre ? `<p><strong>Hora Cierre:</strong> ${data.hora_cierre}</p>` : ""}
+                <p><strong>Estado:</strong> ${data.estado}</p>
+            </div>
+            <div class="col-6 text-end">
+                <p><strong>ID Caja:</strong> ${data.id}</p>
+            </div>
+        </div>
+        <hr>
+        <div class="monto-item">
+            <span>Monto Inicial:</span>
+            <strong>$${UIStateManager.formatCurrency(monto_inicial)}</strong>
+        </div>
+        <div class="monto-item">
+            <span>Ingresos Baños:</span>
+            <span>$${UIStateManager.formatCurrency(monto_bano)}</span>
+        </div>
+        <div class="monto-item">
+            <span>Ingresos Custodia:</span>
+            <span>$${UIStateManager.formatCurrency(monto_custodia)}</span>
+        </div>
+        <div class="monto-item">
+            <span>Ingresos Parking:</span>
+            <span>$${UIStateManager.formatCurrency(monto_parking)}</span>
+        </div>
+        <div class="monto-item">
+            <span>Ingresos Andenes:</span>
+            <span>$${UIStateManager.formatCurrency(monto_andenes)}</span>
+        </div>
+        <hr>
+        <div class="monto-total">
+            <div class="d-flex justify-content-between align-items-center">
+                <span><strong>TOTAL GENERAL:</strong></span>
+                <span class="h4 mb-0 text-success"><strong>$${UIStateManager.formatCurrency(total)}</strong></span>
+            </div>
+        </div>
+        <div class="text-center mt-4 text-muted">
+            <small>Generado el ${fechaHoyChile()} ${horaActualChile()}</small>
+        </div>
+    `);
+}
+
+function limpiarEstadoCaja() {
+  // Limpiar localStorage
+  localStorage.removeItem("id_caja");
+  
+  // Forzar estado cerrado en la UI - INMEDIATO
+  $("#btnCerrarCaja").prop("disabled", true);
+  $("#btnImprimir").prop("disabled", true);
+  $("#btnAbrirCaja").prop("disabled", false);
+  
+  $("#cajaStatus").removeClass("caja-abierta").addClass("caja-cerrada")
+                 .html('<i class="fas fa-circle"></i> Caja Cerrada');
+  
+  // Resetear estadísticas
+  UIStateManager.resetStats();
+  UIStateManager.stopTurnTimer();
+  
+  // Mostrar tabla vacía
+  $("#noDataRow").show();
+  $("#registrosCount").text("0 registros");
+  $("#tablaCaja tbody").html(`
+        <tr id="noDataRow">
+            <td colspan="10" class="text-center py-5 text-muted">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <br>
+                No hay datos de caja disponibles
+            </td>
+        </tr>
+    `);
+}
+
+function verificarEstadoCaja() {
+  const id_caja_local = localStorage.getItem("id_caja");
+  
+  // Si NO hay id_caja en localStorage → caja cerrada
+  if (!id_caja_local) {
     limpiarEstadoCaja();
     return;
   }
-
-  // Si existe un id_caja en localStorage, validar que sea válido
-  if (id_caja_local) {
-    UIStateManager.setLoading("#btnRefresh", true);
-
-    $.post(API_URL + "caja.php", { accion: "mostrar", id_caja: id_caja_local })
-      .done(function (res) {
-        let data;
-        try {
-          data = JSON.parse(res);
-        } catch (e) {
-          console.error("Respuesta inválida del servidor");
-          limpiarEstadoCaja();
-          return;
-        }
-
-        if (data.success) {
-          // Verificar que la caja pertenezca al usuario actual
-          if (parseInt(data.id_usuario) !== parseInt(id_usuario_actual)) {
-            ToastSystem.show("La caja guardada pertenece a otro usuario.", "warning");
-            limpiarEstadoCaja();
-            return;
-          }
-
-          // Verificar que la caja esté abierta
-          if (data.estado !== "abierta") {
-            ToastSystem.show("La caja guardada está cerrada.", "info");
-            limpiarEstadoCaja();
-            return;
-          }
-
-          // Caja válida y abierta → mostrarla
+  
+  // Si hay id_caja, verificar en el servidor si sigue abierta
+  $.post(API_URL + "caja.php", { accion: "mostrar", id_caja: id_caja_local })
+    .done(function (res) {
+      try {
+        const data = JSON.parse(res);
+        
+        if (data.success && data.estado === "abierta") {
+          // Caja existe y está abierta → mostrar datos
           mostrarCaja(data);
           UIStateManager.updateCajaStatus(true, data);
           cargarMovimientosCaja(data.id);
         } else {
-          // Si el ID local no existe en DB, limpiar estado
+          // Caja no existe o está cerrada → limpiar estado
           limpiarEstadoCaja();
         }
-      })
-      .fail(function (xhr, status, error) {
-        ToastSystem.show("Error al verificar caja: " + error, "error");
-        limpiarEstadoCaja();
-      })
-      .always(function () {
-        UIStateManager.setLoading("#btnRefresh", false);
-      });
-  } else {
-    // Si no hay caja local, verificar si el usuario tiene una caja abierta
-    verificarCajaAbiertaUsuario(id_usuario_actual);
-  }
-}
-
-function verificarCajaAbiertaUsuario(id_usuario) {
-  $.post(API_URL + "caja.php", {
-    accion: "abrir",
-    monto_inicial: 0,
-    id_usuario: id_usuario
-  })
-    .done(function (res) {
-      let data;
-      try {
-        data = JSON.parse(res);
       } catch (e) {
-        console.error("Respuesta inválida del servidor");
-        limpiarEstadoCaja();
-        return;
-      }
-
-      if (data.success && data.reutilizada) {
-        // Se encontró una caja abierta existente
-        localStorage.setItem("id_caja", data.id);
-        mostrarCaja(data);
-        UIStateManager.updateCajaStatus(true, data);
-        cargarMovimientosCaja(data.id);
-        ToastSystem.show("Se ha retomado automáticamente tu caja abierta.", "info");
-      } else {
-        // No hay caja abierta
+        console.error("Error parseando respuesta:", e);
         limpiarEstadoCaja();
       }
     })
     .fail(function (xhr, status, error) {
-      ToastSystem.show("Error al verificar caja abierta: " + error, "error");
-      limpiarEstadoCaja();
+      console.error("Error al verificar caja:", error);
+      // En caso de error, mantener el estado actual pero intentar de nuevo luego
     });
 }
 
@@ -563,7 +629,7 @@ $("#formInicioCaja").on("submit", async function (e) {
     monto_inicial: monto,
     id_usuario: id_usuario,
     numero_caja: numeroCaja,
-    hora_inicio: hora_inicio // <-- enviamos hora de inicio
+    hora_inicio: hora_inicio
   })
   .done(function (res) {
     let data;
@@ -604,6 +670,8 @@ $("#btnCerrarCaja").on("click", function () {
     return;
   }
 
+  $(this).prop("disabled", true);
+  $("#btnImprimir").prop("disabled", true);
   UIStateManager.setLoading("#btnCerrarCaja", true);
 
   const hora_cierre = horaActualChile();
@@ -614,23 +682,25 @@ $("#btnCerrarCaja").on("click", function () {
     hora_cierre: hora_cierre
   })
   .done(function (res) {
-    let data;
-    try { 
-      data = JSON.parse(res); 
-    } catch (e) { 
-      throw new Error("Respuesta inválida"); 
-    }
-
-    if (data.success) {
-      // Limpiar completamente el estado al cerrar la caja
+    try {
+      const data = JSON.parse(res);
+      if (data.success) {
+        // Limpiar estado inmediatamente
+        limpiarEstadoCaja();
+        ToastSystem.show("Caja cerrada correctamente", "success");
+      } else {
+        throw new Error(data.error || "Error al cerrar caja");
+      }
+    } catch (e) {
+      ToastSystem.show("Error al procesar respuesta: " + e.message, "error");
+      // Aún así limpiar el estado local
       limpiarEstadoCaja();
-      ToastSystem.show("Caja cerrada correctamente", "success");
-    } else {
-      throw new Error(data.error || "Error al cerrar caja");
     }
   })
   .fail(function (xhr, status, error) {
     ToastSystem.show("Error de conexión: " + error, "error");
+    // Aún así limpiar el estado local
+    limpiarEstadoCaja();
   })
   .always(function () {
     UIStateManager.setLoading("#btnCerrarCaja", false);
@@ -654,14 +724,19 @@ $("#btnImprimir").on("click", function () {
 });
 
 $("#btnRefresh").on("click", function () {
-  cargarEstadoCaja();
+  verificarEstadoCaja();
   ToastSystem.show("Datos actualizados", "info", 2000);
 });
 
 // --- Inicialización ---
 $(document).ready(function () {
-  // Cargar estado inicial de la caja
-  cargarEstadoCaja();
+  // Verificar estado al cargar la página
+  verificarEstadoCaja();
+
+  // Configurar verificación automática cada 30 segundos
+  setInterval(() => {
+    verificarEstadoCaja();
+  }, 30000);
 
   // Configurar auto-refresh cada 10 segundos para movimientos si hay caja abierta
   setInterval(() => {
@@ -670,11 +745,6 @@ $(document).ready(function () {
       cargarMovimientosCaja(id);
     }
   }, 10000);
-
-  // Configurar auto-refresh completo cada 30 segundos
-  setInterval(() => {
-    cargarEstadoCaja();
-  }, 30000);
 
   // Mejorar la experiencia del formulario
   $("#monto_inicial_modal").on("focus", function () {
