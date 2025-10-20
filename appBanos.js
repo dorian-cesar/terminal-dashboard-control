@@ -42,7 +42,6 @@ function initializePage() {
     });
   }
 
-  // Inicializar modal simplificado
   initializeModal();
 
   // Ocultar botones no necesarios
@@ -66,20 +65,33 @@ function actualizarValoresServicios() {
   const valorBaño = document.getElementById("valorBaño");
   const valorDucha = document.getElementById("valorDucha");
 
-  if (valorBaño && window.restroom && window.restroom.Baño) {
-    valorBaño.textContent = `$${window.restroom.Baño}`;
-    console.log("Valor Baño actualizado:", window.restroom.Baño);
+  // Verificar si los elementos existen antes de intentar actualizarlos
+  if (valorBaño) {
+    if (window.restroom && window.restroom.Baño) {
+      valorBaño.textContent = `$${window.restroom.Baño}`;
+      console.log("Valor Baño actualizado:", window.restroom.Baño);
+    } else {
+      console.warn(
+        "No se pudo cargar el valor del Baño, usando valor por defecto"
+      );
+      valorBaño.textContent = "$500"; // Valor por defecto
+    }
   } else {
-    console.error("No se pudo cargar el valor del Baño");
-    valorBaño.textContent = "$500"; // Valor por defecto
+    console.log("Elemento valorBaño no encontrado en esta página");
   }
 
-  if (valorDucha && window.restroom && window.restroom.Ducha) {
-    valorDucha.textContent = `$${window.restroom.Ducha}`;
-    console.log("Valor Ducha actualizado:", window.restroom.Ducha);
+  if (valorDucha) {
+    if (window.restroom && window.restroom.Ducha) {
+      valorDucha.textContent = `$${window.restroom.Ducha}`;
+      console.log("Valor Ducha actualizado:", window.restroom.Ducha);
+    } else {
+      console.warn(
+        "No se pudo cargar el valor de la Ducha, usando valor por defecto"
+      );
+      valorDucha.textContent = "$4000"; // Valor por defecto
+    }
   } else {
-    console.error("No se pudo cargar el valor de la Ducha");
-    valorDucha.textContent = "$4000"; // Valor por defecto
+    console.log("Elemento valorDucha no encontrado en esta página");
   }
 }
 
@@ -93,7 +105,7 @@ function initializeModal() {
   const cancelModal = document.getElementById("cancelModal");
 
   if (!modalPago) {
-    console.error("Modal no encontrado");
+    console.warn("Modal de pago no encontrado");
     return;
   }
 
@@ -119,24 +131,34 @@ function initializeModal() {
   }
 }
 
-function seleccionarMetodoPago(metodo) {
+async function seleccionarMetodoPago(metodo) {
   metodoPagoSeleccionado = metodo;
 
-  // Remover clase active de todos los botones
-  const botones = document.querySelectorAll(".payment-method-btn");
-  botones.forEach((btn) => btn.classList.remove("active"));
-
-  // Agregar clase active al botón seleccionado
   const btnSeleccionado = document.getElementById(
     `btnPago${metodo.charAt(0).toUpperCase() + metodo.slice(1)}`
   );
-  if (btnSeleccionado) {
-    btnSeleccionado.classList.add("active");
+  if (!btnSeleccionado) return;
 
-    // Procesar pago automáticamente después de 500ms (para dar feedback visual)
-    setTimeout(() => {
-      procesarPago(metodo);
-    }, 500);
+  // Visual active
+  document
+    .querySelectorAll(".payment-method-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+  btnSeleccionado.classList.add("active");
+
+  // Deshabilitar todos los botones y mostrar spinner solo en el seleccionado
+  deshabilitarBotonesPago(true);
+  btnSeleccionado.dataset.textoOriginal = btnSeleccionado.innerHTML;
+  btnSeleccionado.innerHTML = `${btnSeleccionado.dataset.textoOriginal} <span class="spinner"></span>`;
+
+  try {
+    await procesarPago(metodo);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    // Habilitar todos los botones y quitar spinner
+    btnSeleccionado.innerHTML = btnSeleccionado.dataset.textoOriginal;
+    delete btnSeleccionado.dataset.textoOriginal;
+    deshabilitarBotonesPago(false);
   }
 }
 
@@ -174,19 +196,17 @@ function mostrarModalPago(tipoServicio) {
 
 function procesarPago(metodoPago) {
   const tipoServicio = servicioSeleccionado;
-  if (!tipoServicio) return;
+  if (!tipoServicio) return Promise.reject("No hay servicio seleccionado");
 
-  cerrarModal();
-
-  // Obtener el precio desde window.restroom
   const precio = window.restroom ? window.restroom[tipoServicio] : 0;
   console.log(`Procesando pago ${metodoPago} para ${tipoServicio}: $${precio}`);
 
-  // Procesar según el método de pago
   if (metodoPago === "efectivo") {
-    procesarPagoEfectivo(tipoServicio);
+    return procesarPagoEfectivo(tipoServicio); // RETORNAR la promesa
   } else if (metodoPago === "tarjeta") {
-    procesarPagoTarjeta(tipoServicio);
+    return procesarPagoTarjeta(tipoServicio); // RETORNAR la promesa
+  } else {
+    return Promise.reject("Método de pago no soportado");
   }
 }
 
@@ -200,6 +220,7 @@ async function procesarPagoEfectivo(tipoServicio) {
     await generarBoleta(tipoServicio);
 
     showToast("Pago en efectivo registrado correctamente.", "success");
+    cerrarModal();
   } catch (error) {
     console.error("Error en pago efectivo:", error);
     showToast("Error al procesar pago en efectivo.", "error");
@@ -210,18 +231,28 @@ async function procesarPagoEfectivo(tipoServicio) {
 
 async function procesarPagoTarjeta(tipoServicio) {
   try {
-    // Para tarjeta, procesar con Transbank primero
-    const resultadoTransbank = await procesarConTransbank(tipoServicio);
+    // 1. Generar código único para el QR
+    const codigoQR = generarTokenNumerico(); // o cualquier lógica que uses
 
-    if (resultadoTransbank.exitoso) {
-      // Si Transbank fue exitoso, generar QR
-      const codigo = await generarQRParaServicio(tipoServicio);
-      // await printQR();
+    // 2. Usar ese código como ticketNumber para Transbank
+    const resultadoTransbank = await procesarConTransbank(
+      tipoServicio,
+      codigoQR
+    );
 
-      showToast("Pago con tarjeta procesado correctamente.", "success");
-    } else {
-      showToast("Error en pago con tarjeta.", "error");
+    if (!resultadoTransbank.success) {
+      showToast(
+        "Error en pago con tarjeta: " + resultadoTransbank.error,
+        "error"
+      );
+      return;
     }
+
+    // 3. Generar QR usando el mismo código
+    await generarQRParaServicio(tipoServicio, codigoQR);
+
+    showToast("Pago con tarjeta procesado correctamente.", "success");
+    cerrarModal();
   } catch (error) {
     console.error("Error en pago tarjeta:", error);
     showToast("Error al procesar pago con tarjeta.", "error");
@@ -230,19 +261,42 @@ async function procesarPagoTarjeta(tipoServicio) {
   }
 }
 
-// Función para procesar con Transbank (placeholder - implementar según tu API)
-async function procesarConTransbank(tipoServicio) {
-  const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+// Función para procesar con Transbank
+async function procesarConTransbank(tipoServicio, ticketNumber) {
+  try {
+    const precio = window.restroom ? window.restroom[tipoServicio] : 0;
 
-  // Aquí iría la integración con Transbank
-  console.log("Procesando pago Transbank por:", precio);
+    // Llamada al backend que integra Transbank
+    const response = await fetch("http://10.5.20.105:3000/api/payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: precio,
+        ticketNumber, // usamos el mismo que el QR
+      }),
+    });
 
-  // Simular procesamiento
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ exitoso: true, idTransaccion: "TBK_" + Date.now() });
-    }, 1000);
-  });
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error("Error en Transbank:", data.error);
+      return { success: false, error: data.error };
+    }
+
+    return {
+      success: true,
+      idTransaccion: data.data.operationNumber,
+      autorizacion: data.data.authorizationCode,
+      monto: data.data.amount,
+      ultimos4: data.data.last4Digits,
+      tipoTarjeta: data.data.cardType,
+      marcaTarjeta: data.data.cardBrand,
+      mensaje: data.data.responseMessage,
+    };
+  } catch (error) {
+    console.error("Error procesando pago:", error);
+    return { success: false, error: error.message };
+  }
 }
 
 // Función para generar boleta (placeholder - implementar según tu API)
@@ -340,7 +394,7 @@ function generarQRParaServicio(tipoServicio) {
       // Otros procesos
       leerDatosServer();
       addUser(numeroT);
-      setTimeout(() => addUserAccessLevel(numeroT.substring(0, 6)), 1000);
+      addUserAccessLevel(numeroT.substring(0, 6));
 
       resolve(numeroT);
     } catch (error) {
@@ -367,90 +421,6 @@ function initializeFiltersAndVerification() {
   if (buscadorCodigo) buscadorCodigo.addEventListener("input", aplicarFiltros);
   if (filtroTipo) filtroTipo.addEventListener("change", aplicarFiltros);
   if (filtroFecha) filtroFecha.addEventListener("change", aplicarFiltros);
-}
-
-function initializeBoletaGeneration() {
-  // Solo inicializar jQuery si estamos en la página principal
-  const entradaBtn = document.getElementById("entrada");
-  if (entradaBtn && typeof $ !== "undefined") {
-    $(document).ready(function () {
-      $("#entrada").click(function (event) {
-        event.preventDefault();
-        // Como ya no hay radio buttons, usar el último servicio seleccionado
-        let servicio = "Baño"; // Valor por defecto
-        let valor = String(window.restroom[servicio]);
-        console.log("Servicio seleccionado:", servicio);
-        console.log("Valor asignado:", valor);
-        if (!valor) {
-          console.error(
-            "El valor no fue encontrado para el servicio:",
-            servicio
-          );
-          showToast("Tipo de servicio no válido.", "warning");
-          return;
-        }
-        let payload = {
-          codigoEmpresa: "89",
-          tipoDocumento: "39",
-          total: valor,
-          detalleBoleta: `53-${valor}-1-dsa-${servicio}`,
-        };
-        console.log("Payload preparado para el envío:", payload);
-        $("#resultado").html(
-          "<div class='loading'>Generando boleta, por favor espere...</div>"
-        );
-        $.ajax({
-          url: "https://qa.pullman.cl/srv-dte-web/rest/emisionDocumentoElectronico/generarDocumento",
-          type: "POST",
-          contentType: "application/json",
-          data: JSON.stringify(payload),
-          beforeSend: function () {
-            console.log("Iniciando conexión con el servidor...");
-          },
-          success: function (response) {
-            try {
-              console.log("Respuesta recibida:", response);
-              if (response.respuesta === "OK") {
-                let boletaHtml = `<div class='alert alert-success'>
-                                    <p><strong>Boleta generada con éxito.</strong></p>
-                                    <p><strong>Folio:</strong> ${response.folio}</p>
-                                    <p><strong>Fecha:</strong> ${response.fecha}</p>
-                                </div>
-                                <div class="mt-3">
-                                    <a href='${response.rutaAcepta}' target='_blank' class='btn'>Ver Boleta</a>
-                                </div>`;
-                $("#resultado").html(boletaHtml);
-                console.log("Boleta generada correctamente.");
-              } else {
-                $("#resultado").html(
-                  "<div class='alert alert-danger'>Error al generar la boleta.</div>"
-                );
-                console.warn("Error en la respuesta del servidor:", response);
-              }
-            } catch (error) {
-              console.error("Error al procesar la respuesta:", error);
-              $("#resultado").html(
-                "<div class='alert alert-danger'>Error inesperado. Consulte la consola para más detalles.</div>"
-              );
-            }
-          },
-          error: function (jqXHR, textStatus, errorThrown) {
-            console.error(
-              "Error en la solicitud AJAX:",
-              textStatus,
-              errorThrown
-            );
-            $("#resultado").html(
-              "<div class='alert alert-danger'>Error en la comunicación con el servidor.</div>"
-            );
-          },
-          complete: function () {
-            console.log("Conexión con el servidor finalizada.");
-          },
-        });
-      });
-    });
-  }
 }
 
 // FUNCIONES DE API Y UTILIDADES
@@ -858,4 +828,41 @@ function generarQRPlaceholder() {
     colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H,
   });
+}
+
+function mostrarSpinnerEnModal(botonSeleccionado) {
+  const botones = document.querySelectorAll(".payment-method-btn");
+  botones.forEach((btn) => (btn.disabled = true)); // deshabilitar todos
+
+  botonSeleccionado.dataset.textoOriginal = botonSeleccionado.innerHTML;
+  botonSeleccionado.innerHTML = `${botonSeleccionado.dataset.textoOriginal} <span class="spinner"></span>`;
+}
+
+function quitarSpinnerEnModal() {
+  const botones = document.querySelectorAll(".payment-method-btn");
+  botones.forEach((btn) => {
+    btn.disabled = false;
+    if (btn.dataset.textoOriginal) {
+      btn.innerHTML = btn.dataset.textoOriginal;
+    }
+  });
+}
+
+function deshabilitarBotonesPago(deshabilitar = true) {
+  const modalPago = document.getElementById("modalPago");
+  if (modalPago) {
+    // Seleccionamos todos los elementos clickeables dentro del modal
+    modalPago.querySelectorAll(".payment-method-btn, button").forEach((el) => {
+      if (el.tagName === "DIV") {
+        // Para los divs de métodos de pago
+        el.style.pointerEvents = deshabilitar ? "none" : "auto";
+      } else {
+        // Para los botones (Cancelar y X)
+        el.disabled = deshabilitar;
+      }
+      // Clases de estilo visual
+      el.classList.toggle("opacity-50", deshabilitar);
+      el.classList.toggle("cursor-not-allowed", deshabilitar);
+    });
+  }
 }
