@@ -5,8 +5,11 @@
     const urlStore = urlServer + '/TerminalCalama/PHP/Custodia/store.php';
     const urlState = urlServer + '/TerminalCalama/PHP/Custodia/reload.php';
     const urlLoad = urlServer + '/TerminalCalama/PHP/Boleta/load.php';
-    const urlImpresion = 'http://10.5.20.105:3000/api/imprimir';
-    const urlPayment = 'http://10.5.20.105:3000/api/payment';
+    const urlLocal = 'http://10.5.20.105:3000';
+    const urlImpresion = urlLocal + '/api/imprimir';
+    const urlPaymentTarjeta = urlLocal + '/api/payment';
+    const urlPaymentEfectivo = 'https://backend-banios.dev-wit.com/api/boletas-calama/enviar'
+
 
     //==================================== HELPERS =======================================
     async function callAPI(datos, url) {
@@ -489,19 +492,81 @@
 
     async function procesarPagoEfectivo(datos) {
         console.log('Procesando pago en efectivo:', datos);
-        // Si tu caja no necesita integración, devuelve resultado simulado consistente:
-        const codigo = generateCode(6);
-        datos.metodoPago = 'Efectivo';
-        datos.codigoTransaccion = codigo;
-        datos.referenciaPago = codigo;
 
-        return {
-            success: true,
-            metodo: 'efectivo',
-            codigoTransaccion: codigo,
-            referenciaPago: codigo,
-            mensaje: 'Pago en efectivo registrado'
-        };
+        try {
+            if (!datos.valorTotal || datos.valorTotal <= 0) {
+                throw new Error('Monto inválido para procesar pago en efectivo');
+            }
+
+            const payload = {
+                nombre: "casillero_custodia",
+                precio: datos.valorTotal
+            };
+
+            console.log("Enviando pago en efectivo a:", urlPaymentEfectivo);
+            console.log("Payload:", payload);
+
+            const response = await fetch(urlPaymentEfectivo, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload),
+            });
+
+            console.log("Respuesta HTTP:", response.status, response.statusText);
+
+            // Validar respuesta HTTP
+            if (!response.ok) {
+                let errorDetail = `Error ${response.status}: ${response.statusText}`;
+
+                try {
+                    const errorText = await response.text();
+                    console.error("Detalle del error:", errorText);
+                    errorDetail += ` - ${errorText}`;
+                } catch (e) {
+                    console.error("No se pudo obtener detalle del error");
+                }
+
+                throw new Error(`Error del servidor: ${errorDetail}`);
+            }
+
+            // Procesar respuesta JSON
+            const result = await response.json();
+            console.log("Respuesta del servidor (JSON):", result);
+
+            if (result.success === false || result.error) {
+                throw new Error(result.message || result.error || 'Error en la respuesta del servidor');
+            }
+
+            return {
+                success: true,
+                metodo: 'efectivo',
+                codigoTransaccion: generateCode(6),
+                referenciaPago: `EF-${generateCode(4)}`,
+                respuestaGateway: result,
+                mensaje: 'Pago en efectivo registrado correctamente'
+            };
+
+        } catch (error) {
+            console.error('Error completo en pago en efectivo:', error);
+
+            // Mejorar mensajes de error para el usuario
+            let userMessage = error.message || 'Error procesando pago en efectivo';
+
+            if (error.message.includes('Failed to fetch')) {
+                userMessage = 'Error de conexión con el servidor. Verifique su conexión a internet y que el servidor esté disponible.';
+            } else if (error.message.includes('CORS') || error.message.includes('cors')) {
+                userMessage = 'Error de configuración del servidor. Contacte al administrador.';
+            } else if (error.message.includes('404')) {
+                userMessage = 'Servicio no encontrado. Verifique la URL del endpoint.';
+            } else if (error.message.includes('500')) {
+                userMessage = 'Error interno del servidor. Contacte al administrador.';
+            }
+
+            throw new Error(userMessage);
+        }
     }
 
     async function procesarPagoTarjeta(datos) {
@@ -520,7 +585,7 @@
 
             console.log('Enviando pago a gateway:', payload);
 
-            const response = await fetch(urlPayment, {
+            const response = await fetch(urlPaymentTarjeta, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
