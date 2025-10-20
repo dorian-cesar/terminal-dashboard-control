@@ -29,8 +29,8 @@ class ToastSystem {
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <strong>${this.getIcon(type)} ${this.getTitle(
-      type
-    )}</strong>
+                          type
+                        )}</strong>
                         <div class="mt-1">${message}</div>
                     </div>
                     <button class="btn-close btn-close-white ms-3" onclick="$(this).closest('.toast').remove()"></button>
@@ -337,35 +337,23 @@ function mostrarCaja(data) {
   const monto_parking = parseFloat(data.monto_parking || 0);
   const monto_andenes = parseFloat(data.monto_andenes || 0);
   const monto_inicial = parseFloat(data.monto_inicial || 0);
-  const total =
-    monto_inicial + monto_bano + monto_custodia + monto_parking + monto_andenes;
+  const total = monto_inicial + monto_bano + monto_custodia + monto_parking + monto_andenes;
 
-  const estadoBadge =
-    data.estado === "abierta"
-      ? '<span class="badge badge-abierta"><i class="fas fa-play-circle me-1"></i>Abierta</span>'
-      : '<span class="badge badge-cerrada"><i class="fas fa-stop-circle me-1"></i>Cerrada</span>';
+  const estadoBadge = data.estado === "abierta"
+    ? '<span class="badge badge-abierta"><i class="fas fa-play-circle me-1"></i>Abierta</span>'
+    : '<span class="badge badge-cerrada"><i class="fas fa-stop-circle me-1"></i>Cerrada</span>';
 
   $("#tablaCaja tbody").html(`
         <tr>
-            <td><i class="fas fa-calendar text-gray-400 me-2"></i>${
-              data.fecha
-            }</td>
-            <td><i class="fas fa-clock text-gray-400 me-2"></i>${
-              data.hora_inicio
-            }</td>
-            <td><i class="fas fa-clock text-gray-400 me-2"></i>${
-              data.hora_cierre || "-"
-            }</td>
-            <td><strong>$${UIStateManager.formatCurrency(
-              monto_inicial
-            )}</strong></td>
+            <td><i class="fas fa-calendar text-gray-400 me-2"></i>${data.fecha}</td>
+            <td><i class="fas fa-clock text-gray-400 me-2"></i>${data.hora_inicio}</td>
+            <td><i class="fas fa-clock text-gray-400 me-2"></i>${data.hora_cierre || "-"}</td>
+            <td><strong>$${UIStateManager.formatCurrency(monto_inicial)}</strong></td>
             <td>$${UIStateManager.formatCurrency(monto_bano)}</td>
             <td>$${UIStateManager.formatCurrency(monto_custodia)}</td>
             <td>$${UIStateManager.formatCurrency(monto_parking)}</td>
             <td>$${UIStateManager.formatCurrency(monto_andenes)}</td>
-            <td><strong class="text-success">$${UIStateManager.formatCurrency(
-              total
-            )}</strong></td>
+            <td><strong class="text-success">$${UIStateManager.formatCurrency(total)}</strong></td>
             <td>${estadoBadge}</td>
         </tr>
     `);
@@ -382,11 +370,7 @@ function mostrarCaja(data) {
         <div class="row">
             <div class="col-6">
                 <p><strong>Hora Inicio:</strong> ${data.hora_inicio}</p>
-                ${
-                  data.hora_cierre
-                    ? `<p><strong>Hora Cierre:</strong> ${data.hora_cierre}</p>`
-                    : ""
-                }
+                ${data.hora_cierre ? `<p><strong>Hora Cierre:</strong> ${data.hora_cierre}</p>` : ""}
                 <p><strong>Estado:</strong> ${data.estado}</p>
             </div>
             <div class="col-6 text-end">
@@ -418,14 +402,31 @@ function mostrarCaja(data) {
         <div class="monto-total">
             <div class="d-flex justify-content-between align-items-center">
                 <span><strong>TOTAL GENERAL:</strong></span>
-                <span class="h4 mb-0 text-success"><strong>$${UIStateManager.formatCurrency(
-                  total
-                )}</strong></span>
+                <span class="h4 mb-0 text-success"><strong>$${UIStateManager.formatCurrency(total)}</strong></span>
             </div>
         </div>
         <div class="text-center mt-4 text-muted">
             <small>Generado el ${fechaHoyChile()} ${horaActualChile()}</small>
         </div>
+    `);
+}
+
+function limpiarEstadoCaja() {
+  // Limpiar localStorage
+  localStorage.removeItem("id_caja");
+  
+  // Resetear UI
+  UIStateManager.updateCajaStatus(false);
+  $("#noDataRow").show();
+  $("#registrosCount").text("0 registros");
+  $("#tablaCaja tbody").html(`
+        <tr id="noDataRow">
+            <td colspan="10" class="text-center py-5 text-muted">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <br>
+                No hay datos de caja disponibles
+            </td>
+        </tr>
     `);
 }
 
@@ -436,13 +437,11 @@ function cargarEstadoCaja() {
 
   if (!id_usuario_actual) {
     ToastSystem.show("Error: no hay usuario autenticado.", "error");
-    UIStateManager.updateCajaStatus(false);
-    $("#noDataRow").show();
-    $("#registrosCount").text("0 registros");
+    limpiarEstadoCaja();
     return;
   }
 
-  // Si existe un id_caja en localStorage, primero validamos que siga siendo válido
+  // Si existe un id_caja en localStorage, validar que sea válido
   if (id_caja_local) {
     UIStateManager.setLoading("#btnRefresh", true);
 
@@ -453,48 +452,51 @@ function cargarEstadoCaja() {
           data = JSON.parse(res);
         } catch (e) {
           console.error("Respuesta inválida del servidor");
+          limpiarEstadoCaja();
           return;
         }
 
         if (data.success) {
-          // Si la caja pertenece a otro usuario, limpiamos localStorage
+          // Verificar que la caja pertenezca al usuario actual
           if (parseInt(data.id_usuario) !== parseInt(id_usuario_actual)) {
-            localStorage.removeItem("id_caja");
-            ToastSystem.show(
-              "La caja guardada pertenece a otro usuario. Se mostrará como cerrada.",
-              "warning"
-            );
-            verificarCajaAbiertaUsuario(id_usuario_actual);
+            ToastSystem.show("La caja guardada pertenece a otro usuario.", "warning");
+            limpiarEstadoCaja();
             return;
           }
 
-          // Caja válida → mostrarla
+          // Verificar que la caja esté abierta
+          if (data.estado !== "abierta") {
+            ToastSystem.show("La caja guardada está cerrada.", "info");
+            limpiarEstadoCaja();
+            return;
+          }
+
+          // Caja válida y abierta → mostrarla
           mostrarCaja(data);
           UIStateManager.updateCajaStatus(true, data);
           cargarMovimientosCaja(data.id);
         } else {
-          // Si el ID local no existe en DB, verificar si el usuario tiene una caja abierta
-          localStorage.removeItem("id_caja");
-          verificarCajaAbiertaUsuario(id_usuario_actual);
+          // Si el ID local no existe en DB, limpiar estado
+          limpiarEstadoCaja();
         }
       })
       .fail(function (xhr, status, error) {
         ToastSystem.show("Error al verificar caja: " + error, "error");
+        limpiarEstadoCaja();
       })
       .always(function () {
         UIStateManager.setLoading("#btnRefresh", false);
       });
   } else {
-    // Si no hay caja local, directamente verificamos en la DB
+    // Si no hay caja local, verificar si el usuario tiene una caja abierta
     verificarCajaAbiertaUsuario(id_usuario_actual);
   }
 }
 
 function verificarCajaAbiertaUsuario(id_usuario) {
-  // Verifica en la base de datos si el usuario ya tiene una caja abierta
   $.post(API_URL + "caja.php", {
-    accion: "abrir", // mismo endpoint, el backend devolverá la existente si ya hay una abierta
-    monto_inicial: 0, // se ignora si ya hay caja abierta
+    accion: "abrir",
+    monto_inicial: 0,
     id_usuario: id_usuario
   })
     .done(function (res) {
@@ -503,30 +505,25 @@ function verificarCajaAbiertaUsuario(id_usuario) {
         data = JSON.parse(res);
       } catch (e) {
         console.error("Respuesta inválida del servidor");
+        limpiarEstadoCaja();
         return;
       }
 
-      if (data.success) {
-        if (data.reutilizada) {
-          localStorage.setItem("id_caja", data.id);
-          mostrarCaja(data);
-          UIStateManager.updateCajaStatus(true, data);
-          cargarMovimientosCaja(data.id);
-          ToastSystem.show("Se ha retomado automáticamente tu caja abierta.", "info");
-        } else {
-          // No había caja abierta, solo mostrar estado cerrado
-          UIStateManager.updateCajaStatus(false);
-          $("#noDataRow").show();
-          $("#registrosCount").text("0 registros");
-        }
+      if (data.success && data.reutilizada) {
+        // Se encontró una caja abierta existente
+        localStorage.setItem("id_caja", data.id);
+        mostrarCaja(data);
+        UIStateManager.updateCajaStatus(true, data);
+        cargarMovimientosCaja(data.id);
+        ToastSystem.show("Se ha retomado automáticamente tu caja abierta.", "info");
       } else {
-        UIStateManager.updateCajaStatus(false);
-        $("#noDataRow").show();
-        $("#registrosCount").text("0 registros");
+        // No hay caja abierta
+        limpiarEstadoCaja();
       }
     })
     .fail(function (xhr, status, error) {
       ToastSystem.show("Error al verificar caja abierta: " + error, "error");
+      limpiarEstadoCaja();
     });
 }
 
@@ -609,21 +606,24 @@ $("#btnCerrarCaja").on("click", function () {
 
   UIStateManager.setLoading("#btnCerrarCaja", true);
 
-  const hora_cierre = horaActualChile(); // <-- hora de cierre
+  const hora_cierre = horaActualChile();
 
   $.post(API_URL + "caja.php", { 
     accion: "cerrar", 
     id_caja: id,
-    hora_cierre: hora_cierre // enviamos hora de cierre
+    hora_cierre: hora_cierre
   })
   .done(function (res) {
     let data;
-    try { data = JSON.parse(res); } catch (e) { throw new Error("Respuesta inválida"); }
+    try { 
+      data = JSON.parse(res); 
+    } catch (e) { 
+      throw new Error("Respuesta inválida"); 
+    }
 
     if (data.success) {
-      localStorage.removeItem("id_caja");
-      mostrarCaja(data); // se mostrará hora de cierre
-      UIStateManager.updateCajaStatus(false);
+      // Limpiar completamente el estado al cerrar la caja
+      limpiarEstadoCaja();
       ToastSystem.show("Caja cerrada correctamente", "success");
     } else {
       throw new Error(data.error || "Error al cerrar caja");
@@ -669,14 +669,12 @@ $(document).ready(function () {
       const id = localStorage.getItem("id_caja");
       cargarMovimientosCaja(id);
     }
-  }, 10000); // Cada 10 segundos para movimientos en tiempo real
+  }, 10000);
 
   // Configurar auto-refresh completo cada 30 segundos
   setInterval(() => {
-    if (localStorage.getItem("id_caja")) {
-      cargarEstadoCaja();
-    }
-  }, 30000); // Cada 30 segundos para refresh completo
+    cargarEstadoCaja();
+  }, 30000);
 
   // Mejorar la experiencia del formulario
   $("#monto_inicial_modal").on("focus", function () {
