@@ -413,3 +413,20 @@ body {
     color: var(--accent-danger);
     border: 1px solid var(--accent-danger);
 }
+
+/* Agrega esto a tu caja.css */
+.btn .spinner {
+  border: 2px solid transparent;
+  border-left: 2px solid currentColor;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.btn:disabled .spinner {
+  opacity: 0.7;
+}

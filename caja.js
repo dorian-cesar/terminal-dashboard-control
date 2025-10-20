@@ -532,8 +532,13 @@ function limpiarEstadoCaja() {
   // Limpiar localStorage
   localStorage.removeItem("id_caja");
   
-  // Forzar estado cerrado en la UI - INMEDIATO
+  // Restaurar botón cerrar caja a estado normal (pero disabled)
   $("#btnCerrarCaja").prop("disabled", true);
+  $("#btnCerrarCaja").html(`
+    <i class="fas fa-lock me-2"></i>
+    Cerrar Caja
+  `);
+  
   $("#btnImprimir").prop("disabled", true);
   $("#btnAbrirCaja").prop("disabled", false);
   
@@ -670,9 +675,15 @@ $("#btnCerrarCaja").on("click", function () {
     return;
   }
 
-  $(this).prop("disabled", true);
-  $("#btnImprimir").prop("disabled", true);
-  UIStateManager.setLoading("#btnCerrarCaja", true);
+  // MOSTRAR SPINNER Y DESACTIVAR INMEDIATAMENTE
+  const $btn = $(this);
+  const originalText = $btn.html();
+  
+  $btn.prop("disabled", true);
+  $btn.html(`
+    <span class="spinner"></span>
+    Cerrando caja...
+  `);
 
   const hora_cierre = horaActualChile();
 
@@ -703,7 +714,6 @@ $("#btnCerrarCaja").on("click", function () {
     limpiarEstadoCaja();
   })
   .always(function () {
-    UIStateManager.setLoading("#btnCerrarCaja", false);
   });
 });
 
