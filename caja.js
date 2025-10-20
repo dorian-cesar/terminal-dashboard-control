@@ -189,6 +189,33 @@ class UIStateManager {
   }
 }
 
+function ahoraChile() {
+  return new Date().toLocaleString("es-CL", {
+    timeZone: "America/Santiago",
+  });
+}
+
+// Ejemplo: solo fecha
+function fechaHoyChile() {
+  return new Date().toLocaleDateString("es-CL", {
+    timeZone: "America/Santiago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+// Ejemplo: hora
+function horaActualChile() {
+  return new Date().toLocaleTimeString("es-CL", {
+    timeZone: "America/Santiago",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+
 async function obtenerNumeroCaja() {
   try {
     // const res = await fetch("http://localhost:3000/api/info-caja");
@@ -397,7 +424,7 @@ function mostrarCaja(data) {
             </div>
         </div>
         <div class="text-center mt-4 text-muted">
-            <small>Generado el ${new Date().toLocaleString("es-CL")}</small>
+            <small>Generado el ${fechaHoyChile()} ${horaActualChile()}</small>
         </div>
     `);
 }
@@ -524,7 +551,6 @@ $("#formInicioCaja").on("submit", async function (e) {
     return;
   }
 
-  // Obtener el número de caja antes de abrir
   const numeroCaja = await obtenerNumeroCaja();
   if (!numeroCaja || numeroCaja === "SIN_NUMERO") {
     ToastSystem.show("No se pudo identificar el terminal de caja.", "error");
@@ -532,19 +558,19 @@ $("#formInicioCaja").on("submit", async function (e) {
     return;
   }
 
+  // Hora actual de Chile
+  const hora_inicio = horaActualChile();
+
   $.post(API_URL + "caja.php", {
     accion: "abrir",
     monto_inicial: monto,
     id_usuario: id_usuario,
-    numero_caja: numeroCaja  // <-- ahora sí se envía
+    numero_caja: numeroCaja,
+    hora_inicio: hora_inicio // <-- enviamos hora de inicio
   })
   .done(function (res) {
     let data;
-    try {
-      data = JSON.parse(res);
-    } catch (e) {
-      throw new Error("Respuesta inválida del servidor");
-    }
+    try { data = JSON.parse(res); } catch (e) { throw new Error("Respuesta inválida"); }
 
     if (data.success) {
       localStorage.setItem("id_caja", data.id);
@@ -555,11 +581,11 @@ $("#formInicioCaja").on("submit", async function (e) {
       $("#modalInicio").modal("hide");
       $("#formInicioCaja")[0].reset();
 
-      if (data.reutilizada) {
-        ToastSystem.show("Ya tenías una caja abierta. Se ha retomado correctamente.", "info");
-      } else {
-        ToastSystem.show("Caja abierta correctamente.", "success");
-      }
+      ToastSystem.show(data.reutilizada ? 
+        "Se ha retomado correctamente la caja abierta." : 
+        "Caja abierta correctamente.", 
+        "success"
+      );
     } else {
       throw new Error(data.error || "Error al abrir caja");
     }
@@ -573,13 +599,7 @@ $("#formInicioCaja").on("submit", async function (e) {
 });
 
 $("#btnCerrarCaja").on("click", function () {
-  if (
-    !confirm(
-      "¿Está seguro de que desea cerrar la caja? Esta acción no se puede deshacer."
-    )
-  ) {
-    return;
-  }
+  if (!confirm("¿Está seguro de que desea cerrar la caja?")) return;
 
   const id = localStorage.getItem("id_caja");
   if (!id) {
@@ -589,30 +609,32 @@ $("#btnCerrarCaja").on("click", function () {
 
   UIStateManager.setLoading("#btnCerrarCaja", true);
 
-  $.post(API_URL + "caja.php", { accion: "cerrar", id_caja: id })
-    .done(function (res) {
-      let data;
-      try {
-        data = JSON.parse(res);
-      } catch (e) {
-        throw new Error("Respuesta inválida del servidor");
-      }
+  const hora_cierre = horaActualChile(); // <-- hora de cierre
 
-      if (data.success) {
-        localStorage.removeItem("id_caja");
-        mostrarCaja(data);
-        UIStateManager.updateCajaStatus(false);
-        ToastSystem.show("Caja cerrada correctamente", "success");
-      } else {
-        throw new Error(data.error || "Error al cerrar caja");
-      }
-    })
-    .fail(function (xhr, status, error) {
-      ToastSystem.show("Error de conexión: " + error, "error");
-    })
-    .always(function () {
-      UIStateManager.setLoading("#btnCerrarCaja", false);
-    });
+  $.post(API_URL + "caja.php", { 
+    accion: "cerrar", 
+    id_caja: id,
+    hora_cierre: hora_cierre // enviamos hora de cierre
+  })
+  .done(function (res) {
+    let data;
+    try { data = JSON.parse(res); } catch (e) { throw new Error("Respuesta inválida"); }
+
+    if (data.success) {
+      localStorage.removeItem("id_caja");
+      mostrarCaja(data); // se mostrará hora de cierre
+      UIStateManager.updateCajaStatus(false);
+      ToastSystem.show("Caja cerrada correctamente", "success");
+    } else {
+      throw new Error(data.error || "Error al cerrar caja");
+    }
+  })
+  .fail(function (xhr, status, error) {
+    ToastSystem.show("Error de conexión: " + error, "error");
+  })
+  .always(function () {
+    UIStateManager.setLoading("#btnCerrarCaja", false);
+  });
 });
 
 $("#btnImprimir").on("click", function () {
