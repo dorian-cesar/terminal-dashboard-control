@@ -28,6 +28,29 @@
         return String.fromCharCode(65 + num);
     }
 
+    async function operacionAtomica(datosGuardado, datosEstado) {
+        try {
+            // Paso 1: Guardar el registro
+            const resultadoGuardado = await callAPI(datosGuardado, urlSave);
+            if (!resultadoGuardado || resultadoGuardado.error) {
+                throw new Error('Error al guardar el registro');
+            }
+
+            // Paso 2: Actualizar el estado de los casilleros
+            const resultadoEstado = await callAPI(datosEstado, urlStore);
+            if (!resultadoEstado || resultadoEstado.error) {
+                throw new Error('Error al actualizar el estado');
+            }
+
+            // Si ambos fueron exitosos, retornar el resultado del guardado
+            return resultadoGuardado;
+
+        } catch (error) {
+            console.error('Operación atómica falló:', error);
+            throw error; // Re-lanzar el error para manejarlo arriba
+        }
+    }
+
     //==================================== PDF CON JSPDF ================================
     // Cargar jsPDF desde CDN dinámicamente
     function cargarJsPDF() {
@@ -263,7 +286,7 @@
             }
 
             try {
-                const datos = {
+                const datosGuardado = {
                     hora: horaStr,
                     fecha: fechaStr,
                     casilla: casillaStr,
@@ -273,15 +296,26 @@
                     id_caja: id_caja
                 };
 
-                const result = await callAPI(datos, urlSave);
+                const estadoActual = await obtenerEstadoActual();
+                estadoActual.push(casillaStr);
+                const datosEstado = {
+                    estado: JSON.stringify(estadoActual),
+                    hora: horaStr,
+                    fecha: fechaStr
+                };
+
+                // Ejecutar operación atómica
+                const result = await operacionAtomica(datosGuardado, datosEstado);
                 const barcodeData = `${result}/${rutStr}`;
 
-                // Copiar al clipboard
+                // Si llegamos aquí, ambas operaciones fueron exitosas
+
+
                 try {
                     await navigator.clipboard.writeText(barcodeData);
                 } catch (_) { }
 
-                // Generar código de barras visual
+
                 if (contBarcode) {
                     contBarcode.innerHTML = `<svg id="barcode"></svg>`;
                     try {
@@ -321,18 +355,20 @@
                     console.error('Error generando/enviando PDF:', err);
                     // Fallback: usar html2pdf si jsPDF falla
                     await fallbackConHtml2PDF(barcodeData, datosTicket);
+                    await fallbackConHtml2PDF(barcodeData, datosTicket);
                 }
 
-                // Actualizar UI
+
                 actualizarTabla();
+                actualizarEstadoFrontend();
+
                 if (formulario.casillero) {
                     formulario.casillero.value = '';
                 }
-                guardarEstado();
 
             } catch (err) {
-                console.error('Error general:', err);
-                alert('Ocurrió un error al procesar los datos.');
+                console.error('Error general en operación atómica:', err);
+                alert('Ocurrió un error al procesar los datos. No se guardó ningún cambio.');
             } finally {
                 if (btnGenerar) {
                     btnGenerar.disabled = false;
@@ -340,6 +376,37 @@
                 }
             }
         });
+    }
+
+    async function obtenerEstadoActual() {
+        try {
+            const response = await fetch(urlState);
+            const data = await response.json();
+            const raw = data.map(item => item.estado)[0];
+            if (!raw) return [];
+
+            let estadoActual;
+            try {
+                estadoActual = JSON.parse(raw);
+            } catch (e) {
+                console.error('Error parseando estado actual', e);
+                return [];
+            }
+
+            return Array.isArray(estadoActual) ? estadoActual : [];
+        } catch (err) {
+            console.error('Error obteniendo estado actual:', err);
+            return [];
+        }
+    }
+
+    function actualizarEstadoFrontend() {
+        const btns = document.querySelectorAll('.casilla');
+        btns.forEach(btn => {
+            btn.classList.remove('disabled', 'active');
+        });
+
+        cargarEstado();
     }
 
     async function fallbackConHtml2PDF(barcodeData, datosTicket) {
@@ -490,7 +557,9 @@
             guardarEstado,
             cargarEstado,
             generarPDFConJsPDF,
-            enviarPdfAlServidor
+            enviarPdfAlServidor,
+            operacionAtomica,
+            actualizarEstadoFrontend
         };
     });
 })();
