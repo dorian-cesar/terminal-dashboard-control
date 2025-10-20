@@ -1,6 +1,7 @@
 (() => {
     // Config
-    const urlServer = 'https://andenes.terminal-calama.com';
+    // const urlServer = 'https://andenes.terminal-calama.com';
+    const urlServer = 'http://10.5.20.93';
     const urlUpdate = urlServer + '/TerminalCalama/PHP/Boleta/save.php';
     const urlStore = urlServer + '/TerminalCalama/PHP/Custodia/store.php';
     const urlState = urlServer + '/TerminalCalama/PHP/Custodia/reload.php';
@@ -696,7 +697,8 @@
             fecha: fechaStr,
             valor: valorTotal,
             rut: rutIn,
-            id_caja: id_caja
+            id_caja: id_caja,
+            medio_pago: datos.metodoPago
         };
 
         // Actualizar el registro en la base de datos

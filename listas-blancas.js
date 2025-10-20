@@ -1,4 +1,4 @@
-/* Config de endpoints (ajusta si cambian rutas) */
+
 const BASE = "http://localhost/parkingCalama/php";
 const API_URL = BASE + "/whitelist/api.php";          // GET, POST (BD), PUT, DELETE
 const API_INSERT = BASE + "/whitelist/InsertWL.php"; // Inserta en app externa (y luego BD)
