@@ -214,11 +214,11 @@ async function procesarPagoEfectivo(tipoServicio) {
   try {
     // Para efectivo, generar QR directamente
     const codigo = await generarQRParaServicio(tipoServicio);
-    // await printQR();
 
     // Generar boleta para efectivo y mostrar folio
     const folio = await generarBoleta(tipoServicio);
     console.log("Folio generado:", folio);
+    // await printQR();
 
     showToast("Pago en efectivo registrado correctamente.", "success");
     cerrarModal();
@@ -251,6 +251,7 @@ async function procesarPagoTarjeta(tipoServicio) {
 
     // 3. Generar QR usando el mismo código
     await generarQRParaServicio(tipoServicio, codigoQR);
+    // await printQR();
 
     showToast("Pago con tarjeta procesado correctamente.", "success");
     cerrarModal();
