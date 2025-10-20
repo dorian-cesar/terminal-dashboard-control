@@ -544,3 +544,115 @@ td {
   scrollbar-width: thin;
   scrollbar-color: #737373 #242424;
 }
+
+/* Modal backdrop y contenedor */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 60;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-panel {
+  background: #121212;
+  border: 1px solid #333;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  color: #e5e5e5;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+.modal-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #2b2b2b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.modal-body {
+  padding: 1rem;
+}
+.modal-footer {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #2b2b2b;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+.payment-tab {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.payment-tab.active {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+.input-dark {
+  width: 100%;
+  background: #1f1f1f;
+  border: 1px solid #333;
+  color: #e5e5e5;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+.small-muted {
+  color: #9aa0a6;
+  font-size: 0.85rem;
+}
+
+/* cambio y resultado */
+.change-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed #333;
+  padding: 0.6rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Mostrar modal */
+.modal-backdrop.active {
+  display: flex;
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.payment-method-btn {
+  padding: 1rem;
+  border: 2px solid #333;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #1a1a1a;
+}
+
+.payment-method-btn:hover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.payment-method-btn.active {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}

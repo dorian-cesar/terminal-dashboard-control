@@ -9,107 +9,261 @@ const urlAddUser = urlServer + "/TerminalCalama/PHP/Restroom/addUser.php";
 const urlLevelUser =
   urlServer + "/TerminalCalama/PHP/Restroom/addLevelUser.php";
 const urlBoleto = urlServer + "/TerminalCalama/PHP/Restroom/estadoBoleto.php";
-console.log(urlBase);
 
-// Inicialización condicional basada en la página actual
+let servicioSeleccionado = null;
+let metodoPagoSeleccionado = null;
+
+// Inicialización
 document.addEventListener("DOMContentLoaded", function () {
-  // Solo inicializar elementos que existen en esta página
+  console.log("DOM cargado - Inicializando página...");
+  console.log("Valores de servicios disponibles:", window.restroom);
   initializePage();
 });
 
 function initializePage() {
-  // Inicializar valores de servicios si los elementos existen
-  const valorBaño = document.getElementById("valorBaño");
-  const valorDucha = document.getElementById("valorDucha");
-  if (valorBaño && valorDucha && window.restroom) {
-    valorBaño.textContent = `$${window.restroom.Baño}`;
-    valorDucha.textContent = `$${window.restroom.Ducha}`;
-  }
+  console.log("Inicializando página...");
+
+  // Inicializar valores de servicios DESPUÉS de que valores.js se haya cargado
+  actualizarValoresServicios();
 
   // Configurar eventos para los botones de servicio
   const btnBaño = document.getElementById("btnBaño");
   const btnDucha = document.getElementById("btnDucha");
 
-  if (btnBaño && btnDucha) {
-    // Configurar eventos click para los botones
+  if (btnBaño) {
     btnBaño.addEventListener("click", () => {
       manejarSeleccionServicio("Baño");
     });
+  }
 
+  if (btnDucha) {
     btnDucha.addEventListener("click", () => {
       manejarSeleccionServicio("Ducha");
     });
   }
 
-  // Ocultar el botón "Generar QR" y "Imprimir QR" ya que la funcionalidad se hace con los botones de servicio
+  // Inicializar modal simplificado
+  initializeModal();
+
+  // Ocultar botones no necesarios
   const genQR = document.getElementById("generar");
-  if (genQR) {
-    genQR.style.display = "none";
-  }
+  if (genQR) genQR.style.display = "none";
 
   const btnImprimir = document.querySelector(".btn-success");
-  if (btnImprimir) {
-    btnImprimir.style.display = "none";
-  }
+  if (btnImprimir) btnImprimir.style.display = "none";
 
-  // Inicializar generación de QR si los elementos existen
-  const contenedorQR = document.getElementById("contenedorQR");
-  const contenedorContador = document.getElementById("keycont");
-
-  // Inicializar con placeholder
-  if (contenedorContador) {
-    contenedorContador.value = "Código QR";
-  }
-
-  // Inicializar estadísticas y tabla si los elementos existen
-  const totalDay = document.getElementById("totalDay");
-  const tablaBody = document.getElementById("tabla-body");
-  if (totalDay || tablaBody) {
-    updateStats();
-    renderHistory();
-  }
-
-  // Inicializar filtros y verificación si los elementos existen
+  // Inicializar otros componentes
   initializeFiltersAndVerification();
-
-  // Inicializar jQuery para boletas si el elemento existe
-  initializeBoletaGeneration();
-
+  updateStats();
+  renderHistory();
   generarQRPlaceholder();
 }
 
-// Función para manejar la selección de servicio
-async function manejarSeleccionServicio(tipoServicio) {
-  const btnBaño = document.getElementById("btnBaño");
-  const btnDucha = document.getElementById("btnDucha");
+// Función específica para actualizar los valores de los servicios
+function actualizarValoresServicios() {
+  console.log("Actualizando valores de servicios...", window.restroom);
 
-  // Guardar contenido original para no perder iconos/texto
-  const originalBtnBaño = btnBaño.innerHTML;
-  const originalBtnDucha = btnDucha.innerHTML;
+  const valorBaño = document.getElementById("valorBaño");
+  const valorDucha = document.getElementById("valorDucha");
 
-  // Deshabilitar botones sin cambiar contenido
-  btnBaño.disabled = true;
-  btnDucha.disabled = true;
+  if (valorBaño && window.restroom && window.restroom.Baño) {
+    valorBaño.textContent = `$${window.restroom.Baño}`;
+    console.log("Valor Baño actualizado:", window.restroom.Baño);
+  } else {
+    console.error("No se pudo cargar el valor del Baño");
+    valorBaño.textContent = "$500"; // Valor por defecto
+  }
 
+  if (valorDucha && window.restroom && window.restroom.Ducha) {
+    valorDucha.textContent = `$${window.restroom.Ducha}`;
+    console.log("Valor Ducha actualizado:", window.restroom.Ducha);
+  } else {
+    console.error("No se pudo cargar el valor de la Ducha");
+    valorDucha.textContent = "$4000"; // Valor por defecto
+  }
+}
+
+function initializeModal() {
+  const modalPago = document.getElementById("modalPago");
+  const modalServiceName = document.getElementById("modalServiceName");
+  const modalServicePrice = document.getElementById("modalServicePrice");
+  const btnPagoEfectivo = document.getElementById("btnPagoEfectivo");
+  const btnPagoTarjeta = document.getElementById("btnPagoTarjeta");
+  const closeModal = document.getElementById("closeModal");
+  const cancelModal = document.getElementById("cancelModal");
+
+  if (!modalPago) {
+    console.error("Modal no encontrado");
+    return;
+  }
+
+  // Botones de método de pago
+  if (btnPagoEfectivo) {
+    btnPagoEfectivo.addEventListener("click", () => {
+      seleccionarMetodoPago("efectivo");
+    });
+  }
+
+  if (btnPagoTarjeta) {
+    btnPagoTarjeta.addEventListener("click", () => {
+      seleccionarMetodoPago("tarjeta");
+    });
+  }
+
+  // Botones de cierre
+  if (closeModal) {
+    closeModal.addEventListener("click", cerrarModal);
+  }
+  if (cancelModal) {
+    cancelModal.addEventListener("click", cerrarModal);
+  }
+}
+
+function seleccionarMetodoPago(metodo) {
+  metodoPagoSeleccionado = metodo;
+
+  // Remover clase active de todos los botones
+  const botones = document.querySelectorAll(".payment-method-btn");
+  botones.forEach((btn) => btn.classList.remove("active"));
+
+  // Agregar clase active al botón seleccionado
+  const btnSeleccionado = document.getElementById(
+    `btnPago${metodo.charAt(0).toUpperCase() + metodo.slice(1)}`
+  );
+  if (btnSeleccionado) {
+    btnSeleccionado.classList.add("active");
+
+    // Procesar pago automáticamente después de 500ms (para dar feedback visual)
+    setTimeout(() => {
+      procesarPago(metodo);
+    }, 500);
+  }
+}
+
+function manejarSeleccionServicio(tipoServicio) {
+  servicioSeleccionado = tipoServicio;
+  metodoPagoSeleccionado = null; // Resetear método de pago
+  mostrarModalPago(tipoServicio);
+}
+
+function mostrarModalPago(tipoServicio) {
+  const modalPago = document.getElementById("modalPago");
+  const modalServiceName = document.getElementById("modalServiceName");
+  const modalServicePrice = document.getElementById("modalServicePrice");
+
+  if (!modalPago) return;
+
+  // Actualizar información del servicio con los valores de valores.js
+  if (modalServiceName) modalServiceName.textContent = tipoServicio;
+
+  // OBTENER EL VALOR DESDE window.restroom
+  const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+  if (modalServicePrice) {
+    modalServicePrice.textContent = `$${precio}`;
+    console.log(`Mostrando modal para ${tipoServicio}: $${precio}`);
+  }
+
+  // Remover selección anterior
+  const botones = document.querySelectorAll(".payment-method-btn");
+  botones.forEach((btn) => btn.classList.remove("active"));
+
+  // Mostrar modal
+  modalPago.classList.add("active");
+  modalPago.setAttribute("aria-hidden", "false");
+}
+
+function procesarPago(metodoPago) {
+  const tipoServicio = servicioSeleccionado;
+  if (!tipoServicio) return;
+
+  cerrarModal();
+
+  // Obtener el precio desde window.restroom
+  const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+  console.log(`Procesando pago ${metodoPago} para ${tipoServicio}: $${precio}`);
+
+  // Procesar según el método de pago
+  if (metodoPago === "efectivo") {
+    procesarPagoEfectivo(tipoServicio);
+  } else if (metodoPago === "tarjeta") {
+    procesarPagoTarjeta(tipoServicio);
+  }
+}
+
+async function procesarPagoEfectivo(tipoServicio) {
   try {
-    // Generar QR
-    await generarQRParaServicio(tipoServicio);
+    // Para efectivo, generar QR directamente
+    const codigo = await generarQRParaServicio(tipoServicio);
+    // await printQR();
 
-    // Imprimir QR
-    await printQR();
+    // Generar boleta para efectivo
+    await generarBoleta(tipoServicio);
+
+    showToast("Pago en efectivo registrado correctamente.", "success");
   } catch (error) {
-    console.error("Error durante la operación:", error);
+    console.error("Error en pago efectivo:", error);
+    showToast("Error al procesar pago en efectivo.", "error");
   } finally {
-    // Rehabilitar botones y restaurar contenido original
-    btnBaño.disabled = false;
-    btnDucha.disabled = false;
-    btnBaño.innerHTML = originalBtnBaño;
-    btnDucha.innerHTML = originalBtnDucha;
     updateStats();
   }
 }
 
-// Nueva función para generar QR específico para servicio
+async function procesarPagoTarjeta(tipoServicio) {
+  try {
+    // Para tarjeta, procesar con Transbank primero
+    const resultadoTransbank = await procesarConTransbank(tipoServicio);
+
+    if (resultadoTransbank.exitoso) {
+      // Si Transbank fue exitoso, generar QR
+      const codigo = await generarQRParaServicio(tipoServicio);
+      // await printQR();
+
+      showToast("Pago con tarjeta procesado correctamente.", "success");
+    } else {
+      showToast("Error en pago con tarjeta.", "error");
+    }
+  } catch (error) {
+    console.error("Error en pago tarjeta:", error);
+    showToast("Error al procesar pago con tarjeta.", "error");
+  } finally {
+    updateStats();
+  }
+}
+
+// Función para procesar con Transbank (placeholder - implementar según tu API)
+async function procesarConTransbank(tipoServicio) {
+  const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+
+  // Aquí iría la integración con Transbank
+  console.log("Procesando pago Transbank por:", precio);
+
+  // Simular procesamiento
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ exitoso: true, idTransaccion: "TBK_" + Date.now() });
+    }, 1000);
+  });
+}
+
+// Función para generar boleta (placeholder - implementar según tu API)
+async function generarBoleta(tipoServicio) {
+  const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+
+  console.log("Generando boleta por:", precio);
+  // Aquí iría tu lógica actual de generación de boletas
+
+  return Promise.resolve();
+}
+
+function cerrarModal() {
+  const modalPago = document.getElementById("modalPago");
+  if (modalPago) {
+    modalPago.classList.remove("active");
+    modalPago.setAttribute("aria-hidden", "true");
+  }
+}
+
+// Función para generar QR específico para servicio
 function generarQRParaServicio(tipoServicio) {
   return new Promise(async (resolve, reject) => {
     const contenedorQR = document.getElementById("contenedorQR");
@@ -133,6 +287,9 @@ function generarQRParaServicio(tipoServicio) {
       fechaHoraAct.getSeconds().toString().padStart(2, "0");
     const fechaStr = fechaHoraAct.toISOString().split("T")[0];
     const tipoStr = tipoServicio;
+
+    // USAR EL VALOR DESDE window.restroom
+    const valor = window.restroom ? window.restroom[tipoServicio] : 0;
     const numeroT = generarTokenNumerico();
 
     const datos = {
@@ -140,9 +297,11 @@ function generarQRParaServicio(tipoServicio) {
       hora: horaStr,
       fecha: fechaStr,
       tipo: tipoStr,
-      valor: window.restroom[tipoStr] || 0,
+      valor: valor, // Usar el valor dinámico
       id_caja: id_caja,
     };
+
+    console.log("Enviando datos a API:", datos);
 
     try {
       await callApi(datos);
@@ -389,7 +548,8 @@ async function printQR() {
     return;
   }
 
-  let tipoSeleccionado = "Baño";
+  // Usar servicioSeleccionado en lugar de valor fijo "Baño"
+  let tipoSeleccionado = servicioSeleccionado || "Baño";
   const dateAct = new Date();
   const horaStr = dateAct.toLocaleTimeString("es-CL");
   const fechaStr = dateAct.toLocaleDateString("es-CL");
