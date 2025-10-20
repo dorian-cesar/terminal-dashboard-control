@@ -1,7 +1,9 @@
 // Variables globales
 let datosGlobales = [];
-const urlBase = "https://andenes.terminal-calama.com";
-const urlServer = "https://andenes.terminal-calama.com";
+// const urlBase = "https://andenes.terminal-calama.com";
+const urlBase = "http://10.5.20.93";
+// const urlServer = "https://andenes.terminal-calama.com";
+const urlServer = "http://10.5.20.93";
 const urlLoad = urlServer + "/TerminalCalama/PHP/Restroom/load.php";
 const urlLoadToday = urlServer + "/TerminalCalama/PHP/Restroom/loadToday.php";
 const urlSave = urlServer + "/TerminalCalama/PHP/Restroom/save.php";
@@ -373,6 +375,7 @@ function generarQRParaServicio(tipoServicio) {
       tipo: tipoStr,
       valor: valor, // Usar el valor dinámico
       id_caja: id_caja,
+      medio_pago: metodoPagoSeleccionado || 'efectivo',
     };
 
     console.log("Enviando datos a API:", datos);
