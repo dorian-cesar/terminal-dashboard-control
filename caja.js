@@ -1,5 +1,5 @@
 // --- Configuración de entorno ---
-const ENV = "prod"; // Cambia a "dev" o "prod" según corresponda
+const ENV = "dev"; // Cambia a "dev" o "prod" según corresponda
 
 const URLS = {
   dev: {
@@ -442,7 +442,14 @@ $("#formInicioCaja").on("submit", function (e) {
 
   UIStateManager.setLoading("#btnSubmitAbrir", true);
 
-  $.post(API_URL + "caja.php", { accion: "abrir", monto_inicial: monto })
+  const userData = JSON.parse(localStorage.getItem("user")) || {};
+  const id_usuario = userData.iduser || null;
+
+  $.post(API_URL + "caja.php", {
+    accion: "abrir",
+    monto_inicial: monto,
+    id_usuario: id_usuario
+  })
     .done(function (res) {
       let data;
       try {
