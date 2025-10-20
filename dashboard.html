@@ -192,8 +192,8 @@
     <script src="app.js"></script>
     <script>
         $(document).ready(function() {
-            checkAuth();
-            loadUserInfo();
+          //  checkAuth();
+          //  loadUserInfo();
             
             $('#logoutBtn').on('click', function(e) {
                 e.preventDefault();
@@ -201,5 +201,41 @@
             });
         });
     </script>
+    <script>
+function logout() {
+    // 1️⃣ Borrar token del localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    // 2️⃣ Borrar cookie jwt (poniendo fecha expirada)
+    document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
+
+    // 3️⃣ Confirmación visual (opcional)
+    console.log("Sesión cerrada correctamente");
+
+    // 4️⃣ Redirigir al login
+    window.location.href = "index.html";
+}
+
+// Ejemplo: si quieres también mostrar email en el sidebar
+function loadUserInfo() {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+        const user = JSON.parse(userData);
+        $('#userEmail').text(user.mail || '');
+        $('#userRole').text(`Nivel: ${user.nivel}`);
+    }
+}
+
+// Ejecutar cuando cargue la página
+$(document).ready(function() {
+    loadUserInfo();
+
+    $('#logoutBtn').on('click', function(e) {
+        e.preventDefault();
+        logout();
+    });
+});
+</script>
 </body>
 </html>

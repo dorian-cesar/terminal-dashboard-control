@@ -330,3 +330,44 @@ body {
 .dataTables_wrapper .dataTables_info {
     color: var(--gray-400);
 }
+
+/* Estilos para el Modal de Pago */
+.modal-dark-custom {
+    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+    border: 1px solid #4a5568;
+    border-radius: 12px;
+}
+
+.modal-dark-custom .modal-header {
+    border-bottom: 1px solid #4a5568;
+    background: rgba(45, 55, 72, 0.8);
+}
+
+.modal-dark-custom .modal-footer {
+    border-top: 1px solid #4a5568;
+    background: rgba(45, 55, 72, 0.8);
+}
+
+.card-pago-option {
+    background: rgba(74, 85, 104, 0.5);
+    border: 2px solid #4a5568;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.card-pago-option:hover {
+    background: rgba(74, 85, 104, 0.8);
+    border-color: #4299e1;
+    transform: translateY(-2px);
+}
+
+.card-pago-option.selected {
+    background: rgba(66, 153, 225, 0.2);
+    border-color: #4299e1;
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
