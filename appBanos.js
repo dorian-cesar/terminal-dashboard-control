@@ -216,8 +216,9 @@ async function procesarPagoEfectivo(tipoServicio) {
     const codigo = await generarQRParaServicio(tipoServicio);
     // await printQR();
 
-    // Generar boleta para efectivo
-    await generarBoleta(tipoServicio);
+    // Generar boleta para efectivo y mostrar folio
+    const folio = await generarBoleta(tipoServicio);
+    console.log("Folio generado:", folio);
 
     showToast("Pago en efectivo registrado correctamente.", "success");
     cerrarModal();
@@ -299,14 +300,32 @@ async function procesarConTransbank(tipoServicio, ticketNumber) {
   }
 }
 
-// Función para generar boleta (placeholder - implementar según tu API)
+// Función para generar boleta
 async function generarBoleta(tipoServicio) {
   const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+  const nombre = tipoServicio === "Baño" ? "Bano" : tipoServicio;
 
-  console.log("Generando boleta por:", precio);
-  // Aquí iría tu lógica actual de generación de boletas
+  try {
+    const response = await fetch(
+      "https://backend-banios.dev-wit.com/api/boletas-calama/enviar",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, precio }),
+      }
+    );
 
-  return Promise.resolve();
+    if (!response.ok) {
+      throw new Error(`Error en la API: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return data.folio;
+  } catch (error) {
+    console.error("No se pudo generar la boleta:", error);
+    return null; // si hay error, retornamos null
+  }
 }
 
 function cerrarModal() {
