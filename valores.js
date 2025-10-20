@@ -14,3 +14,9 @@ var valoresBulto = {
 function getValorBulto(tamaño) {
   return valoresBulto[tamaño] || 0; // Devuelve el valor correspondiente o 0 si no se encuentra el tamaño
 }
+
+var configuracion = {
+  nacional: 20,
+  internacional: 30,
+  iva: 0.19,
+};

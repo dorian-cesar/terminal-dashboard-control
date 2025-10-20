@@ -4,10 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Loza - Buses</title>
+
+    <!-- Librería jQuery (debe ir antes de tus scripts que usan $) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <!-- Librería jsPDF para generar PDF de comprobantes -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+    <!-- Script global -->
+    <script defer src="app.js"></script>
+
     <!-- Script principal -->
     <script defer src="appAndenes.js"></script>
+    <script defer src="valores.js"></script>
   </head>
 
   <body>
@@ -32,7 +41,7 @@
         </select>
 
         <!-- Select tipo de destino -->
-        <select id="tipoDestino" class="entrada" onchange="filtrarDestinos()">
+        <select id="tipoDestino" class="entrada">
           <option value="0">Seleccione tipo de destino</option>
           <option value="nacional">Nacional (20 Min)</option>
           <option value="internacional">Internacional (30 Min)</option>
@@ -62,11 +71,149 @@
         </div>
       </div>
     </div>
-    <script>
+    <!-- <script>
       // Llamar al cargar la página
-      document.addEventListener("DOMContentLoaded", () => {
-        listarAndenesEmpresas();
+      document.addEventListener("DOMContentLoaded", () => {});
+      $(document).ready(function () {
+        checkAuth();
+        loadUserInfo();
+        loadCompanies();
+        loadDestinations();
+        loadActiveVehicles();
+
+        $("#logoutBtn").on("click", function (e) {
+          e.preventDefault();
+          logout();
+        });
+
+        $("#vehicleEntryForm").on("submit", function (e) {
+          e.preventDefault();
+          registerVehicle();
+        });
+
+        $("#consultarBtn").on("click", function () {
+          consultVehicle();
+        });
       });
-    </script>
+
+      function loadCompanies() {
+        const companies = getCompanies();
+        const select = $("#empresa");
+        companies.forEach((company) => {
+          select.append(
+            `<option value="${company.id}">${company.nombre}</option>`
+          );
+        });
+      }
+
+      function loadDestinations() {
+        const destinations = getDestinations();
+        const select = $("#destino");
+        destinations.forEach((dest) => {
+          select.append(`<option value="${dest.id}">${dest.ciudad}</option>`);
+        });
+      }
+
+      function loadActiveVehicles() {
+        const vehicles = getActiveVehicles();
+        const tbody = $("#activeVehiclesTable");
+        tbody.empty();
+
+        vehicles.forEach((vehicle) => {
+          const company = getCompanyById(vehicle.empresaId);
+          const destination = vehicle.destinoId
+            ? getDestinationById(vehicle.destinoId)
+            : null;
+
+          tbody.append(`
+                    <tr>
+                        <td><strong>${vehicle.patente}</strong></td>
+                        <td>${company ? company.nombre : "N/A"}</td>
+                        <td>${
+                          destination ? destination.ciudad : "Sin destino"
+                        }</td>
+                        <td>${vehicle.horaIngreso}</td>
+                        <td><span class="badge bg-success">Activo</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="exitVehicle('${
+                              vehicle.patente
+                            }')">
+                                <i class="bi bi-box-arrow-right"></i> Salida
+                            </button>
+                        </td>
+                    </tr>
+                `);
+        });
+      }
+
+      function registerVehicle() {
+        const patente = $("#patente").val().toUpperCase();
+        const empresaId = $("#empresa").val();
+        const destinoId = $("#destino").val();
+
+        if (!patente || !empresaId) {
+          alert("Por favor complete los campos requeridos");
+          return;
+        }
+
+        const vehicle = {
+          patente: patente,
+          empresaId: empresaId,
+          destinoId: destinoId || null,
+          horaIngreso: new Date().toLocaleTimeString("es-CL", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          estado: "activo",
+        };
+
+        addVehicle(vehicle);
+        $("#vehicleEntryForm")[0].reset();
+        loadActiveVehicles();
+        alert("Vehículo registrado exitosamente");
+      }
+
+      function consultVehicle() {
+        const patente = $("#patente").val().toUpperCase();
+        if (!patente) {
+          alert("Ingrese una patente");
+          return;
+        }
+
+        const vehicle = findVehicleByPatente(patente);
+        const infoDiv = $("#vehicleInfo");
+
+        if (vehicle) {
+          const company = getCompanyById(vehicle.empresaId);
+          const destination = vehicle.destinoId
+            ? getDestinationById(vehicle.destinoId)
+            : null;
+
+          infoDiv.html(`
+                    <p><strong>Patente:</strong> ${vehicle.patente}</p>
+                    <p><strong>Empresa:</strong> ${
+                      company ? company.nombre : "N/A"
+                    }</p>
+                    <p><strong>Destino:</strong> ${
+                      destination ? destination.ciudad : "Sin destino"
+                    }</p>
+                    <p><strong>Hora Ingreso:</strong> ${vehicle.horaIngreso}</p>
+                    <p><strong>Estado:</strong> <span class="badge bg-success">Activo</span></p>
+                `);
+        } else {
+          infoDiv.html(
+            '<p class="text-warning">Vehículo no encontrado en el sistema</p>'
+          );
+        }
+      }
+
+      function exitVehicle(patente) {
+        if (confirm(`¿Confirmar salida del vehículo ${patente}?`)) {
+          removeVehicle(patente);
+          loadActiveVehicles();
+          alert("Salida registrada exitosamente");
+        }
+      }
+    </script> -->
   </body>
 </html>

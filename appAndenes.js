@@ -1,6 +1,10 @@
 let valorTotGlobal = 0; // Variable global para almacenar el valor total
-const baseURL = "https://andenes.terminal-calama.com/php";
-
+const baseURL = "http://localhost/parkingCalama/php";
+const apiDestinos = "http://localhost/parkingCalama/php/destinos/api.php";
+const apiMovimientos = "http://localhost/parkingCalama/php/movimientos/api.php";
+const apiEmpresas = "http://localhost/parkingCalama/php/empresas/api.php";
+const apiWhitelist = "http://localhost/parkingCalama/php/whitelist/api.php";
+const patRegEx = /^[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}$/;
 function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
@@ -17,161 +21,256 @@ function getCookie(cname) {
   return "";
 }
 
-async function calcAndenes() {
-  const input = document.getElementById("andenQRPat").value;
-  const cont = document.getElementById("contAnden");
-  const dest = document.getElementById("destinoBuses");
-  const empresaSelect = document.getElementById("empresaBuses"); // Selección de empresa
+async function getDestByID(idIn) {
+  let ret = await fetch(
+    apiDestinos +
+      "?" +
+      new URLSearchParams({
+        id: idIn,
+      }),
+    {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        Authorization: `Bearer ${getCookie("jwt")}`,
+      },
+    }
+  )
+    .then((reply) => reply.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  return ret;
+}
 
-  if (!(dest.value > 0)) {
-    alert("Seleccione Empresa y Destino");
+async function getEmpByID(idIn) {
+  let ret = await fetch(
+    apiEmpresas +
+      "?" +
+      new URLSearchParams({
+        id: idIn,
+      }),
+    {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        Authorization: `Bearer ${getCookie("jwt")}`,
+      },
+    }
+  )
+    .then((reply) => reply.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  return ret;
+}
+
+async function getWLByPatente(patIn) {
+  let ret = await fetch(
+    apiWhitelist +
+      "?" +
+      new URLSearchParams({
+        patente: patIn,
+      }),
+    {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        Authorization: `Bearer ${getCookie("jwt")}`,
+      },
+    }
+  )
+    .then((reply) => reply.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  return ret;
+}
+
+async function updateMov(datos) {
+  let ret = await fetch(apiMovimientos, {
+    method: "PUT",
+    mode: "cors",
+    headers: {
+      "Content-type": "application/json",
+      Authorization: `Bearer ${getCookie("jwt")}`,
+    },
+    body: JSON.stringify(datos),
+  })
+    .then((reply) => reply.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  return ret;
+}
+
+async function calcAndenes() {
+  const patente = document
+    .getElementById("andenQRPat")
+    .value.trim()
+    .toUpperCase();
+  const cont = document.getElementById("contAnden");
+  const destinoSelect = document.getElementById("destinoBuses");
+  const empresaSelect = document.getElementById("empresaBuses");
+
+  // Validaciones iniciales
+  if (!patente) {
+    alert("Ingrese una patente válida.");
     return;
   }
 
-  if (!(empresaSelect.value > 0)) {
-    // Verificar que se haya seleccionado una empresa
-    alert("Seleccione una empresa");
+  if (empresaSelect.value === "0" || destinoSelect.value === "0") {
+    alert("Seleccione Empresa y Destino.");
     return;
   }
 
   try {
-    const data = await getMovByPatente(input);
-    if (!data) {
-      alert("Patente no encontrada");
+    const data = await getMovByPatente(patente);
+
+    if (!data || Object.keys(data).length === 0) {
+      alert("Patente no encontrada.");
       return;
     }
 
-    if (data["tipo"].toLowerCase() === "anden") {
-      if (data["fechasal"] === "0000-00-00") {
-        cont.textContent = "";
-
-        const date = new Date();
-        const fechaent = new Date(`${data["fechaent"]}T${data["horaent"]}`);
-        const diferencia = (date.getTime() - fechaent.getTime()) / 1000;
-        let minutos = Math.ceil(diferencia / 60);
-
-        const destInfo = await getDestByID(dest.value);
-        const empresaInfo = await getEmpByID(empresaSelect.value); // Obtener información de la empresa
-        let valorBase = destInfo["valor"];
-        let bloques = 0;
-
-        if (destInfo["tipo"] === "nacional") {
-          bloques = Math.ceil(minutos / configuracion.nacional);
-          valorBase *= bloques;
-        } else if (destInfo["tipo"] === "internacional") {
-          bloques = Math.ceil(minutos / configuracion.internacional);
-          valorBase *= bloques;
-        }
-
-        valorTotGlobal = valorBase;
-
-        const ret = await getWLByPatente(data["patente"]);
-        if (ret !== null) {
-          valorTotGlobal = 0;
-        }
-
-        if (valorTotGlobal < 0) {
-          valorTotGlobal = 0;
-        }
-
-        const iva = valorTotGlobal * configuracion.iva;
-        const valorConIVA = valorTotGlobal + iva;
-
-        const [
-          elemPat,
-          empresaPat,
-          fechaPat,
-          horaentPat,
-          horasalPat,
-          tiempPat,
-          valPat,
-          ivaPat,
-          totalPat,
-        ] = ["h1", "h3", "h3", "h3", "h3", "h3", "h3", "h3", "h3"].map((tag) =>
-          document.createElement(tag)
-        );
-
-        elemPat.textContent = `Patente: ${data["patente"]}`;
-        const empresaNombre = empresaInfo["nombre"];
-        empresaPat.textContent = `Empresa: ${empresaNombre}`; // Mostrar tipo de empresa
-        fechaPat.textContent = `Fecha ingreso: ${data["fechaent"]}`;
-        horaentPat.textContent = `Hora Ingreso: ${data["horaent"]}`;
-        horasalPat.textContent = `Hora salida: ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-        tiempPat.textContent = `Tiempo de Parking: ${minutos} min.`;
-        valPat.textContent = `Valor NETO: $${valorTotGlobal.toFixed(0)}`;
-        ivaPat.textContent = `IVA (${(configuracion.iva * 100).toFixed(
-          0
-        )}%): $${iva.toFixed(0)}`;
-        totalPat.textContent = `Total con IVA: $${valorConIVA.toFixed(0)}`;
-        cont.append(
-          elemPat,
-          empresaPat,
-          fechaPat,
-          horaentPat,
-          horasalPat,
-          tiempPat,
-          valPat,
-          ivaPat,
-          totalPat
-        );
-
-        // Actualiza valorTotGlobal con el texto de totalPat
-        valorTotGlobal =
-          parseFloat(totalPat.textContent.replace(/\D+/g, "")) || 0;
-
-        window.datosAnden = {
-          id: data["idmov"],
-          patente: data["patente"],
-          fecha: date.toISOString().split("T")[0],
-          hora: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
-          valor: valorTotGlobal,
-          empresa: empresaSelect.value, // Guardar la ID de la empresa seleccionada
-          empresaNombre: empresaNombre, // Guardar el nombre de la empresa seleccionada
-        };
-      } else {
-        alert("Esta patente ya fue cobrada");
-      }
-    } else {
-      parking();
-      document.getElementById("parkingQRPat").value = input;
+    if (data["tipo"].toLowerCase() !== "anden") {
+      alert("La patente corresponde a otro tipo de movimiento.");
+      return;
     }
+
+    if (data["fechasal"] !== "0000-00-00") {
+      alert("Esta patente ya fue cobrada.");
+      return;
+    }
+
+    // Limpia el contenido del contenedor
+    cont.innerHTML = "";
+
+    const fechaActual = new Date();
+    const fechaEntrada = new Date(`${data["fechaent"]}T${data["horaent"]}`);
+    const diferencia = (fechaActual - fechaEntrada) / 1000; // Diferencia en segundos
+    const minutos = Math.ceil(diferencia / 60);
+
+    // Obtener info de destino y empresa
+    const destInfo = await getDestByID(destinoSelect.value);
+    const empresaInfo = await getEmpByID(empresaSelect.value);
+
+    if (!destInfo || !empresaInfo) {
+      alert("Error al obtener información de empresa o destino.");
+      return;
+    }
+
+    // Calcular valor base según tipo
+    let valorBase = Number(destInfo["valor"]) || 0;
+    let bloques = 0;
+
+    if (destInfo["tipo"] === "nacional") {
+      bloques = Math.ceil(minutos / configuracion.nacional);
+    } else if (destInfo["tipo"] === "internacional") {
+      bloques = Math.ceil(minutos / configuracion.internacional);
+    }
+
+    valorBase *= bloques;
+    valorTotGlobal = Math.max(valorBase, 0);
+
+    // Validar whitelist
+    const ret = await getWLByPatente(data["patente"]);
+    if (ret !== null) valorTotGlobal = 0;
+
+    // Calcular IVA y total
+    const iva = valorTotGlobal * configuracion.iva;
+    const valorConIVA = valorTotGlobal + iva;
+
+    // Crear elementos dinámicos
+    const crear = (tag, text) => {
+      const el = document.createElement(tag);
+      el.textContent = text;
+      return el;
+    };
+
+    const nowTime = `${fechaActual
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${fechaActual
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}:${fechaActual
+      .getSeconds()
+      .toString()
+      .padStart(2, "0")}`;
+
+    const elementos = [
+      crear("h1", `Patente: ${data["patente"]}`),
+      crear("h3", `Empresa: ${empresaInfo["nombre"]}`),
+      crear("h3", `Fecha ingreso: ${data["fechaent"]}`),
+      crear("h3", `Hora ingreso: ${data["horaent"]}`),
+      crear("h3", `Hora salida: ${nowTime}`),
+      crear("h3", `Tiempo de Parking: ${minutos} min.`),
+      crear("h3", `Valor NETO: $${valorTotGlobal.toFixed(0)}`),
+      crear(
+        "h3",
+        `IVA (${(configuracion.iva * 100).toFixed(0)}%): $${iva.toFixed(0)}`
+      ),
+      crear("h3", `Total con IVA: $${valorConIVA.toFixed(0)}`),
+    ];
+
+    cont.append(...elementos);
+
+    // Guardar datos globales para pago
+    window.datosAnden = {
+      id: data["idmov"],
+      patente: data["patente"],
+      fecha: fechaActual.toISOString().split("T")[0],
+      hora: nowTime,
+      valor: valorConIVA,
+      empresa: empresaSelect.value,
+      empresaNombre: empresaInfo["nombre"],
+    };
+
+    valorTotGlobal = valorConIVA; // Actualizar el valor global
   } catch (error) {
     console.error("Error en el cálculo:", error);
+    alert("Ocurrió un error al calcular el valor del andén.");
   }
 }
 
-async function filtrarDestinos() {
-  const tipoDest = document.getElementById("tipoDestino").value; // Obtener el tipo de destino seleccionado
-  const lista = document.getElementById("destinoBuses");
-
-  if (tipoDest === "0") {
-    return; // Si no se ha seleccionado ningún tipo de destino, no hacemos nada
-  }
-
-  try {
-    const data = await andGetDestinos();
-    if (data) {
-      lista.textContent = ""; // Limpia la lista de destinos
-      let nullData = document.createElement("option");
-      nullData.value = 0;
-      nullData.textContent = "Seleccione Destino";
-      lista.appendChild(nullData);
-
-      // Filtrar y mostrar los destinos según el tipo seleccionado
-      data.forEach((itm) => {
-        if (itm["tipo"] === tipoDest) {
-          let optData = document.createElement("option");
-          optData.value = itm["iddest"];
-          optData.textContent = `${itm["ciudad"]} - $${itm["valor"]}`;
-          lista.appendChild(optData);
-        }
+async function getMovByPatente(patente) {
+  if (getCookie("jwt")) {
+    let ret = await fetch(
+      apiMovimientos +
+        "?" +
+        new URLSearchParams({
+          patente: patente,
+        }),
+      {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          Authorization: `Bearer ${getCookie("jwt")}`,
+        },
+      }
+    )
+      .then((reply) => reply.json())
+      .then((data) => {
+        return data;
+      })
+      .catch((error) => {
+        console.log(error);
       });
-    }
-  } catch (error) {
-    console.error("Error al filtrar destinos:", error);
+    return ret;
   }
 }
-
 // Función para listar empresas en el select
 function listarAndenesEmpresas() {
   andGetEmpresas()
@@ -272,16 +371,20 @@ async function andGetEmpresas() {
 // Obtiene la lista de destinos desde la API
 async function andGetDestinos() {
   if (getCookie("jwt")) {
-    let ret = await fetch(apiDestinos, {
-      method: "GET",
-      mode: "cors",
-      headers: {
-        Authorization: `Bearer ${getCookie("jwt")}`,
-      },
-    })
-      .then((reply) => reply.json())
-      .catch((error) => console.log(error));
-    return ret;
+    try {
+      const response = await fetch(apiDestinos, {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          Authorization: `Bearer ${getCookie("jwt")}`,
+        },
+      });
+      const ret = await response.json();
+      return ret;
+    } catch (error) {
+      console.error("Error al obtener destinos:", error);
+      return null;
+    }
   }
 }
 
