@@ -74,13 +74,17 @@
 
 <body>
   <div class="container">
+     <a href="dashboard.html" class="btn btn-outline-light" >
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver
+                    </a>
     <h2 class="mb-4 text-center">💳 Caja Pagadora - Parking</h2>
 
     <div class="row g-4">
       <!-- Tarjeta Izquierda -->
       <div class="col-md-5">
         <div class="card p-4 text-center">
-          <h5>Consulta de Vehículo</h5>
+          <h5 class="text-secondary">Consulta de Vehículo</h5>
           <hr>
           <input type="text" id="patente" class="form-control mb-3 text-center" placeholder="Ingrese patente (Ej: HHHH11)">
           <button class="btn btn-primary w-100" id="btnConsultar">Consultar</button>
@@ -90,7 +94,7 @@
       <!-- Tarjeta Derecha -->
       <div class="col-md-7">
         <div class="card p-4">
-          <h5>Información del Vehículo</h5>
+          <h5 class="text-white">Información del Vehículo</h5>
           <hr>
           <div id="resultado" style="display:none;">
             <div class="result-card">
