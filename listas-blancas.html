@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usuarios - WIT</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Listas Blancas - WIT</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .ctrlbtn {
+            margin-right: 4px;
+        }
+    </style>
 </head>
+
 <body class="dashboard-page">
     <div class="wrapper">
-        <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <h3>WIT</h3>
@@ -24,7 +37,7 @@
             </div>
 
             <ul class="list-unstyled components">
-                <li>
+                <li class="active">
                     <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
                 </li>
                 <li>
@@ -52,7 +65,7 @@
                 <li>
                     <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
                 </li>
-                <li class="active">
+                <li>
                     <a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
                 </li>
                 <li>
@@ -78,8 +91,8 @@
 
             <div class="container-fluid">
                 <div class="page-header mb-4">
-                    <h2>Usuarios</h2>
-                    <p class="text-muted">Gestión de usuarios y permisos</p>
+                    <h2>Listas Blancas</h2>
+                    <p class="text-white">Gestión de patentes autorizadas</p>
                 </div>
 
                 <div class="card">
@@ -93,32 +106,32 @@
                             </select>
                             <span class="ms-2">registros</span>
                         </div>
-                        <div class="d-flex gap-2">
-                            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="🔍 Buscar: Ingresa un término">
-                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openUserModal()">
-                                Registrar Usuario
+                        <div class="d-flex gap-2 text-white">
+                            <input type="text" id="searchInput" class="form-control form-control-sm"
+                                placeholder="Buscar: patente o empresa">
+                            <button class="btn btn-primary btn-sm" onclick="openWLModal()">
+                                Crear Entrada
                             </button>
                         </div>
                     </div>
+
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Correo</th>
-                                        <th>Nivel</th>
-                                        <th>Secciones</th>
+                                        <th>Patente</th>
+                                        <th>Empresa</th>
                                         <th>Controles</th>
                                     </tr>
                                 </thead>
-                                <tbody id="usersTable">
-                                    <!-- Data will be loaded here -->
-                                </tbody>
+                                <tbody id="wlTable"></tbody>
                             </table>
                         </div>
+
                         <div class="d-flex justify-content-between align-items-center mt-3">
-                            <div id="tableInfo">Mostrando 1 a 6 de 6 registros</div>
+                            <div id="tableInfo">Mostrando registros</div>
                             <div>
                                 <button class="btn btn-sm btn-outline-secondary" id="firstPage">Primero</button>
                                 <button class="btn btn-sm btn-outline-secondary" id="prevPage">Anterior</button>
@@ -131,182 +144,68 @@
                 </div>
             </div>
         </div>
+
     </div>
 
-    <!-- User Modal -->
-    <div class="modal fade" id="userModal" tabindex="-1">
+    <!-- Modal Insert/Update -->
+    <div class="modal fade" id="wlModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="userModalTitle">Registrar Usuario</h5>
+                    <h5 class="modal-title" id="wlModalTitle">Crear Entrada</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="userForm">
-                        <input type="hidden" id="userId">
+                    <form id="wlForm">
+                        <input type="hidden" id="wlId">
                         <div class="mb-3">
-                            <label for="userEmail" class="form-label">Correo</label>
-                            <input type="email" class="form-control" id="userEmailInput" required>
+                            <label for="wlPatente" class="form-label">Patente</label>
+                            <input type="text" class="form-control" id="wlPatente" placeholder="ABCD12" required>
                         </div>
                         <div class="mb-3">
-                            <label for="userPassword" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="userPassword" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="userRole" class="form-label">Nivel</label>
-                            <select class="form-select" id="userRoleSelect" required>
-                                <option value="Administrador">Administrador</option>
-                                <option value="Usuario">Usuario</option>
+                            <label for="wlEmpresa" class="form-label">Empresa</label>
+                            <select id="wlEmpresa" class="form-select" required>
+                                <option value="">Cargando...</option>
                             </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Secciones</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="banos" id="sec_banos">
-                                <label class="form-check-label" for="sec_banos">Baños</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="custodias" id="sec_custodias">
-                                <label class="form-check-label" for="sec_custodias">Custodia</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="parking" id="sec_parking">
-                                <label class="form-check-label" for="sec_parking">Parking</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="andenes" id="sec_andenes">
-                                <label class="form-check-label" for="sec_andenes">Andenes</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="caja" id="sec_caja">
-                                <label class="form-check-label" for="sec_caja">Caja</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="configuracion" id="sec_configuracion">
-                                <label class="form-check-label" for="sec_configuracion">Configuración</label>
-                            </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveUser()">Guardar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveWL()">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="session.js"></script>
     <script>
-        $(document).ready(function() {
-            checkAuth();
+
+        function loadUserInfo() {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                $('#userEmail').text(user.mail || '');
+                $('#userRole').text(`Nivel: ${user.nivel}`);
+            }
+        }
+
+        // Ejecutar cuando cargue la página
+        $(document).ready(function () {
             loadUserInfo();
-            loadUsersTable();
-            
-            $('#logoutBtn').on('click', function(e) {
+
+            $('#logoutBtn').on('click', function (e) {
                 e.preventDefault();
                 logout();
             });
-
-            $('#searchInput').on('keyup', function() {
-                loadUsersTable();
-            });
         });
-
-        function loadUsersTable() {
-            const users = getUsers();
-            const searchTerm = $('#searchInput').val().toLowerCase();
-            const tbody = $('#usersTable');
-            tbody.empty();
-            
-            const filteredUsers = users.filter(user => 
-                user.email.toLowerCase().includes(searchTerm) ||
-                user.role.toLowerCase().includes(searchTerm)
-            );
-
-            filteredUsers.forEach(user => {
-                tbody.append(`
-                    <tr>
-                        <td>${user.id}</td>
-                        <td>${user.email}</td>
-                        <td>${user.role}</td>
-                        <td>${user.sections.join(', ')}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="editUser(${user.id})">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `);
-            });
-
-            $('#tableInfo').text(`Mostrando 1 a ${filteredUsers.length} de ${filteredUsers.length} registros`);
-        }
-
-        function openUserModal(userId = null) {
-            $('#userForm')[0].reset();
-            if(userId) {
-                const user = getUserById(userId);
-                $('#userModalTitle').text('Editar Usuario');
-                $('#userId').val(user.id);
-                $('#userEmailInput').val(user.email);
-                $('#userRoleSelect').val(user.role);
-                user.sections.forEach(section => {
-                    $(`#sec_${section}`).prop('checked', true);
-                });
-            } else {
-                $('#userModalTitle').text('Registrar Usuario');
-                $('#userId').val('');
-            }
-        }
-
-        function editUser(userId) {
-            openUserModal(userId);
-            $('#userModal').modal('show');
-        }
-
-        function saveUser() {
-            const userId = $('#userId').val();
-            const email = $('#userEmailInput').val();
-            const password = $('#userPassword').val();
-            const role = $('#userRoleSelect').val();
-            const sections = [];
-            
-            $('.form-check-input:checked').each(function() {
-                sections.push($(this).val());
-            });
-
-            const user = {
-                email: email,
-                password: password,
-                role: role,
-                sections: sections
-            };
-
-            if(userId) {
-                user.id = parseInt(userId);
-                updateUser(user);
-            } else {
-                addUser(user);
-            }
-
-            $('#userModal').modal('hide');
-            loadUsersTable();
-            alert('Usuario guardado exitosamente');
-        }
-
-        function deleteUser(userId) {
-            if(confirm('¿Está seguro de eliminar este usuario?')) {
-                removeUser(userId);
-                loadUsersTable();
-                alert('Usuario eliminado exitosamente');
-            }
-        }
     </script>
+    <script src="listas-blancas.js"></script>
 </body>
+
 </html>
