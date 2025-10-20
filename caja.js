@@ -390,44 +390,104 @@ function mostrarCaja(data) {
 }
 
 function cargarEstadoCaja() {
-  const id = localStorage.getItem("id_caja");
-  if (id) {
+  const userData = JSON.parse(localStorage.getItem("user")) || {};
+  const id_usuario_actual = userData.iduser || null;
+  const id_caja_local = localStorage.getItem("id_caja");
+
+  if (!id_usuario_actual) {
+    ToastSystem.show("Error: no hay usuario autenticado.", "error");
+    UIStateManager.updateCajaStatus(false);
+    $("#noDataRow").show();
+    $("#registrosCount").text("0 registros");
+    return;
+  }
+
+  // Si existe un id_caja en localStorage, primero validamos que siga siendo válido
+  if (id_caja_local) {
     UIStateManager.setLoading("#btnRefresh", true);
 
-    $.post(API_URL + "caja.php", { accion: "mostrar", id_caja: id })
+    $.post(API_URL + "caja.php", { accion: "mostrar", id_caja: id_caja_local })
       .done(function (res) {
         let data;
         try {
           data = JSON.parse(res);
         } catch (e) {
-          throw new Error("Respuesta inválida del servidor");
+          console.error("Respuesta inválida del servidor");
+          return;
         }
 
         if (data.success) {
+          // Si la caja pertenece a otro usuario, limpiamos localStorage
+          if (parseInt(data.id_usuario) !== parseInt(id_usuario_actual)) {
+            localStorage.removeItem("id_caja");
+            ToastSystem.show(
+              "La caja guardada pertenece a otro usuario. Se mostrará como cerrada.",
+              "warning"
+            );
+            verificarCajaAbiertaUsuario(id_usuario_actual);
+            return;
+          }
+
+          // Caja válida → mostrarla
           mostrarCaja(data);
           UIStateManager.updateCajaStatus(true, data);
-
-          // CARGAR MOVIMIENTOS EN TIEMPO REAL
-          cargarMovimientosCaja(id);
+          cargarMovimientosCaja(data.id);
         } else {
-          // Si la caja no existe en el servidor, limpiar localStorage
+          // Si el ID local no existe en DB, verificar si el usuario tiene una caja abierta
           localStorage.removeItem("id_caja");
-          UIStateManager.updateCajaStatus(false);
-          $("#noDataRow").show();
-          $("#registrosCount").text("0 registros");
+          verificarCajaAbiertaUsuario(id_usuario_actual);
         }
       })
       .fail(function (xhr, status, error) {
-        ToastSystem.show("Error al cargar datos: " + error, "error");
+        ToastSystem.show("Error al verificar caja: " + error, "error");
       })
       .always(function () {
         UIStateManager.setLoading("#btnRefresh", false);
       });
   } else {
-    UIStateManager.updateCajaStatus(false);
-    $("#noDataRow").show();
-    $("#registrosCount").text("0 registros");
+    // Si no hay caja local, directamente verificamos en la DB
+    verificarCajaAbiertaUsuario(id_usuario_actual);
   }
+}
+
+function verificarCajaAbiertaUsuario(id_usuario) {
+  // Verifica en la base de datos si el usuario ya tiene una caja abierta
+  $.post(API_URL + "caja.php", {
+    accion: "abrir", // mismo endpoint, el backend devolverá la existente si ya hay una abierta
+    monto_inicial: 0, // se ignora si ya hay caja abierta
+    id_usuario: id_usuario
+  })
+    .done(function (res) {
+      let data;
+      try {
+        data = JSON.parse(res);
+      } catch (e) {
+        console.error("Respuesta inválida del servidor");
+        return;
+      }
+
+      if (data.success) {
+        if (data.reutilizada) {
+          localStorage.setItem("id_caja", data.id);
+          mostrarCaja(data);
+          UIStateManager.updateCajaStatus(true, data);
+          cargarMovimientosCaja(data.id);
+          ToastSystem.show("Se ha retomado automáticamente tu caja abierta.", "info");
+        } else {
+          // No había caja abierta, solo mostrar estado cerrado
+          UIStateManager.updateCajaStatus(false);
+          $("#noDataRow").show();
+          $("#registrosCount").text("0 registros");
+        }
+      } else {
+        UIStateManager.updateCajaStatus(false);
+        $("#noDataRow").show();
+        $("#registrosCount").text("0 registros");
+      }
+    })
+    .fail(function (xhr, status, error) {
+      ToastSystem.show("Error al verificar caja abierta: " + error, "error");
+    });
 }
 
 // --- Event Handlers ---
@@ -444,6 +504,12 @@ $("#formInicioCaja").on("submit", function (e) {
 
   const userData = JSON.parse(localStorage.getItem("user")) || {};
   const id_usuario = userData.iduser || null;
+
+  if (!id_usuario) {
+    ToastSystem.show("Error: No se encontró el usuario en sesión.", "error");
+    UIStateManager.setLoading("#btnSubmitAbrir", false);
+    return;
+  }
 
   $.post(API_URL + "caja.php", {
     accion: "abrir",
@@ -462,13 +528,16 @@ $("#formInicioCaja").on("submit", function (e) {
         localStorage.setItem("id_caja", data.id);
         mostrarCaja(data);
         UIStateManager.updateCajaStatus(true, data);
-
-        // CARGAR MOVIMIENTOS INICIALES
         cargarMovimientosCaja(data.id);
 
         $("#modalInicio").modal("hide");
-        ToastSystem.show("Caja abierta correctamente", "success");
         $("#formInicioCaja")[0].reset();
+
+        if (data.reutilizada) {
+          ToastSystem.show("Ya tenías una caja abierta. Se ha retomado correctamente.", "info");
+        } else {
+          ToastSystem.show("Caja abierta correctamente.", "success");
+        }
       } else {
         throw new Error(data.error || "Error al abrir caja");
       }
