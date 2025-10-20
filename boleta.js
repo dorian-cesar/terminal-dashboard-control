@@ -354,6 +354,7 @@
         const modalPago = new bootstrap.Modal(document.getElementById('modalPago'));
         modalPago.show();
     }
+
     function inicializarEventosModal() {
         // Eventos para selección de método de pago
         document.querySelectorAll('.card-pago-option').forEach(card => {
@@ -387,19 +388,13 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
 
             try {
-                // Procesar pago (efectivo o tarjeta)
+                // 1. Procesar pago (efectivo o tarjeta)
                 const resultadoPago = await procesarPago(metodoSeleccionado);
 
-                // procesarPago debe devolver un objeto con success: true/false
-                if (!resultadoPago || !resultadoPago.success) {
-                    throw new Error(resultadoPago?.mensaje || 'Error en el procesamiento del pago');
-                }
-
-                // Actualizar datosPagoActual con la info del pago (procesarPago ya lo hace en tu código)
-                // Ahora completar todo el proceso: actualizar DB, liberar casillero y generar/imprimir PDF
+                // 2. Si el pago fue exitoso, completar el proceso de entrega
                 await completarProcesoEntrega(datosPagoActual);
 
-                // Si todo OK, dejar estado del botón y cerrar modal
+                // 3. Si todo OK, restaurar UI y cerrar modal
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
 
@@ -422,16 +417,16 @@
                 } else if (error.message) {
                     userMsg = error.message;
                 }
-
-                // Mostrar mensaje amigable al usuario
                 alert(userMsg);
 
                 // (Opcional) log adicional con raw para soporte
                 if (error.gatewayRaw) console.info('Gateway raw:', error.gatewayRaw);
 
-                // Restaurar estado del botón
+                // IMPORTANTE: Restaurar estado del botón pero NO continuar con la entrega
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
+
+                // NO llamar a completarProcesoEntrega() aquí - el casillero debe permanecer bloqueado
             }
         });
     }
@@ -444,29 +439,35 @@
         console.log(`Procesando pago con método: ${metodoPago}`);
 
         let resultadoPago;
+        try {
+            if (metodoPago === 'efectivo') {
+                resultadoPago = await procesarPagoEfectivo(datosPagoActual);
+            } else if (metodoPago === 'tarjeta') {
+                resultadoPago = await procesarPagoTarjeta(datosPagoActual);
+            } else {
+                throw new Error('Método de pago no válido');
+            }
 
-        // Procesar según el método seleccionado
-        if (metodoPago === 'efectivo') {
-            resultadoPago = await procesarPagoEfectivo(datosPagoActual);
-        } else if (metodoPago === 'tarjeta') {
-            resultadoPago = await procesarPagoTarjeta(datosPagoActual);
-        } else {
-            throw new Error('Método de pago no válido');
+            // Validar que el pago fue exitoso
+            if (!resultadoPago || !resultadoPago.success) {
+                throw new Error(resultadoPago.mensaje || 'Error en el procesamiento del pago');
+            }
+
+            console.log('Pago procesado exitosamente:', resultadoPago);
+
+            // Agregar información del pago a los datos para el comprobante
+            datosPagoActual.metodoPago = resultadoPago.metodo;
+            datosPagoActual.codigoTransaccion = resultadoPago.codigoTransaccion;
+            datosPagoActual.referenciaPago = resultadoPago.referenciaPago;
+
+            return resultadoPago;
+        } catch (error) {
+            console.error('Error en procesarPago:', error);
+
+            datosPagoActual = null;
+
+            throw error;
         }
-
-        // Validar que el pago fue exitoso
-        if (!resultadoPago.success) {
-            throw new Error(resultadoPago.mensaje || 'Error en el procesamiento del pago');
-        }
-
-        console.log('Pago procesado exitosamente:', resultadoPago);
-
-        // Agregar información del pago a los datos para el comprobante
-        datosPagoActual.metodoPago = resultadoPago.metodo;
-        datosPagoActual.codigoTransaccion = resultadoPago.codigoTransaccion;
-        datosPagoActual.referenciaPago = resultadoPago.referenciaPago;
-
-        return resultadoPago;
     }
 
     function generateCode(length = 6) {
@@ -499,7 +500,7 @@
             }
 
             const payload = {
-                nombre: "casillero_custodia",
+                nombre: "casilleroCust",
                 precio: datos.valorTotal
             };
 
@@ -517,57 +518,68 @@
 
             console.log("Respuesta HTTP:", response.status, response.statusText);
 
-            // Validar respuesta HTTP
+            // Leer cuerpo (sea OK o error) intentando parsear JSON
+            const textBody = await response.text().catch(() => '');
+            let result = null;
+            try { result = textBody ? JSON.parse(textBody) : null; } catch (e) { result = null; }
+
+            // Si HTTP no OK -> mostrar detalle y lanzar error
             if (!response.ok) {
                 let errorDetail = `Error ${response.status}: ${response.statusText}`;
-
-                try {
-                    const errorText = await response.text();
-                    console.error("Detalle del error:", errorText);
-                    errorDetail += ` - ${errorText}`;
-                } catch (e) {
-                    console.error("No se pudo obtener detalle del error");
-                }
-
+                if (textBody) errorDetail += ` - ${textBody}`;
                 throw new Error(`Error del servidor: ${errorDetail}`);
             }
 
-            // Procesar respuesta JSON
-            const result = await response.json();
             console.log("Respuesta del servidor (JSON):", result);
 
-            if (result.success === false || result.error) {
-                throw new Error(result.message || result.error || 'Error en la respuesta del servidor');
+            // Ahora tratamos como éxito ambos casos que mencionaste:
+            // 1) {"message":"Folio asignado correctamente","folio":3702,"ficticia":false}
+            // 2) {"message":"No hay folios disponibles. Se generó una boleta ficticia.","folio":"412-2729","ficticia":true}
+            if (result && (result.folio !== undefined || result.message)) {
+                // normalizamos valores
+                const folio = result.folio ?? null;
+                const ficticia = !!result.ficticia;
+                const mensaje = result.message || 'Pago en efectivo procesado';
+
+                // Guardar datos relevantes en "datos" para el comprobante
+                datos.metodoPago = 'efectivo';
+                datos.folioBoleta = folio;
+                datos.ficticia = ficticia;
+
+                return {
+                    success: true,
+                    metodo: 'efectivo',
+                    folio,
+                    ficticia,
+                    respuestaGateway: result,
+                    mensaje
+                };
             }
 
-            return {
-                success: true,
-                metodo: 'efectivo',
-                codigoTransaccion: generateCode(6),
-                referenciaPago: `EF-${generateCode(4)}`,
-                respuestaGateway: result,
-                mensaje: 'Pago en efectivo registrado correctamente'
-            };
+            // Si llegamos aquí, la respuesta tiene formato inesperado -> tratar como error
+            throw new Error('Respuesta inesperada del servidor de pagos (formato no válido)');
 
         } catch (error) {
             console.error('Error completo en pago en efectivo:', error);
 
-            // Mejorar mensajes de error para el usuario
+            // Mensajes de usuario más amables
             let userMessage = error.message || 'Error procesando pago en efectivo';
 
-            if (error.message.includes('Failed to fetch')) {
+            if (userMessage.includes('Failed to fetch')) {
                 userMessage = 'Error de conexión con el servidor. Verifique su conexión a internet y que el servidor esté disponible.';
-            } else if (error.message.includes('CORS') || error.message.includes('cors')) {
+            } else if (userMessage.toLowerCase().includes('cors')) {
                 userMessage = 'Error de configuración del servidor. Contacte al administrador.';
-            } else if (error.message.includes('404')) {
+            } else if (userMessage.includes('404')) {
                 userMessage = 'Servicio no encontrado. Verifique la URL del endpoint.';
-            } else if (error.message.includes('500')) {
+            } else if (userMessage.includes('500')) {
                 userMessage = 'Error interno del servidor. Contacte al administrador.';
             }
 
+            // Lanzar error con mensaje amigable (el controlador catch lo mostrará)
             throw new Error(userMessage);
         }
     }
+
 
     async function procesarPagoTarjeta(datos) {
         console.log('Procesando pago con tarjeta:', datos);
@@ -705,7 +717,7 @@
             tiempoOcupado: `${datos.diffDays} Días`,
             valorTotal: `$${valorTotal}`,
             rut: rutIn,
-            metodoPago: datos.metodoPago || 'Efectivo',
+            metodoPago: datos.metodoPago || 'efectivo',
             codigoTransaccion: datos.codigoTransaccion || 'N/A',
             referenciaPago: datos.referenciaPago || 'N/A',
             codigoBarras: barcodeTxt
@@ -719,17 +731,15 @@
         console.log('PDF de entrega generado e enviado exitosamente');
 
         // Mensaje personalizado según el método de pago
-        const mensajeExito = datos.metodoPago === 'Tarjeta'
-            ? `Pago con tarjeta procesado exitosamente. Referencia: ${datos.referenciaPago}. El casillero ha sido liberado y se imprimió el comprobante.`
-            : `Pago en efectivo procesado exitosamente. Código: ${datos.codigoTransaccion}. El casillero ha sido liberado y se imprimió el comprobante.`;
+        const mensajeExito = datos.metodoPago === 'tarjeta'
+            ? `Pago con tarjeta procesado exitosamente. El casillero ha sido liberado y se imprimió el comprobante.`
+            : `Pago en efectivo procesado exitosamente. El casillero ha sido liberado y se imprimió el comprobante.`;
 
         alert(mensajeExito);
 
-        formulario.reset();
-        btnLiberarImprimir.disabled = false;
+        clearPaymentUI();
 
-        // Limpiar datos
-        datosPagoActual = null;
+        btnLiberarImprimir.disabled = false;
     }
 
     async function cargarEstado(casilla) {
@@ -952,6 +962,67 @@
         win.document.open();
         win.document.write(printContent);
         win.document.close();
+    }
+
+    function clearPaymentUI() {
+        try {
+            // 1) Limpiar input de barcode
+            const barcodeInput = document.getElementById('barcodeIn');
+            if (barcodeInput) barcodeInput.value = '';
+
+            // 2) Limpiar la tabla de detalles (tabla-body)
+            const tablaBody = document.getElementById('tabla-body');
+            if (tablaBody) tablaBody.innerHTML = `
+                <tr><td colspan="2" class="text-muted" style="text-align:center">Sin datos</td></tr>
+            `;
+
+            // 3) Limpiar los resúmenes del modal (si quedan abiertos)
+            const resumenValorTotal = document.getElementById('resumenValorTotal');
+            const resumenCasillero = document.getElementById('resumenCasillero');
+            const resumenTiempo = document.getElementById('resumenTiempo');
+            if (resumenValorTotal) resumenValorTotal.textContent = '$0';
+            if (resumenCasillero) resumenCasillero.textContent = '-';
+            if (resumenTiempo) resumenTiempo.textContent = '-';
+
+            // 4) Resetear formulario y botones del modal
+            const formulario = document.getElementById('formulario');
+            if (formulario) formulario.reset();
+
+            const btnLiberarImprimir = document.getElementById('btnLiberarImprimir');
+            if (btnLiberarImprimir) {
+                btnLiberarImprimir.disabled = false;
+            }
+            const btnConfirmarPago = document.getElementById('btnConfirmarPago');
+            if (btnConfirmarPago) {
+                btnConfirmarPago.disabled = true;
+            }
+
+            // 5) Cerrar modal de pago si está abierto
+            const modalEl = document.getElementById('modalPago');
+            if (modalEl) {
+                const bsModal = bootstrap.Modal.getInstance(modalEl);
+                if (bsModal) bsModal.hide();
+            }
+
+            // 6) Limpiar variable de datos en memoria
+            datosPagoActual = null;
+
+            // 7) Remover any pending highlight de la casilla (si existe)
+            // Si marcaste la casilla como .pending en otros flujos, remuévela
+            try {
+                const casilla = document.querySelector('.casilla.pending');
+                if (casilla) casilla.classList.remove('pending');
+            } catch (e) { /* ignore */ }
+
+            // 8) Opcional: actualizar tabla general/tabla de historial
+            if (typeof actualizarTabla === 'function') {
+                try { actualizarTabla(); } catch (e) { /* ignore */ }
+            }
+
+            console.log('UI limpiada tras pago/entrega exitosa.');
+        } catch (err) {
+            console.error('Error limpiando UI:', err);
+        }
     }
 
 
