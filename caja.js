@@ -189,6 +189,19 @@ class UIStateManager {
   }
 }
 
+async function obtenerNumeroCaja() {
+  try {
+    // const res = await fetch("http://localhost:3000/api/info-caja");
+    const res = await fetch("http://10.5.20.105:3000/api/info-caja");
+    const data = await res.json();
+    return data.numero_caja || "SIN_NUMERO";
+  } catch (err) {
+    console.error("Error al obtener NUMERO_CAJA:", err);
+    ToastSystem.show("No se pudo identificar el terminal de caja.", "error");
+    return "SIN_NUMERO";
+  }
+}
+
 // --- Funciones para Movimientos en Tiempo Real ---
 function cargarMovimientosCaja(idCaja) {
   $.post(API_URL + "caja.php", {
@@ -491,7 +504,7 @@ function verificarCajaAbiertaUsuario(id_usuario) {
 }
 
 // --- Event Handlers ---
-$("#formInicioCaja").on("submit", function (e) {
+$("#formInicioCaja").on("submit", async function (e) {
   e.preventDefault();
 
   const monto = $("#monto_inicial_modal").val();
@@ -511,43 +524,52 @@ $("#formInicioCaja").on("submit", function (e) {
     return;
   }
 
+  // Obtener el número de caja antes de abrir
+  const numeroCaja = await obtenerNumeroCaja();
+  if (!numeroCaja || numeroCaja === "SIN_NUMERO") {
+    ToastSystem.show("No se pudo identificar el terminal de caja.", "error");
+    UIStateManager.setLoading("#btnSubmitAbrir", false);
+    return;
+  }
+
   $.post(API_URL + "caja.php", {
     accion: "abrir",
     monto_inicial: monto,
-    id_usuario: id_usuario
+    id_usuario: id_usuario,
+    numero_caja: numeroCaja  // <-- ahora sí se envía
   })
-    .done(function (res) {
-      let data;
-      try {
-        data = JSON.parse(res);
-      } catch (e) {
-        throw new Error("Respuesta inválida del servidor");
-      }
+  .done(function (res) {
+    let data;
+    try {
+      data = JSON.parse(res);
+    } catch (e) {
+      throw new Error("Respuesta inválida del servidor");
+    }
 
-      if (data.success) {
-        localStorage.setItem("id_caja", data.id);
-        mostrarCaja(data);
-        UIStateManager.updateCajaStatus(true, data);
-        cargarMovimientosCaja(data.id);
+    if (data.success) {
+      localStorage.setItem("id_caja", data.id);
+      mostrarCaja(data);
+      UIStateManager.updateCajaStatus(true, data);
+      cargarMovimientosCaja(data.id);
 
-        $("#modalInicio").modal("hide");
-        $("#formInicioCaja")[0].reset();
+      $("#modalInicio").modal("hide");
+      $("#formInicioCaja")[0].reset();
 
-        if (data.reutilizada) {
-          ToastSystem.show("Ya tenías una caja abierta. Se ha retomado correctamente.", "info");
-        } else {
-          ToastSystem.show("Caja abierta correctamente.", "success");
-        }
+      if (data.reutilizada) {
+        ToastSystem.show("Ya tenías una caja abierta. Se ha retomado correctamente.", "info");
       } else {
-        throw new Error(data.error || "Error al abrir caja");
+        ToastSystem.show("Caja abierta correctamente.", "success");
       }
-    })
-    .fail(function (xhr, status, error) {
-      ToastSystem.show("Error de conexión: " + error, "error");
-    })
-    .always(function () {
-      UIStateManager.setLoading("#btnSubmitAbrir", false);
-    });
+    } else {
+      throw new Error(data.error || "Error al abrir caja");
+    }
+  })
+  .fail(function (xhr, status, error) {
+    ToastSystem.show("Error de conexión: " + error, "error");
+  })
+  .always(function () {
+    UIStateManager.setLoading("#btnSubmitAbrir", false);
+  });
 });
 
 $("#btnCerrarCaja").on("click", function () {
