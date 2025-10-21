@@ -22,56 +22,6 @@ function getCookie(cname) {
   return "";
 }
 
-// async function getDestByID(idIn) {
-//   let ret = await fetch(
-//     apiDestinos +
-//       "?" +
-//       new URLSearchParams({
-//         id: idIn,
-//       }),
-//     {
-//       method: "GET",
-//       mode: "cors",
-//       headers: {
-//         Authorization: `Bearer ${getCookie("jwt")}`,
-//       },
-//     }
-//   )
-//     .then((reply) => reply.json())
-//     .then((data) => {
-//       return data;
-//     })
-//     .catch((error) => {
-//       console.log(error);
-//     });
-//   return ret;
-// }
-
-// async function getEmpByID(idIn) {
-//   let ret = await fetch(
-//     apiEmpresas +
-//       "?" +
-//       new URLSearchParams({
-//         id: idIn,
-//       }),
-//     {
-//       method: "GET",
-//       mode: "cors",
-//       headers: {
-//         Authorization: `Bearer ${getCookie("jwt")}`,
-//       },
-//     }
-//   )
-//     .then((reply) => reply.json())
-//     .then((data) => {
-//       return data;
-//     })
-//     .catch((error) => {
-//       console.log(error);
-//     });
-//   return ret;
-// }
-
 async function getWLByPatente(patIn) {
   let ret = await fetch(
     apiWhitelist +
@@ -125,14 +75,15 @@ async function calcAndenes() {
   const cont = document.getElementById("contAnden");
   const destinoSelect = document.getElementById("destinoBuses");
   const empresaSelect = document.getElementById("empresaBuses");
+  const payBtn = document.getElementById("payBtn");
 
   if (!patente) {
-    alert("Ingrese una patente válida.");
+    showToast("Ingrese una patente válida.", "warning");
     return;
   }
 
   if (empresaSelect.value === "0" || destinoSelect.value === "0") {
-    alert("Seleccione Empresa y Destino.");
+    showToast("Seleccione Empresa y Destino.", "warning");
     return;
   }
 
@@ -140,21 +91,26 @@ async function calcAndenes() {
     const data = await getMovByPatente(patente);
 
     if (!data || Object.keys(data).length === 0) {
-      alert("Patente no encontrada.");
+      showToast("Patente no encontrada.", "error");
       return;
     }
 
     if (data["tipo"].toLowerCase() !== "anden") {
-      alert("La patente corresponde a otro tipo de movimiento.");
+      showToast("La patente corresponde a otro tipo de movimiento.", "warning");
       return;
     }
 
     if (data["fechasal"] !== "0000-00-00") {
-      alert("Esta patente ya fue cobrada.");
+      showToast("Esta patente ya fue cobrada.", "warning");
       return;
     }
 
+    // Limpiar y preparar el contenedor
     cont.innerHTML = "";
+    cont.classList.remove("loaded"); // Remover clase primero
+
+    // Forzar un reflow antes de añadir contenido
+    void cont.offsetWidth;
 
     const fechaActual = new Date();
     const fechaEntrada = new Date(`${data["fechaent"]}T${data["horaent"]}`);
@@ -176,7 +132,7 @@ async function calcAndenes() {
 
     // Validar que estén los datos
     if (!destInfo.tipo || isNaN(destInfo.valor)) {
-      alert("Error: datos del destino inválidos.");
+      showToast("Error: datos del destino inválidos.", "error");
       return;
     }
 
@@ -194,16 +150,11 @@ async function calcAndenes() {
     valorTotGlobal = Math.max(valorBase, 0);
 
     const ret = await getWLByPatente(data["patente"]);
-    if (ret !== null) valorTotGlobal = 0;
+    const isWhitelist = ret !== null;
+    if (isWhitelist) valorTotGlobal = 0;
 
     const iva = valorTotGlobal * configuracion.iva;
     const valorConIVA = valorTotGlobal + iva;
-
-    const crear = (tag, text) => {
-      const el = document.createElement(tag);
-      el.textContent = text;
-      return el;
-    };
 
     const nowTime = `${fechaActual
       .getHours()
@@ -216,37 +167,130 @@ async function calcAndenes() {
       .toString()
       .padStart(2, "0")}`;
 
-    const elementos = [
-      crear("h1", `Patente: ${data["patente"]}`),
-      crear("h3", `Empresa: ${empresaInfo.nombre}`),
-      crear("h3", `Fecha ingreso: ${data["fechaent"]}`),
-      crear("h3", `Hora ingreso: ${data["horaent"]}`),
-      crear("h3", `Hora salida: ${nowTime}`),
-      crear("h3", `Tiempo de Parking: ${minutos} min.`),
-      crear("h3", `Valor NETO: $${valorTotGlobal.toFixed(0)}`),
-      crear(
-        "h3",
-        `IVA (${(configuracion.iva * 100).toFixed(0)}%): $${iva.toFixed(0)}`
-      ),
-      crear("h3", `Total con IVA: $${valorConIVA.toFixed(0)}`),
-    ];
+    // Crear la estructura HTML mejorada
+    const paymentHTML = `
+      <div class="payment-header">
+        <h2 class="payment-title">${data["patente"]}</h2>
+        <div class="payment-subtitle">
+          ${
+            isWhitelist
+              ? '<span class="payment-status free">WHITELIST - GRATIS</span>'
+              : "Detalles del cálculo de pago"
+          }
+        </div>
+      </div>
 
-    cont.append(...elementos);
+      <div class="payment-info-grid">
+        <div class="payment-info-item">
+          <span class="payment-info-label">
+            <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            </svg>
+            Empresa
+          </span>
+          <span class="payment-info-value">${empresaInfo.nombre}</span>
+        </div>
+
+        <div class="payment-info-item">
+          <span class="payment-info-label">
+            <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4V.5zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2z"/>
+            </svg>
+            Fecha ingreso
+          </span>
+          <span class="payment-info-value">${data["fechaent"]}</span>
+        </div>
+
+        <div class="payment-info-item">
+          <span class="payment-info-label">
+            <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+            </svg>
+            Hora ingreso
+          </span>
+          <span class="payment-info-value">${data["horaent"]}</span>
+        </div>
+
+        <div class="payment-info-item">
+          <span class="payment-info-label">
+            <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+            </svg>
+            Hora salida
+          </span>
+          <span class="payment-info-value">${nowTime}</span>
+        </div>
+
+        <div class="payment-info-item highlight">
+          <span class="payment-info-label">
+            <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.5-13a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 8.793V3z"/>
+            </svg>
+            Tiempo estacionado
+          </span>
+          <span class="payment-info-value">${minutos} minutos</span>
+        </div>
+      </div>
+
+      ${
+        !isWhitelist
+          ? `
+      <div class="payment-breakdown">
+        <div class="payment-breakdown-title">Desglose de Costos</div>
+        <div class="payment-breakdown-item">
+          <span class="payment-breakdown-label">Tarifa base (${bloques} bloques)</span>
+          <span class="payment-breakdown-value">$${valorBase.toFixed(0)}</span>
+        </div>
+        <div class="payment-breakdown-item">
+          <span class="payment-breakdown-label">IVA (${(
+            configuracion.iva * 100
+          ).toFixed(0)}%)</span>
+          <span class="payment-breakdown-value">$${iva.toFixed(0)}</span>
+        </div>
+      </div>
+
+      <div class="payment-summary">
+        <div class="payment-summary-title">Total a Pagar</div>
+        <div class="payment-total-amount">$${valorConIVA.toFixed(0)}</div>
+        <div class="payment-total-label">Incluye impuestos</div>
+      </div>
+      `
+          : `
+      <div class="payment-summary">
+        <div class="payment-summary-title">Vehículo en Whitelist</div>
+        <div class="payment-total-amount" style="color: var(--primary-light);">$0</div>
+        <div class="payment-total-label">Exento de pago</div>
+      </div>
+      `
+      }
+    `;
+
+    cont.innerHTML = paymentHTML;
+
+    // Añadir la clase loaded después de un pequeño delay para las animaciones
+    setTimeout(() => {
+      cont.classList.add("loaded");
+    }, 10);
+
+    // Habilitar el botón de pago
+    payBtn.disabled = false;
 
     window.datosAnden = {
       id: data["idmov"],
       patente: data["patente"],
       fecha: fechaActual.toISOString().split("T")[0],
       hora: nowTime,
-      valor: valorConIVA,
+      valor: isWhitelist ? 0 : valorConIVA,
       empresa: empresaSelect.value,
       empresaNombre: empresaInfo.nombre,
     };
 
-    valorTotGlobal = valorConIVA;
+    valorTotGlobal = isWhitelist ? 0 : valorConIVA;
   } catch (error) {
     console.error("Error en el cálculo:", error);
-    alert("Ocurrió un error al calcular el valor del andén.");
+    showToast("Ocurrió un error al calcular el valor del andén.", "error");
   }
 }
 
@@ -276,6 +320,7 @@ async function getMovByPatente(patente) {
     return ret;
   }
 }
+
 // Función para listar empresas en el select
 function listarAndenesEmpresas() {
   andGetEmpresas()
@@ -399,12 +444,16 @@ async function pagarAnden(valorTot = valorTotGlobal) {
   const input = document.getElementById("andenQRPat").value;
   const cont = document.getElementById("contAnden");
   const empresaSelect = document.getElementById("empresaBuses"); // Captura la empresa seleccionada
+  const payBtn = document.getElementById("payBtn");
   const date = new Date();
 
   // Validación de id_caja en localStorage
   const id_caja = localStorage.getItem("id_caja");
   if (!id_caja) {
-    alert("Por favor, primero debe abrir la caja antes de realizar un pago.");
+    showToast(
+      "Por favor, primero debe abrir la caja antes de realizar un pago.",
+      "warning"
+    );
     return; // Detiene la ejecución si no hay id_caja
   }
 
@@ -416,7 +465,7 @@ async function pagarAnden(valorTot = valorTotGlobal) {
   try {
     const data = await getMovByPatente(input);
     if (!data) {
-      alert("Patente no encontrada");
+      showToast("Patente no encontrada", "error");
       return;
     }
 
@@ -428,7 +477,7 @@ async function pagarAnden(valorTot = valorTotGlobal) {
           empresaSelect.value !== "0" ? empresaSelect.value : null;
 
         if (!empresaSeleccionada || empresaSeleccionada === "0") {
-          alert("Debe seleccionar una empresa antes de pagar.");
+          showToast("Debe seleccionar una empresa antes de pagar.", "warning");
           return;
         }
 
@@ -463,31 +512,35 @@ async function pagarAnden(valorTot = valorTotGlobal) {
 
         const result = await response.json();
         if (result.msg) {
-          // Mover la actualización del movimiento y la alerta aquí
-          // await updateMov(datos);
-          // refreshMov(); // Refrescar la tabla de movimientos
-          // refreshPagos(); // Refrescar la tabla de pagos
-          alert("Pago registrado correctamente.");
-
+          showToast("Pago registrado correctamente.", "success");
           // Imprimir boleta térmica solo después de registrar el pago
-          // const ventanaImpr = window.open("", "_blank");
           imprimirBoletaTermicaAndenes(datos);
         } else {
-          alert("Error al registrar el pago: " + result.error);
+          showToast("Error al registrar el pago: " + result.error, "error");
         }
 
         // Limpiar el formulario
         document.getElementById("andenQRPat").value = "";
-        cont.innerHTML = "";
+        cont.innerHTML = `
+          <div class="empty-state">
+            <h3>Sin datos para mostrar</h3>
+            <p>Ingrese una patente y calcule para ver los detalles</p>
+          </div>
+        `;
+        payBtn.disabled = true;
+        cont.classList.remove("loaded");
       } else {
-        alert("Esta patente ya fue cobrada");
+        showToast("Esta patente ya fue cobrada", "warning");
       }
     } else {
-      alert("La patente pertenece a un tipo distinto de movimiento.");
+      showToast(
+        "La patente pertenece a un tipo distinto de movimiento.",
+        "warning"
+      );
     }
   } catch (error) {
     console.error("Error:", error);
-    alert("Ocurrió un error al procesar la solicitud.");
+    showToast("Ocurrió un error al procesar la solicitud.", "error");
   }
 }
 
@@ -564,7 +617,7 @@ async function imprimirBoletaTermicaAndenes(datos) {
     }
   } catch (error) {
     console.error("Error al imprimir boleta térmica:", error);
-    alert("Error generando o enviando la boleta térmica.");
+    showToast("Error generando o enviando la boleta térmica.", "error");
   } finally {
     document.body.removeChild(div);
   }
@@ -591,4 +644,39 @@ async function andGetEmpresas() {
     window.location.href = "index.html";
     return null;
   }
+}
+
+function showToast(message, type = "info", duration = 4000) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  // Limitar a máximo 5 toasts
+  while (container.children.length >= 5) {
+    container.removeChild(container.firstChild);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button>&times;</button>
+  `;
+
+  // Cerrar manualmente
+  toast.querySelector("button").addEventListener("click", () => {
+    toast.style.animation = "slide-out 0.5s forwards";
+    setTimeout(() => {
+      if (toast.parentNode) container.removeChild(toast);
+    }, 500);
+  });
+
+  container.appendChild(toast);
+
+  // Auto-cerrar con animación
+  setTimeout(() => {
+    toast.style.animation = "slide-out 0.5s forwards";
+    setTimeout(() => {
+      if (toast.parentNode) container.removeChild(toast);
+    }, 500);
+  }, duration);
 }

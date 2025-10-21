@@ -1,24 +1,56 @@
 :root {
-  /* Ajustando paleta de grises para ser más oscura y coincidir con la imagen de referencia */
+  /* Paleta de colores mejorada */
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-light: #60a5fa;
+  --success: #10b981;
+  --success-dark: #059669;
+  --warning: #f59e0b;
+  --warning-dark: #d97706;
+  --danger: #ef4444;
+  --danger-dark: #dc2626;
+
+  /* Escala de grises mejorada */
   --gray-50: #fafafa;
   --gray-100: #f5f5f5;
   --gray-200: #e5e5e5;
   --gray-300: #d4d4d4;
   --gray-400: #a3a3a3;
   --gray-500: #737373;
-  --gray-600: #3f3f3f;
-  --gray-700: #2d2d2d;
-  --gray-800: #242424;
-  --gray-900: #1a1a1a;
+  --gray-600: #525252;
+  --gray-700: #404040;
+  --gray-800: #262626;
+  --gray-900: #171717;
 
-  /* Ajustando colores de acento para coincidir con la imagen */
-  --accent-success: #10b981;
-  --accent-warning: #eab308;
-  --accent-danger: #ef4444;
-  --accent-info: #3b82f6;
+  /* Espaciado */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Bordes */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* ---------------- Body & Layout ---------------- */
+/* ---------------- Reset y Base ---------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 html,
 body {
   margin: 0;
@@ -26,168 +58,541 @@ body {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background-color: #1a1a1a; /* Fondo más oscuro */
-  color: #e5e5e5; /* Texto más claro para mejor contraste */
-  font-family: "Inter", system-ui, sans-serif;
+  background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
+  color: var(--gray-100);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  line-height: 1.5;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
 }
 
 /* ---------------- Contenedor Principal ---------------- */
-.caja1 {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1.5rem;
+.container {
   display: flex;
   flex-direction: column;
-  background-color: #1a1a1a; /* Fondo más oscuro */
   height: 100vh;
-  overflow-y: auto;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-md);
+  gap: var(--space-lg);
+  overflow: hidden;
 }
 
-/* ---------------- Títulos y Texto ---------------- */
-h1 {
-  font-size: 1.4rem;
-  margin-bottom: 1rem;
-  font-weight: bold;
+/* ---------------- Header ---------------- */
+.header {
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--gray-700);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.header-titles {
+  flex: 1;
+}
+
+.header-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: var(--space-xs);
+}
+
+.header-subtitle {
+  color: var(--gray-400);
+  font-size: 0.9rem;
+}
+
+/* ---------------- Botón Volver ---------------- */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--gray-700);
+  color: var(--gray-200);
+  border: 1px solid var(--gray-600);
+  border-radius: var(--radius-md);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-back:hover {
+  background: var(--gray-600);
+  border-color: var(--gray-500);
+  transform: translateY(-1px);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+}
+
+/* ---------------- Contenido Principal ---------------- */
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ---------------- Paneles ---------------- */
+.form-panel,
+.info-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--gray-800);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-700);
+  overflow: hidden;
+}
+
+.panel-header {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--gray-700);
+}
+
+.panel-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: var(--space-xs);
+}
+
+.panel-header p {
+  color: var(--gray-400);
+  font-size: 0.875rem;
+}
+
+/* ---------------- Formulario ---------------- */
+.form-group {
+  margin-bottom: var(--space-md);
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-300);
+  margin-bottom: var(--space-sm);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  background: var(--gray-700);
+  border: 1px solid var(--gray-600);
+  color: var(--gray-100);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-input::placeholder {
+  color: var(--gray-500);
+}
+
+/* ---------------- Botones ---------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-primary {
+  background: var(--primary);
   color: white;
 }
 
-h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #e5e5e5;
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
-p {
-  color: #a3a3a3;
-  margin-bottom: 1rem;
+.btn-success {
+  background: var(--success);
+  color: white;
 }
 
-/* ---------------- Layout de Columnas ---------------- */
-.izq,
-.derecha {
-  flex: 1;
-  padding: 1rem;
+.btn-success:hover:not(:disabled) {
+  background: var(--success-dark);
+  transform: translateY(-1px);
 }
 
-.izq {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.btn-text {
+  transition: opacity 0.2s ease;
 }
 
-.derecha {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+.btn:disabled .btn-text {
+  opacity: 0.7;
 }
 
 /* ---------------- Card de Información ---------------- */
 .card {
-  background-color: #242424; /* Fondo más oscuro */
-  border: 1px solid #3f3f3f; /* Borde más oscuro */
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  width: 100%;
-  max-width: 400px;
+  background: var(--gray-800);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 1px solid var(--gray-700);
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
-#contAnden {
+.payment-details {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
 }
 
-#contAnden h1 {
-  font-size: 1.5rem;
-  color: white;
-  margin-bottom: 0.5rem;
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: var(--space-2xl);
+  color: var(--gray-500);
+  flex: 1;
 }
 
-#contAnden h3 {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #3f3f3f;
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.5rem;
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-sm);
+  color: var(--gray-400);
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+}
+
+/* ================ DETALLES DE PAGO MEJORADOS ================ */
+.payment-header {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 2px solid var(--primary);
+}
+
+.payment-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-subtitle {
+  color: var(--gray-400);
+  font-size: 0.9rem;
   font-weight: 500;
 }
 
-#contAnden h3:last-child {
+.payment-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.payment-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--gray-750);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--gray-600);
+  transition: all 0.2s ease;
+}
+
+.payment-info-item:hover {
+  background: var(--gray-750);
+  border-left-color: var(--primary);
+  transform: translateX(2px);
+}
+
+.payment-info-item.highlight {
+  background: linear-gradient(135deg, var(--gray-750) 0%, var(--gray-700) 100%);
+  border-left-color: var(--warning);
+}
+
+.payment-info-item.total {
+  background: linear-gradient(
+    135deg,
+    var(--primary-dark) 0%,
+    var(--primary) 100%
+  );
+  border-left-color: var(--primary-light);
+  margin-top: var(--space-md);
+}
+
+.payment-info-label {
+  color: var(--gray-300);
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.payment-info-label .icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.payment-info-value {
+  color: var(--gray-100);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+.payment-info-item.total .payment-info-label,
+.payment-info-item.total .payment-info-value {
+  color: white;
+  font-weight: 700;
+}
+
+.payment-breakdown {
+  background: var(--gray-750);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  border: 1px solid var(--gray-600);
+}
+
+.payment-breakdown-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-300);
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--gray-700);
+}
+
+.payment-breakdown-item:last-child {
   border-bottom: none;
 }
 
-/* ---------------- Inputs & Selects ---------------- */
-.entrada {
-  background-color: #2d2d2d; /* Inputs más oscuros */
-  border: 1px solid #3f3f3f; /* Borde más oscuro */
-  color: #e5e5e5; /* Texto más claro */
-  border-radius: 0.375rem;
-  padding: 0.75rem;
-  font-size: 0.875rem;
-  width: 100%;
-  box-sizing: border-box;
+.payment-breakdown-label {
+  color: var(--gray-400);
+  font-size: 0.85rem;
 }
 
-.entrada:focus {
-  outline: none;
-  border-color: var(--accent-info);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-/* ---------------- Buttons ---------------- */
-.btn {
-  background-color: var(--accent-info);
-  color: white;
+.payment-breakdown-value {
+  color: var(--gray-200);
+  font-size: 0.85rem;
   font-weight: 500;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  cursor: pointer;
+}
+
+.payment-summary {
+  background: linear-gradient(135deg, var(--gray-750) 0%, var(--gray-700) 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 2px solid var(--success);
+  margin-top: auto;
+}
+
+.payment-summary-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--success);
+  margin-bottom: var(--space-md);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-total-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+  text-align: center;
+  margin-bottom: var(--space-sm);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.payment-total-label {
+  color: var(--gray-300);
+  font-size: 0.875rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Estados especiales */
+.payment-status {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  text-align: center;
-  transition: 0.2s;
-  width: 100%;
-  font-size: 1rem;
+  gap: var(--space-xs);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.btn:hover {
-  background-color: #2563eb;
+.payment-status.pending {
+  background: var(--warning);
+  color: var(--gray-900);
 }
 
-.btn-success {
-  background-color: #10b981; /* Verde más vibrante */
+.payment-status.paid {
+  background: var(--success);
+  color: white;
 }
 
-.btn-success:hover {
-  background-color: #059669; /* Hover verde más oscuro */
+.payment-status.free {
+  background: var(--primary);
+  color: white;
 }
 
-.btn.disabled {
-  background-color: #3f3f3f !important; /* Deshabilitado más oscuro */
-  cursor: not-allowed;
-}
-
-/* ---------------- Responsive ---------------- */
-@media (min-width: 768px) {
-  .caja1 {
-    flex-direction: row;
+/* Animaciones para la aparición */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .izq,
-  .derecha {
-    flex: 1;
+.payment-details.loaded > * {
+  animation: slideInUp 0.5s ease forwards;
+}
+
+.payment-details.loaded > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.payment-details.loaded > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.payment-details.loaded > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.payment-details.loaded > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.payment-details.loaded > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+/* ---------------- Acciones ---------------- */
+.form-actions,
+.payment-actions {
+  margin-top: auto;
+}
+
+.payment-actions {
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--gray-700);
+}
+
+/* ---------------- Info Footer ---------------- */
+.info-footer {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--gray-700);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+}
+
+.info-label {
+  color: var(--gray-400);
+  font-size: 0.875rem;
+}
+
+.info-value {
+  color: var(--gray-300);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* ---------------- Spinner ---------------- */
+.spinner {
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+
+.btn.loading .spinner {
+  display: block;
+}
+
+.btn.loading .btn-text {
+  opacity: 0.7;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
@@ -211,9 +616,9 @@ p {
   align-items: center;
   padding: 12px 16px;
   border-radius: 8px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   color: #fff;
-  font-family: "Helvetica Neue", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 500;
   opacity: 0;
@@ -256,69 +661,222 @@ p {
   font-weight: bold;
   margin-left: 10px;
   cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.toast button:hover {
+  opacity: 1;
 }
 
 .toast.success {
-  background-color: #4caf50;
+  background-color: var(--success);
 }
 
 .toast.error {
-  background-color: #f44336;
+  background-color: var(--danger);
 }
 
 .toast.warning {
-  background-color: #ff9800;
+  background-color: var(--warning);
 }
 
 .toast.info {
-  background-color: #2196f3;
+  background-color: var(--primary);
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 1024px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .container {
+    padding: var(--space-sm);
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .form-panel,
+  .info-panel {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .btn-back {
+    align-self: flex-end;
+    margin-top: var(--space-sm);
+  }
+
+  .payment-total-amount {
+    font-size: 1.75rem;
+  }
+
+  .payment-info-item {
+    padding: var(--space-sm);
+  }
+}
+
+@media (max-width: 640px) {
+  .header-title {
+    font-size: 1.5rem;
+  }
+
+  .form-panel,
+  .info-panel {
+    padding: var(--space-md);
+  }
+
+  #toast-container {
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+
+  .btn-back {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .payment-header {
+    margin-bottom: var(--space-md);
+  }
+
+  .payment-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* ---------------- Estados de carga ---------------- */
+.loading {
+  pointer-events: none;
+  opacity: 0.7;
 }
 
 /* ---------------- Scrollbar ---------------- */
-.caja1::-webkit-scrollbar {
-  width: 10px;
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.caja1::-webkit-scrollbar-track {
-  background: #242424;
-  border-radius: 8px;
+::-webkit-scrollbar-track {
+  background: var(--gray-800);
+  border-radius: var(--radius-sm);
 }
 
-.caja1::-webkit-scrollbar-thumb {
-  background-color: #737373;
-  border-radius: 8px;
-  border: 2px solid #242424;
+::-webkit-scrollbar-thumb {
+  background-color: var(--gray-600);
+  border-radius: var(--radius-sm);
 }
 
-.caja1::-webkit-scrollbar-thumb:hover {
-  background-color: #3f3f3f;
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gray-500);
 }
 
 /* Scrollbar para Firefox */
-.caja1 {
+* {
   scrollbar-width: thin;
-  scrollbar-color: #737373 #242424;
+  scrollbar-color: var(--gray-600) var(--gray-800);
 }
 
-/* ---------------- Spinner ---------------- */
-.spinner {
-  border: 2px solid transparent;
-  border-top: 2px solid #fff;
-  border-right: 2px solid #fff;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 0.6s linear infinite;
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: 5px;
+/* Color adicional para grises */
+:root {
+  --gray-750: #2d2d2d;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+/* ================ FIX PARA CONTENEDOR DE DETALLES ================ */
+.payment-details {
+  min-width: 0; /* Permite que el contenido se ajuste */
+  width: 100%;
+}
+
+.payment-details.loaded {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Permite el scroll interno si es necesario */
+}
+
+/* Asegurar que todos los elementos internos tengan ancho completo */
+.payment-header,
+.payment-info-grid,
+.payment-breakdown,
+.payment-summary {
+  width: 100%;
+  min-width: 0; /* Previene el desbordamiento */
+}
+
+/* Contenedor principal de la card */
+.card {
+  min-width: 0; /* Importante para flexbox */
+  width: 100%;
+}
+
+/* Asegurar que los textos largos no rompan el diseño */
+.payment-info-value,
+.payment-breakdown-value {
+  word-break: break-word;
+  text-align: right;
+  min-width: 0;
+}
+
+/* Para elementos con texto muy largo */
+.payment-info-item {
+  min-width: 0;
+  gap: var(--space-md);
+}
+
+.payment-info-label {
+  flex-shrink: 0; /* No permite que la etiqueta se encoja demasiado */
+  min-width: 120px; /* Ancho mínimo para las etiquetas */
+}
+
+.payment-info-value {
+  flex: 1;
+  min-width: 0; /* Permite que el valor se ajuste */
+  text-align: right;
+}
+
+/* Responsive adicional para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .payment-info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
   }
-  100% {
-    transform: rotate(360deg);
+
+  .payment-info-value {
+    text-align: left;
+    width: 100%;
   }
+
+  .payment-info-label {
+    min-width: auto;
+  }
+}
+
+/* Asegurar que el contenedor principal mantenga su tamaño */
+.info-panel {
+  min-width: 0; /* Permite que se ajuste al contenido */
+}
+
+/* Prevenir que el grid se colapse */
+.main-content {
+  min-width: 0;
+}
+
+/* Fix específico para el contenedor cuando tiene contenido */
+#contAnden:not(.empty-state) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }

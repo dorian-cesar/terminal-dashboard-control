@@ -3,79 +3,136 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Loza - Buses</title>
-    <!-- css andenes -->
+    <title>Caja de Andenes</title>
     <link rel="stylesheet" href="andenes.css" />
 
-    <!-- Librería jQuery (debe ir antes de tus scripts que usan $) -->
+    <!-- Librerías -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Librería jsPDF para generar PDF de comprobantes -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <!-- librerías para generar PDF -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-    <!-- Script global -->
-    <script src="session.js" ;></script>
+    <!-- Scripts -->
+    <script src="session.js"></script>
     <script defer src="app.js"></script>
-
-    <!-- Script principal -->
     <script defer src="appAndenes.js"></script>
     <script defer src="valores.js"></script>
   </head>
 
   <body>
-    <div class="caja1" id="pageBuses">
-      <!-- Título de la sección -->
-      <h1>Caja Andenes de Buses</h1>
-
-      <!-- Descripción -->
-      <p>Ingrese su Patente</p>
-
-      <!-- Columna izquierda con formularios -->
-      <div class="izq">
-        <input
-          type="text"
-          class="entrada"
-          id="andenQRPat"
-          placeholder="Ingrese patente"
-        />
-
-        <select id="empresaBuses" class="entrada">
-          <option value="0">Seleccione Empresa</option>
-        </select>
-
-        <!-- Select tipo de destino -->
-        <select id="tipoDestino" class="entrada">
-          <option value="0">Seleccione tipo de destino</option>
-          <option value="nacional">Nacional (20 Min)</option>
-          <option value="internacional">Internacional (30 Min)</option>
-        </select>
-
-        <!-- Select destino -->
-        <select id="destinoBuses" class="entrada">
-          <option value="0">Seleccione Destino</option>
-        </select>
-
-        <!-- Botón calcular -->
-        <button class="btn" onclick="calcAndenes()">Calcular</button>
-      </div>
-
-      <!-- Columna derecha con información -->
-      <div class="derecha">
-        <div class="card">
-          <div id="contAnden">
-            <h1>Patente</h1>
-            <h3>Fecha</h3>
-            <h3>Hora de ingreso</h3>
-            <h3>Hora salida</h3>
-            <h3>Tiempo de Parking</h3>
-            <h3>Valor</h3>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <div class="header-titles">
+            <h1 class="header-title">Andenes de Buses</h1>
+            <p class="header-subtitle">
+              Sistema de gestión de pagos para andenes
+            </p>
           </div>
-          <button onclick="pagarAnden()" class="btn">Pagar</button>
+          <button
+            class="btn-back"
+            onclick="window.location.href='dashboard.html'"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path
+                d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"
+              />
+            </svg>
+            Volver al Dashboard
+          </button>
         </div>
-      </div>
+      </header>
+
+      <!-- Contenido principal -->
+      <main class="main-content">
+        <!-- Panel izquierdo - Formulario -->
+        <section class="form-panel">
+          <div class="panel-header">
+            <h2>Datos del Vehículo</h2>
+            <p>Ingrese la información requerida para calcular el pago</p>
+          </div>
+
+          <div class="form-group">
+            <label for="andenQRPat" class="form-label"
+              >Patente del Vehículo</label
+            >
+            <input
+              type="text"
+              class="form-input"
+              id="andenQRPat"
+              placeholder="Ej: AB123CD"
+              autocomplete="off"
+              autofocus
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="empresaBuses" class="form-label">Empresa</label>
+            <select id="empresaBuses" class="form-select">
+              <option value="0">Seleccione una empresa</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="tipoDestino" class="form-label">Tipo de Destino</label>
+            <select id="tipoDestino" class="form-select">
+              <option value="0">Seleccione tipo de destino</option>
+              <option value="nacional">Nacional (20 Min)</option>
+              <option value="internacional">Internacional (30 Min)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="destinoBuses" class="form-label">Destino</label>
+            <select id="destinoBuses" class="form-select">
+              <option value="0">Seleccione un destino</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button
+              class="btn btn-primary"
+              onclick="calcAndenes()"
+              id="calcBtn"
+            >
+              <span class="btn-text">Calcular Pago</span>
+              <div class="spinner" id="calcSpinner"></div>
+            </button>
+          </div>
+        </section>
+
+        <!-- Panel derecho - Información y pago -->
+        <section class="info-panel">
+          <div class="panel-header">
+            <h2>Detalles del Pago</h2>
+            <p>Resumen del cálculo y opciones de pago</p>
+          </div>
+
+          <div class="card">
+            <div id="contAnden" class="payment-details">
+              <div class="empty-state">
+                <h3>Sin datos para mostrar</h3>
+                <p>Ingrese una patente y calcule para ver los detalles</p>
+              </div>
+            </div>
+
+            <div class="payment-actions">
+              <button
+                onclick="pagarAnden()"
+                class="btn btn-success"
+                id="payBtn"
+                disabled
+              >
+                <span class="btn-text">Realizar Pago</span>
+                <div class="spinner" id="paySpinner"></div>
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
+
+    <div id="toast-container"></div>
   </body>
 </html>
