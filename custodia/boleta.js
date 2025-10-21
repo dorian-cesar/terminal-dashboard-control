@@ -1,16 +1,21 @@
 (() => {
-    // Config
-    // const urlServer = 'https://andenes.terminal-calama.com';
-    const urlServer = 'http://10.5.20.93';
-    const urlUpdate = urlServer + '/TerminalCalama/PHP/Boleta/save.php';
-    const urlStore = urlServer + '/TerminalCalama/PHP/Custodia/store.php';
-    const urlState = urlServer + '/TerminalCalama/PHP/Custodia/reload.php';
-    const urlLoad = urlServer + '/TerminalCalama/PHP/Boleta/load.php';
-    const urlLocal = 'http://10.5.20.105:3000';
+    // ==================================== CONFIGURACIÓN ====================================
+    const ENV = window.APP_ENV;
+    const BASE_URL = window.BASE_URL;
+    const urlLocal = window.URL_LOCAL;
+
+    // URL para pago en efectivo
+    const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
+    
+    // Construir URLs completas del servidor principal
+    const urlUpdate = BASE_URL + 'TerminalCalama/PHP/Boleta/save.php';
+    const urlStore = BASE_URL + 'TerminalCalama/PHP/Custodia/store.php';
+    const urlState = BASE_URL + 'TerminalCalama/PHP/Custodia/reload.php';
+    const urlLoad = BASE_URL + 'TerminalCalama/PHP/Boleta/load.php';
+    
+    // URLs locales (impresión y transbank)
     const urlImpresion = urlLocal + '/api/imprimir';
     const urlPaymentTarjeta = urlLocal + '/api/payment';
-    const urlPaymentEfectivo = 'https://backend-banios.dev-wit.com/api/boletas-calama/enviar'
-
 
     //==================================== HELPERS =======================================
     async function callAPI(datos, url) {

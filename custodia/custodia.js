@@ -1,11 +1,17 @@
 (() => {
-    // Config
-    const urlServer = 'https://andenes.terminal-calama.com';
-    const urlSave = urlServer + '/TerminalCalama/PHP/Custodia/save.php';
-    const urlLoad = urlServer + '/TerminalCalama/PHP/Custodia/load.php';
-    const urlStore = urlServer + '/TerminalCalama/PHP/Custodia/store.php';
-    const urlState = urlServer + '/TerminalCalama/PHP/Custodia/reload.php';
-    const urlImpresion = 'http://10.5.20.105:3000/api/imprimir';
+    const ENV = window.APP_ENV;
+    const BASE_URL = window.BASE_URL;
+    const urlLocal = window.URL_LOCAL;
+
+    // URLs específicas de ESTA página
+    const API_CUSTODIA_BASE = `${BASE_URL}TerminalCalama/PHP/Custodia/`;
+    const urlSave = API_CUSTODIA_BASE + 'save.php';
+    const urlLoad = API_CUSTODIA_BASE + 'load.php';
+    const urlStore = API_CUSTODIA_BASE + 'store.php';
+    const urlState = API_CUSTODIA_BASE + 'reload.php';
+    
+    // URLs de impresión
+    const urlImpresion = urlLocal + '/api/imprimir';
 
     //==================================== HELPERS =======================================
     async function callAPI(datos, url) {

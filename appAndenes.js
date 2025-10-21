@@ -6,10 +6,6 @@ const apiEmpresas = "http://localhost/parkingCalama/php/empresas/api.php";
 const apiWhitelist = "http://localhost/parkingCalama/php/whitelist/api.php";
 const patRegEx = /^[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}$/;
 
-// Variables para el sistema de pago
-let servicioSeleccionado = null;
-let metodoPagoSeleccionado = null;
-
 function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
@@ -26,321 +22,51 @@ function getCookie(cname) {
   return "";
 }
 
-// Inicialización del sistema de pago
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("DOM cargado - Inicializando página...");
-  initializePaymentSystem();
-  listarAndenesEmpresas();
-});
-
-function initializePaymentSystem() {
-  initializeModal();
-}
-
-// Sistema de Modal de Pago
-function initializeModal() {
-  const modalPago = document.getElementById("modalPago");
-  const btnPagoEfectivo = document.getElementById("btnPagoEfectivo");
-  const btnPagoTarjeta = document.getElementById("btnPagoTarjeta");
-  const closeModal = document.getElementById("closeModal");
-  const cancelModal = document.getElementById("cancelModal");
-
-  if (!modalPago) {
-    console.warn("Modal de pago no encontrado");
-    return;
-  }
-
-  // Configurar eventos de métodos de pago
-  if (btnPagoEfectivo) {
-    btnPagoEfectivo.addEventListener("click", () => {
-      seleccionarMetodoPago("efectivo");
-    });
-  }
-
-  if (btnPagoTarjeta) {
-    btnPagoTarjeta.addEventListener("click", () => {
-      seleccionarMetodoPago("tarjeta");
-    });
-  }
-
-  // Botones de cierre
-  if (closeModal) {
-    closeModal.addEventListener("click", cerrarModal);
-  }
-  if (cancelModal) {
-    cancelModal.addEventListener("click", cerrarModal);
-  }
-}
-
-async function seleccionarMetodoPago(metodo) {
-  metodoPagoSeleccionado = metodo;
-
-  const btnSeleccionado = document.getElementById(
-    `btnPago${metodo.charAt(0).toUpperCase() + metodo.slice(1)}`
-  );
-  if (!btnSeleccionado) return;
-
-  // Visual active state
-  document
-    .querySelectorAll(".payment-method-btn")
-    .forEach((btn) => btn.classList.remove("active"));
-  btnSeleccionado.classList.add("active");
-
-  // Deshabilitar botones y mostrar spinner
-  deshabilitarBotonesPago(true);
-  btnSeleccionado.dataset.textoOriginal = btnSeleccionado.innerHTML;
-  btnSeleccionado.innerHTML = `${btnSeleccionado.dataset.textoOriginal} <span class="spinner"></span>`;
-
-  try {
-    await procesarPago(metodo);
-  } catch (err) {
-    console.error(err);
-    showToast("Error al procesar el pago", "error");
-  } finally {
-    // Restaurar estado de botones
-    btnSeleccionado.innerHTML = btnSeleccionado.dataset.textoOriginal;
-    delete btnSeleccionado.dataset.textoOriginal;
-    deshabilitarBotonesPago(false);
-  }
-}
-
-function procesarPago(metodoPago) {
-  if (!servicioSeleccionado)
-    return Promise.reject("No hay servicio seleccionado");
-
-  console.log(`Procesando pago ${metodoPago} para andén: $${valorTotGlobal}`);
-
-  if (metodoPago === "efectivo") {
-    return procesarPagoEfectivo();
-  } else if (metodoPago === "tarjeta") {
-    return procesarPagoTarjeta();
-  } else {
-    return Promise.reject("Método de pago no soportado");
-  }
-}
-
-async function procesarPagoEfectivo() {
-  try {
-    // Para efectivo, procesar directamente el pago
-    await pagarAndenConMetodo("efectivo");
-    showToast("Pago en efectivo registrado correctamente.", "success");
-    cerrarModal();
-  } catch (error) {
-    console.error("Error en pago efectivo:", error);
-    showToast("Error al procesar pago en efectivo.", "error");
-    throw error;
-  }
-}
-
-async function procesarPagoTarjeta() {
-  try {
-    // Procesar con Transbank
-    const resultadoTransbank = await procesarConTransbank();
-
-    if (!resultadoTransbank.success) {
-      showToast(
-        "Error en pago con tarjeta: " + resultadoTransbank.error,
-        "error"
-      );
-      return;
-    }
-
-    // Si el pago con tarjeta fue exitoso, procesar el pago
-    await pagarAndenConMetodo("tarjeta", resultadoTransbank.autorizacion);
-
-    showToast("Pago con tarjeta procesado correctamente.", "success");
-    cerrarModal();
-  } catch (error) {
-    console.error("Error en pago tarjeta:", error);
-    showToast("Error al procesar pago con tarjeta.", "error");
-    throw error;
-  }
-}
-
-// Función para procesar con Transbank
-async function procesarConTransbank() {
-  try {
-    const response = await fetch("http://10.5.20.105:3000/api/payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: valorTotGlobal,
-        ticketNumber: generarTokenNumerico(),
+async function getWLByPatente(patIn) {
+  let ret = await fetch(
+    apiWhitelist +
+      "?" +
+      new URLSearchParams({
+        patente: patIn,
       }),
-    });
-
-    const data = await response.json();
-
-    if (!data.success) {
-      console.error("Error en Transbank:", data.error);
-      return { success: false, error: data.error };
+    {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        Authorization: `Bearer ${getCookie("jwt")}`,
+      },
     }
-
-    return {
-      success: true,
-      idTransaccion: data.data.operationNumber,
-      autorizacion: data.data.authorizationCode,
-      monto: data.data.amount,
-      ultimos4: data.data.last4Digits,
-      tipoTarjeta: data.data.cardType,
-      marcaTarjeta: data.data.cardBrand,
-      mensaje: data.data.responseMessage,
-    };
-  } catch (error) {
-    console.error("Error procesando pago:", error);
-    return { success: false, error: error.message };
-  }
-}
-
-// Función modificada para pagar con método de pago
-async function pagarAndenConMetodo(metodoPago, autorizacion = null) {
-  const input = document.getElementById("andenQRPat").value;
-  const cont = document.getElementById("contAnden");
-  const empresaSelect = document.getElementById("empresaBuses");
-  const payBtn = document.getElementById("payBtn");
-  const date = new Date();
-
-  // Validación de id_caja en localStorage
-  const id_caja = localStorage.getItem("id_caja");
-  if (!id_caja) {
-    throw new Error("Caja no abierta");
-  }
-
-  if (!patRegEx.test(input)) {
-    throw new Error("Patente inválida");
-  }
-
-  const data = await getMovByPatente(input);
-  if (!data) {
-    throw new Error("Patente no encontrada");
-  }
-
-  if (data["tipo"].toLowerCase() === "anden") {
-    if (data["fechasal"] === "0000-00-00") {
-      console.log("Patente válida, registrando el pago...");
-
-      const empresaSeleccionada =
-        empresaSelect.value !== "0" ? empresaSelect.value : null;
-
-      if (!empresaSeleccionada || empresaSeleccionada === "0") {
-        throw new Error("Debe seleccionar una empresa antes de pagar.");
-      }
-
-      const datos = {
-        id: data["idmov"],
-        patente: data["patente"],
-        fecha: date.toISOString().split("T")[0],
-        hora: `${date.getHours().toString().padStart(2, "0")}:${date
-          .getMinutes()
-          .toString()
-          .padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`,
-        valor: valorTotGlobal,
-        empresa: empresaSeleccionada,
-        empresaNombre: window.datosAnden.empresaNombre,
-        destino:
-          document.getElementById("destinoBuses").options[
-            document.getElementById("destinoBuses").selectedIndex
-          ].text,
-        id_caja: id_caja,
-        medio_pago: metodoPago,
-        autorizacion_tarjeta: autorizacion,
-      };
-
-      // Llamar a la API para actualizar el movimiento
-      const response = await fetch(baseURL + "/movimientos/api.php", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getCookie("jwt")}`,
-        },
-        body: JSON.stringify(datos),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result.msg) {
-        // Imprimir boleta térmica
-        await imprimirBoletaTermicaAndenes(datos);
-
-        // Limpiar el formulario
-        document.getElementById("andenQRPat").value = "";
-        cont.innerHTML = `
-          <div class="empty-state">
-            <h3>Sin datos para mostrar</h3>
-            <p>Ingrese una patente y calcule para ver los detalles</p>
-          </div>
-        `;
-        payBtn.disabled = true;
-        cont.classList.remove("loaded");
-
-        return result;
-      } else {
-        throw new Error("Error al registrar el pago: " + result.error);
-      }
-    } else {
-      throw new Error("Esta patente ya fue cobrada");
-    }
-  } else {
-    throw new Error("La patente pertenece a un tipo distinto de movimiento.");
-  }
-}
-
-function mostrarModalPago() {
-  const modalPago = document.getElementById("modalPago");
-  const modalServiceName = document.getElementById("modalServiceName");
-  const modalServicePrice = document.getElementById("modalServicePrice");
-
-  if (!modalPago) return;
-
-  // Actualizar información del servicio
-  if (modalServiceName) modalServiceName.textContent = "Estacionamiento Andén";
-  if (modalServicePrice)
-    modalServicePrice.textContent = `$${valorTotGlobal.toFixed(0)}`;
-
-  // Remover selección anterior de métodos
-  const botones = document.querySelectorAll(".payment-method-btn");
-  botones.forEach((btn) => btn.classList.remove("active"));
-
-  // Mostrar modal
-  modalPago.classList.add("active");
-  modalPago.setAttribute("aria-hidden", "false");
-}
-
-function cerrarModal() {
-  const modalPago = document.getElementById("modalPago");
-  if (modalPago) {
-    modalPago.classList.remove("active");
-    modalPago.setAttribute("aria-hidden", "true");
-  }
-}
-
-function deshabilitarBotonesPago(deshabilitar = true) {
-  const modalPago = document.getElementById("modalPago");
-  if (modalPago) {
-    modalPago.querySelectorAll(".payment-method-btn, button").forEach((el) => {
-      if (el.tagName === "DIV") {
-        el.style.pointerEvents = deshabilitar ? "none" : "auto";
-      } else {
-        el.disabled = deshabilitar;
-      }
-      el.classList.toggle("opacity-50", deshabilitar);
-      el.classList.toggle("cursor-not-allowed", deshabilitar);
+  )
+    .then((reply) => reply.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.log(error);
     });
-  }
+  return ret;
 }
 
-function generarTokenNumerico() {
-  let token = (Math.floor(Math.random() * 9) + 1).toString();
-  for (let i = 1; i < 10; i++) {
-    token += Math.floor(Math.random() * 10);
-  }
-  return token;
+async function updateMov(datos) {
+  let ret = await fetch(apiMovimientos, {
+    method: "PUT",
+    mode: "cors",
+    headers: {
+      "Content-type": "application/json",
+      Authorization: `Bearer ${getCookie("jwt")}`,
+    },
+    body: JSON.stringify(datos),
+  })
+    .then((reply) => reply.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  return ret;
 }
 
-// Función original modificada para abrir modal de pago
 async function calcAndenes() {
   const patente = document
     .getElementById("andenQRPat")
@@ -381,7 +107,7 @@ async function calcAndenes() {
 
     // Limpiar y preparar el contenedor
     cont.innerHTML = "";
-    cont.classList.remove("loaded");
+    cont.classList.remove("loaded"); // Remover clase primero
 
     // Forzar un reflow antes de añadir contenido
     void cont.offsetWidth;
@@ -539,15 +265,6 @@ async function calcAndenes() {
       </div>
       `
       }
-
-      <!-- Botón de pago -->
-      <div class="payment-actions">
-        <button id="proceedToPayment" class="btn-primary" ${
-          isWhitelist ? "disabled" : ""
-        }>
-          ${isWhitelist ? "EXENTO DE PAGO" : "PROCESAR PAGO"}
-        </button>
-      </div>
     `;
 
     cont.innerHTML = paymentHTML;
@@ -557,18 +274,9 @@ async function calcAndenes() {
       cont.classList.add("loaded");
     }, 10);
 
-    // Configurar el botón de pago si no es whitelist
-    if (!isWhitelist) {
-      const proceedBtn = document.getElementById("proceedToPayment");
-      if (proceedBtn) {
-        proceedBtn.addEventListener("click", () => {
-          servicioSeleccionado = "anden";
-          mostrarModalPago();
-        });
-      }
-    }
+    // Habilitar el botón de pago
+    payBtn.disabled = false;
 
-    // Guardar datos globales
     window.datosAnden = {
       id: data["idmov"],
       patente: data["patente"],
@@ -586,35 +294,29 @@ async function calcAndenes() {
   }
 }
 
-// Funciones auxiliares originales
-async function getWLByPatente(patIn) {
-  let ret = await fetch(
-    apiWhitelist + "?" + new URLSearchParams({ patente: patIn }),
-    {
-      method: "GET",
-      mode: "cors",
-      headers: { Authorization: `Bearer ${getCookie("jwt")}` },
-    }
-  )
-    .then((reply) => reply.json())
-    .then((data) => data)
-    .catch((error) => console.log(error));
-  return ret;
-}
-
 async function getMovByPatente(patente) {
   if (getCookie("jwt")) {
     let ret = await fetch(
-      apiMovimientos + "?" + new URLSearchParams({ patente: patente }),
+      apiMovimientos +
+        "?" +
+        new URLSearchParams({
+          patente: patente,
+        }),
       {
         method: "GET",
         mode: "cors",
-        headers: { Authorization: `Bearer ${getCookie("jwt")}` },
+        headers: {
+          Authorization: `Bearer ${getCookie("jwt")}`,
+        },
       }
     )
       .then((reply) => reply.json())
-      .then((data) => data)
-      .catch((error) => console.log(error));
+      .then((data) => {
+        return data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     return ret;
   }
 }
@@ -645,6 +347,9 @@ function listarAndenesEmpresas() {
       console.error("Error al listar empresas:", error);
     });
 }
+
+// Llamar a la función para listar empresas al cargar la página
+document.addEventListener("DOMContentLoaded", listarAndenesEmpresas);
 
 // Función auxiliar para cargar y filtrar destinos
 async function cargarDestinos(tipoDest, lista) {
@@ -709,8 +414,6 @@ async function andGetEmpresas() {
     return data;
   } catch (error) {
     console.error("Error al obtener empresas:", error);
-    // Redirigir al index.html
-    window.location.href = "index.html";
     return null;
   }
 }
@@ -735,7 +438,6 @@ async function andGetDestinos() {
   }
 }
 
-// Función original de pago (mantenida para compatibilidad)
 async function pagarAnden(valorTot = valorTotGlobal) {
   console.log("valorTot recibido en impAnden:", valorTot);
 
@@ -783,13 +485,7 @@ async function pagarAnden(valorTot = valorTotGlobal) {
           id: data["idmov"],
           patente: data["patente"],
           fecha: date.toISOString().split("T")[0],
-          hora: `${date.getHours().toString().padStart(2, "0")}:${date
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")}:${date
-            .getSeconds()
-            .toString()
-            .padStart(2, "0")}`,
+          hora: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
           valor: valorTot,
           empresa: empresaSeleccionada, // Insertar el ID de la empresa seleccionada
           empresaNombre: window.datosAnden.empresaNombre, // Insertar el nombre de la empresa seleccionada
@@ -853,7 +549,6 @@ async function imprimirBoletaTermicaAndenes(datos) {
   const fechaStr = dateAct.toLocaleDateString("es-CL");
   const horaStr = dateAct.toLocaleTimeString("es-CL");
   const destino = datos.destino.split(" - ")[0].trim();
-  const patente = datos.patente.toUpperCase();
 
   // HTML del ticket térmico
   const ticketHTML = `
@@ -870,18 +565,10 @@ async function imprimirBoletaTermicaAndenes(datos) {
       <div style="margin:2px 0;">BOLETA DE ANDÉN</div>
       <div style="margin:2px 0;">${fechaStr} ${horaStr}</div>
       <div style="margin:4px 0;">----------------------------------</div>
-      <div style="margin:2px 0;">PATENTE: <b>${patente}</b></div>
+      <div style="margin:2px 0;">PATENTE: <b>${datos.patente}</b></div>
       <div style="margin:2px 0;">EMPRESA: <b>${datos.empresaNombre}</b></div>
       <div style="margin:2px 0;">DESTINO: <b>${destino}</b></div>
       <div style="margin:2px 0;">VALOR TOTAL: <b>$${datos.valor}</b></div>
-      <div style="margin:2px 0;">MÉTODO PAGO: <b>${
-        datos.medio_pago || "efectivo"
-      }</b></div>
-      ${
-        datos.autorizacion_tarjeta
-          ? `<div style="margin:2px 0;">AUTORIZACIÓN: <b>${datos.autorizacion_tarjeta}</b></div>`
-          : ""
-      }
       <div style="margin:4px 0;">----------------------------------</div>
       <div style="margin-top:4px; font-size:12px;">VÁLIDO COMO BOLETA</div>
       <div style="margin-top:6px; font-size:12px;">¡GRACIAS POR SU VISITA!</div>
@@ -933,6 +620,29 @@ async function imprimirBoletaTermicaAndenes(datos) {
     showToast("Error generando o enviando la boleta térmica.", "error");
   } finally {
     document.body.removeChild(div);
+  }
+}
+
+async function andGetEmpresas() {
+  try {
+    const response = await fetch(baseURL + "/empresas/api.php", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getCookie("jwt")}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error al obtener empresas:", error);
+    // Redirigir al index.html
+    window.location.href = "index.html";
+    return null;
   }
 }
 
