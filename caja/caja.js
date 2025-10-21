@@ -204,7 +204,7 @@ function horaActualChile() {
 
 
 async function obtenerNumeroCaja() {
-  const url = "http://10.5.20.105:3000/api/info-caja";
+  const url = "http://localhost:3000/api/info-caja";
 
   try {
     const controller = new AbortController();
