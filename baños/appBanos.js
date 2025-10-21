@@ -602,7 +602,7 @@ async function printQR(voucher) {
     pdf.addImage(imgData, "PNG", 2, 2, 54, 0);
     const pdfBase64 = pdf.output("datauristring").split(",")[1];
 
-    const response = await fetch(IMPRESION_API, {
+    const response = await fetch(urlImpresion, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
