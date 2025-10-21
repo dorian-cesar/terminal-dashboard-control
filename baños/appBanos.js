@@ -4,6 +4,10 @@ let datosGlobales = [];
 // CONFIGURACIÓN DESDE config.js
 const ENV = window.APP_ENV;
 const BASE_URL = window.BASE_URL;
+const urlLocal = window.URL_LOCAL;
+
+// URL para pago en efectivo
+const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
 
 // URLs específicas de ESTA página
 const API_BANOS_BASE = `${BASE_URL}TerminalCalama/PHP/Restroom/`;
@@ -14,10 +18,9 @@ const urlAddUser = API_BANOS_BASE + "addUser.php";
 const urlLevelUser = API_BANOS_BASE + "addLevelUser.php";
 const urlBoleto = API_BANOS_BASE + "estadoBoleto.php";
 
-// URLs específicas que NO usan BASE_URL 
-const TRANSBANK_API = "http://10.5.20.105:3000/api/payment";
-const IMPRESION_API = "http://10.5.20.105:3000/api/imprimir";
-const BOLETA_API = "https://backend-banios.dev-wit.com/api/boletas-calama/enviar";
+// URLs locales (impresión y transbank)
+const urlImpresion = urlLocal + '/api/imprimir';
+const urlPaymentTarjeta = urlLocal + '/api/payment';
 
 let servicioSeleccionado = null;
 let metodoPagoSeleccionado = null;
@@ -316,7 +319,7 @@ async function generarBoleta(tipoServicio) {
   const nombre = tipoServicio === "Baño" ? "Bano" : tipoServicio;
 
   try {
-    const response = await fetch(BOLETA_API, {
+    const response = await fetch(urlPaymentEfectivo, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, precio }),
