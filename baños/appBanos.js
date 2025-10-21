@@ -281,7 +281,7 @@ async function procesarConTransbank(tipoServicio, ticketNumber) {
     const precio = window.restroom ? window.restroom[tipoServicio] : 0;
 
     // Llamada al backend que integra Transbank (URL específica, no usa BASE_URL)
-    const response = await fetch(TRANSBANK_API, {
+    const response = await fetch(urlPaymentTarjeta, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
