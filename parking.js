@@ -627,7 +627,7 @@ async function enviarPdfAlServidor(pdf, filename = 'comprobante_parking.pdf', pr
         };
 
         console.log('Enviando PDF al servidor de impresión...');
-        const res = await fetch(API_IMPRESION, {
+        const res = await fetch(urlImpresion, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
