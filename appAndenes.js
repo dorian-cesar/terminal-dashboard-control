@@ -5,6 +5,7 @@ const apiMovimientos = "http://localhost/parkingCalama/php/movimientos/api.php";
 const apiEmpresas = "http://localhost/parkingCalama/php/empresas/api.php";
 const apiWhitelist = "http://localhost/parkingCalama/php/whitelist/api.php";
 const patRegEx = /^[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}$/;
+
 function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
@@ -552,6 +553,8 @@ async function andGetEmpresas() {
     return data;
   } catch (error) {
     console.error("Error al obtener empresas:", error);
+    // Redirigir al index.html
+    window.location.href = "index.html";
     return null;
   }
 }
