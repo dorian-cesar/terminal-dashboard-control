@@ -72,7 +72,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-width: 1400px;
+  max-width: 80vw;
   margin: 0 auto;
   padding: var(--space-md);
   gap: var(--space-lg);
@@ -81,7 +81,7 @@ body {
 
 /* ---------------- Header ---------------- */
 .header {
-  padding: var(--space-md) 0;
+  padding-bottom: var(--space-md);
   border-bottom: 1px solid var(--gray-700);
 }
 
@@ -293,12 +293,6 @@ body {
   flex: 1;
 }
 
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: var(--space-md);
-  opacity: 0.5;
-}
-
 .empty-state h3 {
   font-size: 1.125rem;
   margin-bottom: var(--space-sm);
@@ -334,20 +328,21 @@ body {
 
 .payment-info-grid {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  flex-wrap: wrap; /* Permite que los items se acomoden horizontalmente si no caben */
+  gap: var(--space-md);
   margin-bottom: var(--space-lg);
 }
 
 .payment-info-item {
+  flex: 1 1 200px; /* crece hasta ocupar espacio, mínimo 200px */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.5rem 0.75rem;
   background: var(--gray-750);
-  border-radius: var(--radius-md);
   border-left: 3px solid var(--gray-600);
-  transition: all 0.2s ease;
+  border-radius: var(--radius-md);
+  min-width: 200px; /* asegura que no se achiquen demasiado */
 }
 
 .payment-info-item:hover {
@@ -416,6 +411,11 @@ body {
   letter-spacing: 0.5px;
 }
 
+.payment-breakdown-item,
+.payment-total-amount {
+  flex: 1 1 150px; /* ancho mínimo para cada bloque */
+}
+
 .payment-breakdown-item {
   display: flex;
   justify-content: space-between;
@@ -439,6 +439,8 @@ body {
 }
 
 .payment-summary {
+  justify-content: flex-start; /* items alineados al inicio */
+  align-items: center;
   background: linear-gradient(135deg, var(--gray-750) 0%, var(--gray-700) 100%);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
@@ -450,7 +452,7 @@ body {
   font-size: 1rem;
   font-weight: 700;
   color: var(--success);
-  margin-bottom: var(--space-md);
+  /* margin-bottom: var(--space-md); */
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -865,7 +867,7 @@ body {
 
 /* Asegurar que el contenedor principal mantenga su tamaño */
 .info-panel {
-  min-width: 0; /* Permite que se ajuste al contenido */
+  min-width: 30vw; /* Permite que se ajuste al contenido */
 }
 
 /* Prevenir que el grid se colapse */
