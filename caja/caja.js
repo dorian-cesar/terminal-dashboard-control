@@ -1,23 +1,14 @@
-// --- Configuración de entorno ---
-const ENV = "dev"; // Cambia a "dev" o "prod" según corresponda
+const ENV = window.APP_ENV;
+const BASE_URL = window.BASE_URL;
 
-const URLS = {
-  dev: {
-    FRONT: "http://localhost/terminal-dashboard-control/dashboard.html",
-    API: "http://localhost/caja-calama/",
-  },
-  prod: {
-    FRONT: "http://localhost/terminal-dashboard-control/dashboard.html",
-    API: "https://andenes.terminal-calama.com/caja-calama/",
-  },
-};
+// URLs específicas de ESTA página
+const VOLVER_URL = `../dashboard.html`;
 
-// --- URLs dinámicas según entorno ---
-const VOLVER_URL = URLS[ENV].FRONT;
-const API_URL = URLS[ENV].API;
+//api caja
+const API_URL = `${BASE_URL}caja-calama/`;
 
+// EL RESTO DEL CÓDIGO PERMANECE IGUAL...
 $(document).ready(function () {
-  const VOLVER_URL = URLS[ENV].FRONT;
   $("#volver").attr("href", VOLVER_URL);
 });
 
