@@ -143,6 +143,7 @@ body {
     margin-left: 280px;
     padding: 0;
     min-height: 100vh;
+    width: calc(100% - 280px); /* Asegura que ocupe el espacio restante */
 }
 
 .top-bar {
@@ -153,6 +154,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%; /* Asegura que ocupe todo el ancho */
+    position: relative;
 }
 
 .top-bar h4 {
@@ -265,7 +268,7 @@ body {
 /* Stats Cards */
 .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -413,6 +416,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
+    width: 100%;
 }
 
 /* Activity Card */
@@ -423,6 +427,7 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     height: 100%;
     transition: all 0.3s ease;
+    width: 100%; /* Asegura que ocupe todo el espacio disponible */
 }
 
 .card:hover {
@@ -640,20 +645,32 @@ body {
 @media (min-width: 1400px) {
     .container-fluid {
         max-width: 95%;
+        padding: 2rem;
     }
     
     .stats-row {
         grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
     }
 }
 
 @media (min-width: 1200px) and (max-width: 1399px) {
     .container-fluid {
         max-width: 95%;
+        padding: 2rem;
     }
     
     .stats-row {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
     }
 }
 
@@ -664,7 +681,23 @@ body {
     gap: 1rem;
 }
 
-/* Ajustes responsivos */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .container-fluid {
+        max-width: 100%;
+        padding: 1.5rem;
+    }
+    
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+/* Ajustes para móviles */
 @media (max-width: 768px) {
     .container-fluid {
         padding: 1rem;
@@ -678,5 +711,18 @@ body {
     
     .action-buttons {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+    
+    #content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .top-bar {
+        padding: 1rem;
     }
 }

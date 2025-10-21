@@ -130,6 +130,12 @@
     });
     if (document.visibilityState === "visible") startInterval();
   }
+
+  // ✅ Exponer funciones globalmente
+  window.checkAuthOnce = checkAuthOnce;
+  window.logout = logout;
+  window.initSessionWatcher = initSessionWatcher;
+
   window.SessionHelper = {
     logout,
     redirectToLogin,
@@ -139,7 +145,6 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     checkAuthOnce();
-
     initSessionWatcher();
   });
 })();
