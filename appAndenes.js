@@ -22,55 +22,55 @@ function getCookie(cname) {
   return "";
 }
 
-async function getDestByID(idIn) {
-  let ret = await fetch(
-    apiDestinos +
-      "?" +
-      new URLSearchParams({
-        id: idIn,
-      }),
-    {
-      method: "GET",
-      mode: "cors",
-      headers: {
-        Authorization: `Bearer ${getCookie("jwt")}`,
-      },
-    }
-  )
-    .then((reply) => reply.json())
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-  return ret;
-}
+// async function getDestByID(idIn) {
+//   let ret = await fetch(
+//     apiDestinos +
+//       "?" +
+//       new URLSearchParams({
+//         id: idIn,
+//       }),
+//     {
+//       method: "GET",
+//       mode: "cors",
+//       headers: {
+//         Authorization: `Bearer ${getCookie("jwt")}`,
+//       },
+//     }
+//   )
+//     .then((reply) => reply.json())
+//     .then((data) => {
+//       return data;
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
+//   return ret;
+// }
 
-async function getEmpByID(idIn) {
-  let ret = await fetch(
-    apiEmpresas +
-      "?" +
-      new URLSearchParams({
-        id: idIn,
-      }),
-    {
-      method: "GET",
-      mode: "cors",
-      headers: {
-        Authorization: `Bearer ${getCookie("jwt")}`,
-      },
-    }
-  )
-    .then((reply) => reply.json())
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-  return ret;
-}
+// async function getEmpByID(idIn) {
+//   let ret = await fetch(
+//     apiEmpresas +
+//       "?" +
+//       new URLSearchParams({
+//         id: idIn,
+//       }),
+//     {
+//       method: "GET",
+//       mode: "cors",
+//       headers: {
+//         Authorization: `Bearer ${getCookie("jwt")}`,
+//       },
+//     }
+//   )
+//     .then((reply) => reply.json())
+//     .then((data) => {
+//       return data;
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
+//   return ret;
+// }
 
 async function getWLByPatente(patIn) {
   let ret = await fetch(
@@ -126,7 +126,6 @@ async function calcAndenes() {
   const destinoSelect = document.getElementById("destinoBuses");
   const empresaSelect = document.getElementById("empresaBuses");
 
-  // Validaciones iniciales
   if (!patente) {
     alert("Ingrese una patente válida.");
     return;
@@ -155,45 +154,51 @@ async function calcAndenes() {
       return;
     }
 
-    // Limpia el contenido del contenedor
     cont.innerHTML = "";
 
     const fechaActual = new Date();
     const fechaEntrada = new Date(`${data["fechaent"]}T${data["horaent"]}`);
-    const diferencia = (fechaActual - fechaEntrada) / 1000; // Diferencia en segundos
+    const diferencia = (fechaActual - fechaEntrada) / 1000;
     const minutos = Math.ceil(diferencia / 60);
 
-    // Obtener info de destino y empresa
-    const destInfo = await getDestByID(destinoSelect.value);
-    const empresaInfo = await getEmpByID(empresaSelect.value);
+    // Obtener info directamente del select
+    const destOption = destinoSelect.options[destinoSelect.selectedIndex];
+    const empresaOption = empresaSelect.options[empresaSelect.selectedIndex];
 
-    if (!destInfo || !empresaInfo) {
-      alert("Error al obtener información de empresa o destino.");
+    const destInfo = {
+      tipo: destOption.dataset.tipo,
+      valor: Number(destOption.dataset.valor),
+    };
+
+    const empresaInfo = {
+      nombre: empresaOption.dataset.nombre,
+    };
+
+    // Validar que estén los datos
+    if (!destInfo.tipo || isNaN(destInfo.valor)) {
+      alert("Error: datos del destino inválidos.");
       return;
     }
 
     // Calcular valor base según tipo
-    let valorBase = Number(destInfo["valor"]) || 0;
+    let valorBase = destInfo.valor || 0;
     let bloques = 0;
 
-    if (destInfo["tipo"] === "nacional") {
+    if (destInfo.tipo === "nacional") {
       bloques = Math.ceil(minutos / configuracion.nacional);
-    } else if (destInfo["tipo"] === "internacional") {
+    } else if (destInfo.tipo === "internacional") {
       bloques = Math.ceil(minutos / configuracion.internacional);
     }
 
     valorBase *= bloques;
     valorTotGlobal = Math.max(valorBase, 0);
 
-    // Validar whitelist
     const ret = await getWLByPatente(data["patente"]);
     if (ret !== null) valorTotGlobal = 0;
 
-    // Calcular IVA y total
     const iva = valorTotGlobal * configuracion.iva;
     const valorConIVA = valorTotGlobal + iva;
 
-    // Crear elementos dinámicos
     const crear = (tag, text) => {
       const el = document.createElement(tag);
       el.textContent = text;
@@ -213,7 +218,7 @@ async function calcAndenes() {
 
     const elementos = [
       crear("h1", `Patente: ${data["patente"]}`),
-      crear("h3", `Empresa: ${empresaInfo["nombre"]}`),
+      crear("h3", `Empresa: ${empresaInfo.nombre}`),
       crear("h3", `Fecha ingreso: ${data["fechaent"]}`),
       crear("h3", `Hora ingreso: ${data["horaent"]}`),
       crear("h3", `Hora salida: ${nowTime}`),
@@ -228,7 +233,6 @@ async function calcAndenes() {
 
     cont.append(...elementos);
 
-    // Guardar datos globales para pago
     window.datosAnden = {
       id: data["idmov"],
       patente: data["patente"],
@@ -236,10 +240,10 @@ async function calcAndenes() {
       hora: nowTime,
       valor: valorConIVA,
       empresa: empresaSelect.value,
-      empresaNombre: empresaInfo["nombre"],
+      empresaNombre: empresaInfo.nombre,
     };
 
-    valorTotGlobal = valorConIVA; // Actualizar el valor global
+    valorTotGlobal = valorConIVA;
   } catch (error) {
     console.error("Error en el cálculo:", error);
     alert("Ocurrió un error al calcular el valor del andén.");
@@ -280,17 +284,16 @@ function listarAndenesEmpresas() {
         const lista = document.getElementById("empresaBuses");
         lista.innerHTML = ""; // Limpiar el select
 
-        // Agregar la opción por defecto
         const nullData = document.createElement("option");
         nullData.value = 0;
         nullData.textContent = "Seleccione Empresa";
         lista.appendChild(nullData);
 
-        // Agregar las empresas al select
         data.forEach((itm) => {
           const optData = document.createElement("option");
           optData.value = itm["idemp"];
           optData.textContent = itm["nombre"];
+          optData.dataset.nombre = itm["nombre"];
           lista.appendChild(optData);
         });
       }
@@ -308,18 +311,19 @@ async function cargarDestinos(tipoDest, lista) {
   try {
     const data = await andGetDestinos();
     if (data) {
-      lista.textContent = ""; // Limpia la lista de destinos
+      lista.textContent = "";
       let nullData = document.createElement("option");
       nullData.value = 0;
       nullData.textContent = "Seleccione Destino";
       lista.appendChild(nullData);
 
-      // Filtrar y mostrar los destinos según el tipo seleccionado
       data.forEach((itm) => {
         if (itm["tipo"] === tipoDest) {
           let optData = document.createElement("option");
           optData.value = itm["iddest"];
           optData.textContent = `${itm["ciudad"]} - $${itm["valor"]}`;
+          optData.dataset.tipo = itm["tipo"];
+          optData.dataset.valor = itm["valor"];
           lista.appendChild(optData);
         }
       });
@@ -460,14 +464,14 @@ async function pagarAnden(valorTot = valorTotGlobal) {
         const result = await response.json();
         if (result.msg) {
           // Mover la actualización del movimiento y la alerta aquí
-          await updateMov(datos);
-          refreshMov(); // Refrescar la tabla de movimientos
-          refreshPagos(); // Refrescar la tabla de pagos
+          // await updateMov(datos);
+          // refreshMov(); // Refrescar la tabla de movimientos
+          // refreshPagos(); // Refrescar la tabla de pagos
           alert("Pago registrado correctamente.");
 
           // Imprimir boleta térmica solo después de registrar el pago
-          const ventanaImpr = window.open("", "_blank");
-          imprimirBoletaTermicaAndenes(datos, ventanaImpr);
+          // const ventanaImpr = window.open("", "_blank");
+          imprimirBoletaTermicaAndenes(datos);
         } else {
           alert("Error al registrar el pago: " + result.error);
         }
@@ -487,53 +491,83 @@ async function pagarAnden(valorTot = valorTotGlobal) {
   }
 }
 
-function imprimirBoletaTermicaAndenes(datos, ventanaImpr) {
-  ventanaImpr.document.write(`
-        <html>
-        <head>
-            <title>Boleta de Pago</title>
-            <style>
-                body { font-family: Arial, sans-serif; text-align: center; }
-                h1, h3 { margin: 0; }
-                .line { border-bottom: 1px solid #000; margin: 10px 0; }
-            </style>
-        </head>
-        <body>
-            <h1>WIT.LA</h1>
-            <h3>Boleta de Pago (Andenes)</h3>
-            <div class="line"></div>
-            <h3>Patente: ${datos.patente}</h3>
-            <h3>Empresa: ${datos.empresaNombre}</h3>
-            <h3>Fecha: ${datos.fecha}</h3>
-            <h3>Hora: ${datos.hora}</h3>
-            <h3>Destino: ${datos.destino}</h3>
-            <div class="line"></div>
-            <h3>Valor Total: $${datos.valor}</h3>
-            <div class="line"></div>
-            <h3>Gracias por su visita</h3>
-        </body>
-        </html>
-    `);
-  ventanaImpr.document.close();
+async function imprimirBoletaTermicaAndenes(datos) {
+  const dateAct = new Date();
+  const fechaStr = dateAct.toLocaleDateString("es-CL");
+  const horaStr = dateAct.toLocaleTimeString("es-CL");
+  const destino = datos.destino.split(" - ")[0].trim();
 
-  setTimeout(() => {
-    ventanaImpr.focus();
-    ventanaImpr.print();
+  // HTML del ticket térmico
+  const ticketHTML = `
+    <div id="ticketImpresion" style="
+        width:200px;
+        text-align:center;
+        font-family:'Courier New', monospace;
+        color:#000;
+        font-size:13px;
+        line-height:1.3;
+        padding:5px;
+    ">
+      <h3 style="font-size:15px; font-weight:bold;">TERMINAL CALAMA</h3>
+      <div style="margin:2px 0;">BOLETA DE ANDÉN</div>
+      <div style="margin:2px 0;">${fechaStr} ${horaStr}</div>
+      <div style="margin:4px 0;">----------------------------------</div>
+      <div style="margin:2px 0;">PATENTE: <b>${datos.patente}</b></div>
+      <div style="margin:2px 0;">EMPRESA: <b>${datos.empresaNombre}</b></div>
+      <div style="margin:2px 0;">DESTINO: <b>${destino}</b></div>
+      <div style="margin:2px 0;">VALOR TOTAL: <b>$${datos.valor}</b></div>
+      <div style="margin:4px 0;">----------------------------------</div>
+      <div style="margin-top:4px; font-size:12px;">VÁLIDO COMO BOLETA</div>
+      <div style="margin-top:6px; font-size:12px;">¡GRACIAS POR SU VISITA!</div>
+    </div>`;
 
-    // Intentar cerrar la ventana después de un tiempo más largo (ajustable)
-    setTimeout(() => {
-      try {
-        ventanaImpr.close(); // Intenta cerrar la ventana
-      } catch (e) {
-        console.error("No se pudo cerrar la ventana:", e);
-      }
-    }, 1000); // Ajuste del tiempo, puede cambiarse según el comportamiento del navegador
-  }, 1000);
+  // Crear un div temporal fuera de pantalla
+  const div = document.createElement("div");
+  div.innerHTML = ticketHTML;
+  div.style.position = "fixed";
+  div.style.left = "-9999px";
+  document.body.appendChild(div);
 
-  // Add event listener to close the window after printing or canceling
-  ventanaImpr.onafterprint = () => {
-    ventanaImpr.close();
-  };
+  try {
+    // Capturar el HTML como imagen
+    const canvas = await html2canvas(div, { scale: 4 });
+    const imgData = canvas.toDataURL("image/png");
+
+    // Crear PDF tipo térmico (58 mm de ancho)
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: [58, 100],
+    });
+
+    pdf.addImage(imgData, "PNG", 2, 2, 54, 0);
+    const pdfBase64 = pdf.output("datauristring").split(",")[1];
+
+    // Enviar el PDF al servidor de impresión
+    const response = await fetch("http://10.5.20.105:3000/api/imprimir", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pdfData: pdfBase64,
+        printer: "POS58",
+        filename: `boleta_anden_${datos.patente}.pdf`,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showToast("Boleta enviada a impresión correctamente.", "success");
+    } else {
+      showToast("Error al imprimir: " + data.message, "error");
+    }
+  } catch (error) {
+    console.error("Error al imprimir boleta térmica:", error);
+    alert("Error generando o enviando la boleta térmica.");
+  } finally {
+    document.body.removeChild(div);
+  }
 }
 
 async function andGetEmpresas() {
