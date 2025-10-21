@@ -392,6 +392,16 @@ body {
     border-left-color: var(--accent-danger);
 }
 
+/* CSS mínimo para toasts */
+.toast-container { pointer-events: none; }
+.toast { pointer-events: auto; background: #222; color: #fff; }
+.toast-success { background: #0f9d58; }
+.toast-error { background: #d9534f; }
+.toast-warning { background: #f0ad4e; color: #000; }
+.toast-info { background: #17a2b8; }
+.btn-close { cursor: pointer; }
+
+
 /* Estado de Caja Visual */
 .caja-status {
     display: inline-flex;

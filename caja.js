@@ -21,50 +21,40 @@ $(document).ready(function () {
   $("#volver").attr("href", VOLVER_URL);
 });
 
-// --- Sistema de Notificaciones ---
+// --- Sistema de Notificaciones (mejorado, crea contenedor si no existe y tiene fallback) ---
 class ToastSystem {
   static show(message, type = "info", duration = 5000) {
-    const toast = $(`
-            <div class="toast toast-${type}">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <strong>${this.getIcon(type)} ${this.getTitle(
-                          type
-                        )}</strong>
-                        <div class="mt-1">${message}</div>
-                    </div>
-                    <button class="btn-close btn-close-white ms-3" onclick="$(this).closest('.toast').remove()"></button>
-                </div>
-            </div>
-        `);
+    // Garantizar que el contenedor existe
+    if (!$(".toast-container").length) {
+      $("body").append('<div class="toast-container"></div>');
+    }
 
-    $(".toast-container").append(toast);
-
-    setTimeout(() => {
-      toast.fadeOut(300, function () {
-        $(this).remove();
-      });
-    }, duration);
-  }
-
-  static getIcon(type) {
-    const icons = {
+    const icon = {
       success: "✅",
       error: "❌",
       warning: "⚠️",
       info: "ℹ️",
-    };
-    return icons[type] || icons.info;
-  }
+    }[type] || "ℹ️";
 
-  static getTitle(type) {
-    const titles = {
+    const title = {
       success: "Éxito",
       error: "Error",
       warning: "Advertencia",
       info: "Información",
-    };
-    return titles[type] || titles.info;
+    }[type] || "Información";
+
+    const toast = $(`
+      <div class="toast toast-${type}">
+        <div><strong>${icon} ${title}</strong></div>
+        <div>${message}</div>
+      </div>
+    `);
+
+    $(".toast-container").append(toast);
+
+    // Animación simple
+    toast.hide().fadeIn(200);
+    setTimeout(() => toast.fadeOut(400, () => toast.remove()), duration);
   }
 }
 
@@ -223,14 +213,31 @@ function horaActualChile() {
 
 
 async function obtenerNumeroCaja() {
+  const url = "http://10.5.20.105:3000/api/info-caja";
+
   try {
-    // const res = await fetch("http://localhost:3000/api/info-caja");
-    const res = await fetch("http://10.5.20.105:3000/api/info-caja");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
     const data = await res.json();
     return data.numero_caja || "SIN_NUMERO";
   } catch (err) {
     console.error("Error al obtener NUMERO_CAJA:", err);
-    ToastSystem.show("No se pudo identificar el terminal de caja.", "error");
+
+    // Mostrar siempre alerta visual + fallback de alerta nativa
+    ToastSystem.show(
+      "No se pudo conectar con el servidor de identificación de terminal.<br>Verifique la red o contacte a soporte técnico.",
+      "error",
+      8000
+    );
+
+    alert("⚠️ Error: no se pudo conectar con el servidor de caja.\n\nVerifique la red o contacte a soporte.");
+
     return "SIN_NUMERO";
   }
 }
