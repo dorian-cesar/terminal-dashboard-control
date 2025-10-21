@@ -1,16 +1,23 @@
 // Variables globales
 let datosGlobales = [];
-// const urlBase = "https://andenes.terminal-calama.com";
-const urlBase = "http://10.5.20.93";
-// const urlServer = "https://andenes.terminal-calama.com";
-const urlServer = "http://10.5.20.93";
-const urlLoad = urlServer + "/TerminalCalama/PHP/Restroom/load.php";
-const urlLoadToday = urlServer + "/TerminalCalama/PHP/Restroom/loadToday.php";
-const urlSave = urlServer + "/TerminalCalama/PHP/Restroom/save.php";
-const urlAddUser = urlServer + "/TerminalCalama/PHP/Restroom/addUser.php";
-const urlLevelUser =
-  urlServer + "/TerminalCalama/PHP/Restroom/addLevelUser.php";
-const urlBoleto = urlServer + "/TerminalCalama/PHP/Restroom/estadoBoleto.php";
+
+// CONFIGURACIÓN DESDE config.js
+const ENV = window.APP_ENV;
+const BASE_URL = window.BASE_URL;
+
+// URLs específicas de ESTA página
+const API_BANOS_BASE = `${BASE_URL}TerminalCalama/PHP/Restroom/`;
+const urlLoad = API_BANOS_BASE + "load.php";
+const urlLoadToday = API_BANOS_BASE + "loadToday.php";
+const urlSave = API_BANOS_BASE + "save.php";
+const urlAddUser = API_BANOS_BASE + "addUser.php";
+const urlLevelUser = API_BANOS_BASE + "addLevelUser.php";
+const urlBoleto = API_BANOS_BASE + "estadoBoleto.php";
+
+// URLs específicas que NO usan BASE_URL 
+const TRANSBANK_API = "http://10.5.20.105:3000/api/payment";
+const IMPRESION_API = "http://10.5.20.105:3000/api/imprimir";
+const BOLETA_API = "https://backend-banios.dev-wit.com/api/boletas-calama/enviar";
 
 let servicioSeleccionado = null;
 let metodoPagoSeleccionado = null;
@@ -270,13 +277,13 @@ async function procesarConTransbank(tipoServicio, ticketNumber) {
   try {
     const precio = window.restroom ? window.restroom[tipoServicio] : 0;
 
-    // Llamada al backend que integra Transbank
-    const response = await fetch("http://10.5.20.105:3000/api/payment", {
+    // Llamada al backend que integra Transbank (URL específica, no usa BASE_URL)
+    const response = await fetch(TRANSBANK_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         amount: precio,
-        ticketNumber, // usamos el mismo que el QR
+        ticketNumber,
       }),
     });
 
@@ -309,25 +316,21 @@ async function generarBoleta(tipoServicio) {
   const nombre = tipoServicio === "Baño" ? "Bano" : tipoServicio;
 
   try {
-    const response = await fetch(
-      "https://backend-banios.dev-wit.com/api/boletas-calama/enviar",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, precio }),
-      }
-    );
+    const response = await fetch(BOLETA_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, precio }),
+    });
 
     if (!response.ok) {
       throw new Error(`Error en la API: ${response.status}`);
     }
 
     const data = await response.json();
-
     return data.folio;
   } catch (error) {
     console.error("No se pudo generar la boleta:", error);
-    return null; // si hay error, retornamos null
+    return null;
   }
 }
 
@@ -596,7 +599,7 @@ async function printQR(voucher) {
     pdf.addImage(imgData, "PNG", 2, 2, 54, 0);
     const pdfBase64 = pdf.output("datauristring").split(",")[1];
 
-    const response = await fetch("http://10.5.20.105:3000/api/imprimir", {
+    const response = await fetch(IMPRESION_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -6,7 +6,10 @@
     <title>Administrador - Baños y Duchas</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../config.js"></script>
+    <script src="../session.js"></script>
     <link href="banos.css" rel="stylesheet" />
+    
 
     <!-- QR Code -->
     <script
@@ -19,7 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <!-- Scripts con tu lógica -->
-    <script defer src="valores.js"></script>
+    <script defer src="../valores.js"></script>
     <script defer src="appBanos.js"></script>
   </head>
   <body>
@@ -82,7 +85,7 @@
             </button>
             <button
               class="btn btn-secondary text-md"
-              onclick="window.location.href='dashboard.html'"
+              onclick="window.location.href='../dashboard.html'"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
