@@ -11,17 +11,16 @@ const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
 
 // URLs específicas de ESTA página
 const API_BANOS_BASE = `${BASE_URL}TerminalCalama/PHP/Restroom/`;
-const urlLoad        = `${API_BANOS_BASE}load.php`;
-const urlLoadToday   = `${API_BANOS_BASE}loadToday.php`;
-const urlSave        = `${API_BANOS_BASE}save.php`;
-const urlAddUser     = `${API_BANOS_BASE}addUser.php`;
-const urlLevelUser   = `${API_BANOS_BASE}addLevelUser.php`;
-const urlBoleto      = `${API_BANOS_BASE}estadoBoleto.php`;
-
+const urlLoad = `${API_BANOS_BASE}load.php`;
+const urlLoadToday = `${API_BANOS_BASE}loadToday.php`;
+const urlSave = `${API_BANOS_BASE}save.php`;
+const urlAddUser = `${API_BANOS_BASE}addUser.php`;
+const urlLevelUser = `${API_BANOS_BASE}addLevelUser.php`;
+const urlBoleto = `${API_BANOS_BASE}estadoBoleto.php`;
 
 // URLs locales (impresión y transbank)
-const urlImpresion = urlLocal + '/api/imprimir';
-const urlPaymentTarjeta = urlLocal + '/api/payment';
+const urlImpresion = urlLocal + "/api/imprimir";
+const urlPaymentTarjeta = urlLocal + "/api/payment";
 
 let servicioSeleccionado = null;
 let metodoPagoSeleccionado = null;
@@ -178,6 +177,14 @@ async function seleccionarMetodoPago(metodo) {
 function manejarSeleccionServicio(tipoServicio) {
   servicioSeleccionado = tipoServicio;
   metodoPagoSeleccionado = null; // Resetear método de pago
+  const id_caja = localStorage.getItem("id_caja");
+  if (!id_caja) {
+    showToast(
+      "Por favor, primero debe abrir la caja antes de realizar un pago.",
+      "warning"
+    );
+    return;
+  }
   mostrarModalPago(tipoServicio);
 }
 
@@ -382,7 +389,7 @@ function generarQRParaServicio(tipoServicio) {
       tipo: tipoStr,
       valor: valor, // Usar el valor dinámico
       id_caja: id_caja,
-      medio_pago: metodoPagoSeleccionado || 'efectivo',
+      medio_pago: metodoPagoSeleccionado || "efectivo",
     };
 
     console.log("Enviando datos a API:", datos);

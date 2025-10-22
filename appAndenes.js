@@ -394,6 +394,15 @@ function generarTokenNumerico() {
 
 // Función original modificada para abrir modal de pago
 async function calcAndenes() {
+  const id_caja = localStorage.getItem("id_caja");
+  if (!id_caja) {
+    showToast(
+      "Por favor, primero debe abrir la caja antes de realizar un pago.",
+      "warning"
+    );
+    return;
+  }
+
   const patente = document
     .getElementById("andenQRPat")
     .value.trim()
@@ -401,7 +410,6 @@ async function calcAndenes() {
   const cont = document.getElementById("contAnden");
   const destinoSelect = document.getElementById("destinoBuses");
   const empresaSelect = document.getElementById("empresaBuses");
-  // const payBtn = document.getElementById("payBtn");
 
   if (!patente) {
     showToast("Ingrese una patente válida.", "warning");
@@ -415,7 +423,6 @@ async function calcAndenes() {
 
   try {
     const data = await getMovByPatente(patente);
-
     if (!data || Object.keys(data).length === 0) {
       showToast("Patente no encontrada.", "error");
       return;
@@ -431,19 +438,14 @@ async function calcAndenes() {
       return;
     }
 
-    // Limpiar y preparar el contenedor
     cont.innerHTML = "";
     cont.classList.remove("loaded");
-
-    // Forzar un reflow antes de añadir contenido
     void cont.offsetWidth;
 
     const fechaActual = new Date();
     const fechaEntrada = new Date(`${data["fechaent"]}T${data["horaent"]}`);
-    const diferencia = (fechaActual - fechaEntrada) / 1000;
-    const minutos = Math.ceil(diferencia / 60);
+    const minutos = Math.ceil((fechaActual - fechaEntrada) / 60000);
 
-    // Obtener info directamente del select
     const destOption = destinoSelect.options[destinoSelect.selectedIndex];
     const empresaOption = empresaSelect.options[empresaSelect.selectedIndex];
 
@@ -456,21 +458,17 @@ async function calcAndenes() {
       nombre: empresaOption.dataset.nombre,
     };
 
-    // Validar que estén los datos
     if (!destInfo.tipo || isNaN(destInfo.valor)) {
       showToast("Error: datos del destino inválidos.", "error");
       return;
     }
 
-    // Calcular valor base según tipo
+    // Calcular valor total
     let valorBase = destInfo.valor || 0;
-    let bloques = 0;
-
-    if (destInfo.tipo === "nacional") {
-      bloques = Math.ceil(minutos / configuracion.nacional);
-    } else if (destInfo.tipo === "internacional") {
-      bloques = Math.ceil(minutos / configuracion.internacional);
-    }
+    let bloques =
+      destInfo.tipo === "nacional"
+        ? Math.ceil(minutos / configuracion.nacional)
+        : Math.ceil(minutos / configuracion.internacional);
 
     valorBase *= bloques;
     valorTotGlobal = Math.max(valorBase, 0);
@@ -481,7 +479,6 @@ async function calcAndenes() {
 
     const iva = valorTotGlobal * configuracion.iva;
     const valorConIVA = valorTotGlobal + iva;
-
     const nowTime = `${fechaActual
       .getHours()
       .toString()
@@ -493,102 +490,109 @@ async function calcAndenes() {
       .toString()
       .padStart(2, "0")}`;
 
-    // Crear la estructura HTML mejorada
+    // Crear estructura HTML
     const paymentHTML = `
-  <div class="panel-header">
-    <h2>Detalles del Pago</h2>
-    <p>Resumen del cálculo y opciones de pago</p>
-  </div>
+      <div class="panel-header">
+        <h2>Detalles del Pago</h2>
+        <p>Resumen del cálculo y opciones de pago</p>
+      </div>
 
-  <div class="payment-info-compact">
-    <div class="info-item">
-      <span class="info-label">Empresa:</span>
-      <span class="info-value">${empresaInfo.nombre}</span>
-    </div>
-    <div class="info-item">
-      <span class="info-label">Patente:</span>
-      <span class="info-value">${patente}</span>
-    </div>
-    <div class="info-item">
-      <span class="info-label">Fecha ingreso:</span>
-      <span class="info-value">${data["fechaent"]}</span>
-    </div>
-    <div class="info-item">
-      <span class="info-label">Hora ingreso:</span>
-      <span class="info-value">${data["horaent"]}</span>
-    </div>
-    <div class="info-item">
-      <span class="info-label">Hora salida:</span>
-      <span class="info-value">${nowTime}</span>
-    </div>
-    <div class="info-item highlight">
-      <span class="info-label">Tiempo estacionado:</span>
-      <span class="info-value">${minutos} minutos</span>
-    </div>
-  </div>
+      <div class="payment-info-compact">
+        <div class="info-item"><span class="info-label">Empresa:</span><span class="info-value">${
+          empresaInfo.nombre
+        }</span></div>
+        <div class="info-item"><span class="info-label">Patente:</span><span class="info-value">${patente}</span></div>
+        <div class="info-item"><span class="info-label">Fecha ingreso:</span><span class="info-value">${
+          data["fechaent"]
+        }</span></div>
+        <div class="info-item"><span class="info-label">Hora ingreso:</span><span class="info-value">${
+          data["horaent"]
+        }</span></div>
+        <div class="info-item"><span class="info-label">Hora salida:</span><span class="info-value">${nowTime}</span></div>
+        <div class="info-item highlight"><span class="info-label">Tiempo estacionado:</span><span class="info-value">${minutos} minutos</span></div>
+      </div>
 
-  ${
-    !isWhitelist
-      ? `
-      <div class="payment-breakdown">
-        <div class="payment-breakdown-title">Desglose de Costos</div>
-        <div class="payment-breakdown-item">
-          <span class="payment-breakdown-label">Tarifa base (${bloques} bloques)</span>
-          <span class="payment-breakdown-value">$${valorBase.toFixed(0)}</span>
-        </div>
-        <div class="payment-breakdown-item">
-          <span class="payment-breakdown-label">IVA (${(
-            configuracion.iva * 100
-          ).toFixed(0)}%)</span>
-          <span class="payment-breakdown-value">$${iva.toFixed(0)}</span>
-        </div>
-      </div>
-      <div class="payment-summary clickable" id="proceedToPayment">
-        <div class="payment-summary-title">Total a Pagar</div>
-        <div class="payment-total-amount">$${valorConIVA.toFixed(0)}</div>
-        <div class="payment-total-label">Haga clic para seleccionar método de pago</div>
-      </div>
-      `
-      : `
-      <div class="payment-summary">
-        <div class="payment-summary-title">Vehículo en Whitelist</div>
-        <div class="payment-total-amount" style="color: var(--primary-light);">$0</div>
-        <div class="payment-total-label">Exento de pago</div>
-      </div>
-      `
-  }
-`;
+      ${
+        !isWhitelist
+          ? `
+            <div class="payment-breakdown">
+              <div class="payment-breakdown-title">Desglose de Costos</div>
+              <div class="payment-breakdown-item"><span class="payment-breakdown-label">Tarifa base (${bloques} bloques)</span><span class="payment-breakdown-value">$${valorBase.toFixed(
+              0
+            )}</span></div>
+              <div class="payment-breakdown-item"><span class="payment-breakdown-label">IVA (${(
+                configuracion.iva * 100
+              ).toFixed(
+                0
+              )}%)</span><span class="payment-breakdown-value">$${iva.toFixed(
+              0
+            )}</span></div>
+            </div>
+            <div class="payment-summary clickable" id="proceedToPayment">
+              <div class="payment-summary-title">Total a Pagar</div>
+              <div class="payment-total-amount">$${valorConIVA.toFixed(0)}</div>
+              <div class="payment-total-label">Haga clic para seleccionar método de pago</div>
+            </div>
+          `
+          : `
+            <div class="payment-summary clickable" id="proceedToPayment">
+              <div class="payment-summary-title">Vehículo en Lista Blanca</div>
+              <div class="payment-total-amount" style="color: var(--success);">$0</div>
+              <div class="payment-total-label">Exento de pago — haga clic para registrar salida</div>
+            </div>
+          `
+      }
+    `;
 
     cont.innerHTML = paymentHTML;
+    setTimeout(() => cont.classList.add("loaded"), 10);
 
-    // Añadir la clase loaded después de un pequeño delay para las animaciones
-    setTimeout(() => {
-      cont.classList.add("loaded");
-    }, 10);
+    const proceedBtn = document.getElementById("proceedToPayment");
+    if (proceedBtn) {
+      proceedBtn.addEventListener("click", async () => {
+        if (isWhitelist) {
+          const datos = {
+            id: data["idmov"],
+            patente: data["patente"],
+            fecha: fechaActual.toISOString().split("T")[0],
+            hora: nowTime,
+            valor: 0,
+            empresa: empresaSelect.value,
+            empresaNombre: empresaInfo.nombre,
+            destino: destinoSelect.options[destinoSelect.selectedIndex].text,
+            id_caja,
+          };
 
-    // Configurar el evento de clic en el payment-summary si no es whitelist
-    if (!isWhitelist) {
-      const proceedBtn = document.getElementById("proceedToPayment");
-      if (proceedBtn) {
-        proceedBtn.addEventListener("click", () => {
+          try {
+            const response = await fetch(apiMovimientos, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${getCookie("jwt")}`,
+              },
+              body: JSON.stringify(datos),
+            });
+
+            if (response.ok) {
+              showToast(
+                "Salida registrada correctamente (Lista Blanca).",
+                "success"
+              );
+              cont.innerHTML = `<div class="empty-state"><h3>Registro completado</h3><p>Vehículo en lista blanca registrado con éxito.</p></div>`;
+            } else {
+              showToast("Error al registrar salida de whitelist.", "error");
+            }
+          } catch (err) {
+            console.error("Error registrando whitelist:", err);
+            showToast("Error en la comunicación con la API.", "error");
+          }
+        } else {
           servicioSeleccionado = "anden";
           mostrarModalPago();
-        });
-
-        // Añadir efectos hover con JavaScript para mejor feedback
-        proceedBtn.addEventListener("mouseenter", function () {
-          this.style.transform = "translateY(-2px)";
-          this.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
-        });
-
-        proceedBtn.addEventListener("mouseleave", function () {
-          this.style.transform = "translateY(0)";
-          this.style.boxShadow = "0 2px 8px rgba(59, 130, 246, 0.2)";
-        });
-      }
+        }
+      });
     }
 
-    // Guardar datos globales
     window.datosAnden = {
       id: data["idmov"],
       patente: data["patente"],
