@@ -18,7 +18,7 @@ body.dashboard-page {
   margin: 0;
   padding: 0;
   font-family: "Inter", sans-serif;
-  overflow-y: hidden;
+  /* overflow-y: hidden; */
 }
 
 /* ===== Sidebar ===== */
