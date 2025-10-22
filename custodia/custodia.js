@@ -374,7 +374,7 @@
 
             } catch (err) {
                 console.error('Error general en operación atómica:', err);
-                alert('Ocurrió un error al procesar los datos. No se guardó ningún cambio.');
+                alert('Ocurrió un error al imprimir');
             } finally {
                 if (btnGenerar) {
                     btnGenerar.disabled = false;

@@ -7,15 +7,15 @@
     // URL para pago en efectivo
     const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
     
-    // Construir URLs completas del servidor principal
-    const urlUpdate = BASE_URL + 'TerminalCalama/PHP/Boleta/save.php';
-    const urlStore = BASE_URL + 'TerminalCalama/PHP/Custodia/store.php';
-    const urlState = BASE_URL + 'TerminalCalama/PHP/Custodia/reload.php';
-    const urlLoad = BASE_URL + 'TerminalCalama/PHP/Boleta/load.php';
-    
-    // URLs locales (impresión y transbank)
-    const urlImpresion = urlLocal + '/api/imprimir';
-    const urlPaymentTarjeta = urlLocal + '/api/payment';
+    // --- Servidor principal ---
+    const urlUpdate = `${BASE_URL}TerminalCalama/PHP/Boleta/save.php`;
+    const urlStore  = `${BASE_URL}TerminalCalama/PHP/Custodia/store.php`;
+    const urlState  = `${BASE_URL}TerminalCalama/PHP/Custodia/reload.php`;
+    const urlLoad   = `${BASE_URL}TerminalCalama/PHP/Boleta/load.php`;
+
+    // --- URLs locales (impresión y Transbank) ---
+    const urlImpresion     = `${urlLocal}/api/imprimir`;
+    const urlPaymentTarjeta = `${urlLocal}/api/payment`;
 
     //==================================== HELPERS =======================================
     async function callAPI(datos, url) {
@@ -694,7 +694,7 @@
     async function completarProcesoEntrega(datos) {
         const { idIn, rutIn, result, valorTotal, fechaStr, horaStr, id_caja, barcodeTxt } = datos;
 
-        // Preparar los datos para actualizar el registro
+        // 1️⃣ Actualizar el registro en la base de datos (se hace primero)
         const datosUpdate = {
             id: idIn,
             estado: "Entregado",
@@ -706,17 +706,28 @@
             medio_pago: datos.metodoPago
         };
 
-        // Actualizar el registro en la base de datos
-        await callAPI(datosUpdate, urlUpdate);
-        console.log("Registro actualizado correctamente.");
-
-        // Liberar casillero
-        const casilla = result.posicion;
-        if (casilla) {
-            await cargarEstado(casilla);
+        try {
+            await callAPI(datosUpdate, urlUpdate);
+            console.log("✅ Registro actualizado correctamente.");
+        } catch (error) {
+            console.error("❌ Error actualizando registro:", error);
+            alert("El pago fue procesado, pero hubo un error registrando la entrega. Contacte al administrador.");
+            throw error; // detener si falla el registro, porque es crítico
         }
 
-        // Generar e imprimir PDF de entrega
+        // 2️⃣ Liberar el casillero (aunque la impresión falle)
+        const casilla = result.posicion;
+        try {
+            if (casilla) {
+                await cargarEstado(casilla);
+                console.log(`🟢 Casillero ${casilla} liberado correctamente.`);
+            }
+        } catch (error) {
+            console.warn(`⚠️ No se pudo liberar el casillero ${casilla}:`, error);
+            // Continuamos aunque falle, no es crítico
+        }
+
+        // 3️⃣ Intentar generar e imprimir el PDF — pero si falla, solo se advierte
         const datosTicket = {
             fechaSalida: fechaStr,
             horaSalida: horaStr,
@@ -730,22 +741,25 @@
             codigoBarras: barcodeTxt
         };
 
-        console.log('Generando PDF de entrega con datos:', datosTicket);
-        const pdf = await generarPDFEntrega(datosTicket);
-        const filename = `entrega_${result.posicion}_${fechaStr}.pdf`;
-        await enviarPdfAlServidor(pdf, filename, '');
+        try {
+            console.log('🖨️ Generando PDF de entrega...', datosTicket);
+            const pdf = await generarPDFEntrega(datosTicket);
+            const filename = `entrega_${result.posicion}_${fechaStr}.pdf`;
+            await enviarPdfAlServidor(pdf, filename, '');
+            console.log('✅ PDF enviado correctamente a la impresora.');
+        } catch (error) {
+            console.error("⚠️ Error generando o enviando el PDF:", error);
+            alert("El pago se completó correctamente, pero ocurrió un error al imprimir el comprobante.");
+            // No lanzamos error aquí para no romper el flujo
+        }
 
-        console.log('PDF de entrega generado e enviado exitosamente');
-
-        // Mensaje personalizado según el método de pago
+        // 4️⃣ Confirmación y limpieza del flujo
         const mensajeExito = datos.metodoPago === 'tarjeta'
-            ? `Pago con tarjeta procesado exitosamente. El casillero ha sido liberado y se imprimió el comprobante.`
-            : `Pago en efectivo procesado exitosamente. El casillero ha sido liberado y se imprimió el comprobante.`;
+            ? `Pago con tarjeta procesado exitosamente. El casillero ha sido liberado.`
+            : `Pago en efectivo procesado exitosamente. El casillero ha sido liberado.`;
 
         alert(mensajeExito);
-
         clearPaymentUI();
-
         btnLiberarImprimir.disabled = false;
     }
 
