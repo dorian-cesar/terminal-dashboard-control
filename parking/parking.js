@@ -1,14 +1,21 @@
-const API_URL_MOVIMIENTOS = "http://localhost/parkingCalama/php/movimientos/api.php?patente=";
-const API_MOV_UPDATE = "http://localhost/parkingCalama/php/movimientos/api.php";
-const API_WHITELIST = "http://localhost/parkingCalama/php/whitelist/api.php?patente=";
-const API_EMPRESAS = "http://localhost/parkingCalama/php/empresas/api.php";
-const API_IMPRESION = 'http://10.5.20.105:3000/api/imprimir';
-const VALOR_MINUTO = 30;
+const ENV = window.APP_ENV;
+const BASE_URL = window.BASE_URL;
+const urlLocal = window.URL_LOCAL;
+const VALOR_MINUTO = window.VALOR_MINUTO;
 
-// Endpoints del gateway
-const urlLocal = 'http://10.5.20.105:3000';
+// URL para pago en efectivo
+const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
+
+const API_URL_MOVIMIENTOS = BASE_URL+ "parkingCalama/php/movimientos/api.php?patente=";
+const API_MOV_UPDATE = BASE_URL + "parkingCalama/php/movimientos/api.php";
+const API_WHITELIST = BASE_URL + "parkingCalama/php/whitelist/api.php?patente=";
+const API_EMPRESAS = BASE_URL + "parkingCalama/php/empresas/api.php";
+
+// Endpoint de impresión
+const urlImpresion = urlLocal + '/api/imprimir';
+
+// Endpoint de pago con tarjeta
 const urlPaymentTarjeta = urlLocal + '/api/payment';
-const urlPaymentEfectivo = 'https://backend-banios.dev-wit.com/api/boletas-calama/enviar';
 
 let ultimoMovimiento = null;
 let estaEnWhitelist = false;
