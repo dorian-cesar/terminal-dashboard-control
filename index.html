@@ -179,8 +179,7 @@
         // ==================================== CONFIGURACIÓN ====================================
         const ENV = window.APP_ENV;
         const BASE_URL = window.BASE_URL;
-        // const API_URL = BASE_URL + "parkingCalama/php/login/api.php";
-        const API_URL = "http://localhost/parkingCalama/php/login/api.php";
+        const API_URL = (BASE_URL || "") + "parkingCalama/php/login/api.php";
 
         // Si ya está logueado, redirigir
         if (localStorage.getItem("token")) {

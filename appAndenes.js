@@ -9,7 +9,8 @@ const URL_PAYMENT_EFECTIVO = window.URL_PAYMENT_EFECTIVO;
 
 const apiDestinos = `${BASE_URL}parkingCalama/php/destinos/api.php`;
 const apiMovimientos = `${BASE_URL}parkingCalama/php/movimientos/api.php`;
-const apiEmpresas = `${BASE_URL}parkingCalama/php/empresas/api.php`;
+// const apiEmpresas = `${BASE_URL}parkingCalama/php/empresas/api.php`;
+const apiEmpresas = (BASE_URL || "") + "parkingCalama/php/empresas/api.php";
 const apiWhitelist = `${BASE_URL}parkingCalama/php/whitelist/api.php`;
 
 const API_PAYMENT_TARJETA = `${URL_LOCAL}/api/payment`;
