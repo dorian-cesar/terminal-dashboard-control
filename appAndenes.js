@@ -1,9 +1,20 @@
 let valorTotGlobal = 0; // Variable global para almacenar el valor total
-const baseURL = "http://localhost/parkingCalama/php";
-const apiDestinos = "http://localhost/parkingCalama/php/destinos/api.php";
-const apiMovimientos = "http://localhost/parkingCalama/php/movimientos/api.php";
-const apiEmpresas = "http://localhost/parkingCalama/php/empresas/api.php";
-const apiWhitelist = "http://localhost/parkingCalama/php/whitelist/api.php";
+
+// --- CONFIGURACIÓN GLOBAL ---
+
+const ENV = window.APP_ENV;
+const BASE_URL = window.BASE_URL;           
+const URL_LOCAL = window.URL_LOCAL;      
+const URL_PAYMENT_EFECTIVO = window.URL_PAYMENT_EFECTIVO;
+
+const apiDestinos = BASE_URL + "parkingCalama/php/destinos/api.php";
+const apiMovimientos = BASE_URL + "parkingCalama/php/movimientos/api.php";
+const apiEmpresas = BASE_URL + "parkingCalama/php/empresas/api.php";
+const apiWhitelist = BASE_URL + "parkingCalama/php/whitelist/api.php";
+
+const API_PAYMENT_TARJETA = URL_LOCAL + "/api/payment";
+const API_IMPRESION = URL_LOCAL + "/api/imprimir";
+
 const patRegEx = /^[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}$/;
 
 // Variables para el sistema de pago
@@ -168,7 +179,7 @@ async function procesarPagoTarjeta() {
 // Función para procesar con Transbank
 async function procesarConTransbank() {
   try {
-    const response = await fetch("http://10.5.20.105:3000/api/payment", {
+    const response = await fetch(API_PAYMENT_TARJETA, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -256,7 +267,7 @@ async function pagarAndenConMetodo(metodoPago, autorizacion = null) {
       };
 
       // Llamar a la API para actualizar el movimiento
-      const response = await fetch(baseURL + "/movimientos/api.php", {
+      const response = await fetch(apiMovimientos, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -786,7 +797,7 @@ async function pagarAnden(valorTot = valorTotGlobal) {
         };
 
         // Llamar a la API para actualizar el movimiento antes de imprimir la boleta
-        const response = await fetch(baseURL + "/movimientos/api.php", {
+        const response = await fetch(apiMovimientos, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -898,7 +909,7 @@ async function imprimirBoletaTermicaAndenes(datos) {
     const pdfBase64 = pdf.output("datauristring").split(",")[1];
 
     // Enviar el PDF al servidor de impresión
-    const response = await fetch("http://10.5.20.105:3000/api/imprimir", {
+    const response = await fetch(API_IMPRESION, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
