@@ -3,17 +3,17 @@ let valorTotGlobal = 0; // Variable global para almacenar el valor total
 // --- CONFIGURACIÓN GLOBAL ---
 
 const ENV = window.APP_ENV;
-const BASE_URL = window.BASE_URL;           
-const URL_LOCAL = window.URL_LOCAL;      
+const BASE_URL = window.BASE_URL;
+const URL_LOCAL = window.URL_LOCAL;
 const URL_PAYMENT_EFECTIVO = window.URL_PAYMENT_EFECTIVO;
 
-const apiDestinos = BASE_URL + "parkingCalama/php/destinos/api.php";
-const apiMovimientos = BASE_URL + "parkingCalama/php/movimientos/api.php";
-const apiEmpresas = BASE_URL + "parkingCalama/php/empresas/api.php";
-const apiWhitelist = BASE_URL + "parkingCalama/php/whitelist/api.php";
+const apiDestinos = `${BASE_URL}parkingCalama/php/destinos/api.php`;
+const apiMovimientos = `${BASE_URL}parkingCalama/php/movimientos/api.php`;
+const apiEmpresas = `${BASE_URL}parkingCalama/php/empresas/api.php`;
+const apiWhitelist = `${BASE_URL}parkingCalama/php/whitelist/api.php`;
 
-const API_PAYMENT_TARJETA = URL_LOCAL + "/api/payment";
-const API_IMPRESION = URL_LOCAL + "/api/imprimir";
+const API_PAYMENT_TARJETA = `${URL_LOCAL}/api/payment`;
+const API_IMPRESION = `${URL_LOCAL}/api/imprimir`;
 
 const patRegEx = /^[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}$/;
 
@@ -140,14 +140,44 @@ function procesarPago(metodoPago) {
 
 async function procesarPagoEfectivo() {
   try {
-    // Para efectivo, procesar directamente el pago
-    await pagarAndenConMetodo("efectivo");
+    const folio = await generarBoleta();
+    console.log("Folio generado:", folio);
+    if (!folio) {
+      showToast("No se pudo generar el folio de boleta.", "error");
+      return;
+    }
+
+    await pagarAndenConMetodo("efectivo", folio);
+
     showToast("Pago en efectivo registrado correctamente.", "success");
     cerrarModal();
   } catch (error) {
     console.error("Error en pago efectivo:", error);
     showToast("Error al procesar pago en efectivo.", "error");
     throw error;
+  }
+}
+
+async function generarBoleta() {
+  const precio = valorTotGlobal;
+  const nombre = "Anden";
+  console.log("Precio:", precio, "Nombre:", nombre);
+  try {
+    const response = await fetch(URL_PAYMENT_EFECTIVO, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, precio }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error en la API: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.folio;
+  } catch (error) {
+    console.error("No se pudo generar la boleta:", error);
+    return null;
   }
 }
 
@@ -690,7 +720,7 @@ document
 // Obtiene la lista de empresas desde la API
 async function andGetEmpresas() {
   try {
-    const response = await fetch(baseURL + "/empresas/api.php", {
+    const response = await fetch(apiEmpresas, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${getCookie("jwt")}`,
