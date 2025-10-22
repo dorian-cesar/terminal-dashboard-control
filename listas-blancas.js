@@ -1,268 +1,274 @@
-
 const BASE = "http://localhost/parkingCalama/php";
-const API_URL = BASE + "/whitelist/api.php";          // GET, POST (BD), PUT, DELETE
-const API_INSERT = BASE + "/whitelist/InsertWL.php"; // Inserta en app externa (y luego BD)
-const API_DELETE_EXT = BASE + "/whitelist/deleteWL.php"; // Borra en app externa
-const API_EMP = BASE + "/empresas/api.php";
+const API_URL = BASE + "/whitelist/api.php"; // GET, POST, PUT, DELETE
+const API_EMP = BASE + "/empresas/api.php"; // GET empresas
 
-/* RegEx de patentes (igual que tenías) */
+/* RegEx de patentes */
 const patRegEx = /^[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}$/;
 
-/* Paginación cliente simple */
+/* Paginación simple */
 let currentPage = 1;
-let entriesPerPage = parseInt(document.getElementById('entriesPerPage').value || 10);
-let cachedWL = []; // caché de datos para filtrar/paginar en cliente
+let entriesPerPage = parseInt($("#entriesPerPage").val() || 10);
+let cachedWL = [];
+let cachedEmp = [];
 
 /* Elementos */
-const tbody = $('#wlTable');
-const tableInfo = $('#tableInfo');
-const searchInput = $('#searchInput');
-const entriesSelect = $('#entriesPerPage');
+const tbody = $("#whitelistTable");
+const tableInfo = $("#tableInfo");
+const searchInput = $("#searchInput");
+const entriesSelect = $("#entriesPerPage");
 
-/* --- Funciones API --- */
-
-async function getWL() {
-    try {
-        const res = await axios.get(API_URL);
-        return res.data;
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
+/* --- API FUNCTIONS --- */
+async function getWhitelist() {
+  try {
+    const res = await axios.get(API_URL);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
 }
 
-async function getWLById(id) {
-    try {
-        const res = await axios.get(`${API_URL}?id=${id}`);
-        return res.data;
-    } catch (e) {
-        console.error(e);
-        return null;
-    }
+async function getWhitelistById(id) {
+  try {
+    const res = await axios.get(`${API_URL}?id=${id}`);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
-async function addWL(datos) {
-    // Reproduce la lógica que tenías: primero insertar en app externa, luego en BD
-    try {
-        const ext = await axios.post(API_INSERT, datos);
-        if (ext.data && ext.data.error) {
-            return { error: ext.data.error };
-        }
-    } catch (e) {
-        console.error('Error insert externa', e);
-        return { error: e.message || 'Error en app externa' };
-    }
-
-    try {
-        const db = await axios.post(API_URL, datos);
-        return db.data;
-    } catch (e) {
-        console.error('Error insert BD', e);
-        return { error: e.message || 'Error en base de datos' };
-    }
+async function addWhitelist(item) {
+  try {
+    await axios.post(API_URL, item);
+  } catch (e) {
+    console.error(e);
+    alert("Error al agregar patente");
+  }
 }
 
-async function updateWL(datos) {
-    try {
-        const res = await axios.put(API_URL, datos);
-        return res.data;
-    } catch (e) {
-        console.error(e);
-        return { error: e.message };
-    }
+async function updateWhitelist(item) {
+  try {
+    await axios.put(API_URL, item);
+  } catch (e) {
+    console.error(e);
+    alert("Error al actualizar");
+  }
 }
 
-async function removeWL(id) {
-    // Primero obtener patente para eliminar en app externa
-    const data = await getWLById(id);
-    if (!data) return { error: 'Registro no encontrado' };
-
-    try {
-        const ext = await axios.post(API_DELETE_EXT, { patente: data.patente });
-        if (ext.data && ext.data.error) {
-            return { error: ext.data.error };
-        }
-    } catch (e) {
-        console.error('Error delete externa', e);
-        return { error: e.message || 'Error en app externa' };
-    }
-
-    try {
-        const db = await axios.delete(API_URL, { data: id });
-        return db.data;
-    } catch (e) {
-        console.error('Error delete BD', e);
-        return { error: e.message || 'Error en base de datos' };
-    }
+async function removeWhitelist(id) {
+  try {
+    await axios.delete(API_URL, { data: { id } });
+  } catch (e) {
+    console.error(e);
+    alert("Error al eliminar");
+  }
 }
 
 async function getEmpresas() {
-    try {
-        const res = await axios.get(API_EMP);
-        return res.data;
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
+  try {
+    const res = await axios.get(API_EMP);
+    cachedEmp = res.data;
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    cachedEmp = [];
+    return [];
+  }
 }
 
-/* --- Rellenar tabla (cliente-side, búsqueda y paginación simple) --- */
+async function loadEmpresasSelect() {
+  if (cachedEmp.length === 0) {
+    await getEmpresas();
+  }
 
+  const select = $("#empresa");
+  select.empty();
+  select.append(`<option value="">Seleccione empresa</option>`);
+  cachedEmp.forEach((e) => {
+    select.append(`<option value="${e.idemp}">${e.nombre}</option>`);
+  });
+}
+
+/* --- TABLA / PAGINACIÓN --- */
 function applyPagination(filtered) {
-    entriesPerPage = parseInt(entriesSelect.val());
-    const total = filtered.length;
-    const lastPage = Math.max(1, Math.ceil(total / entriesPerPage));
+  entriesPerPage = parseInt(entriesSelect.val());
+  const total = filtered.length;
+  const lastPage = Math.max(1, Math.ceil(total / entriesPerPage));
 
-    if (currentPage > lastPage) currentPage = lastPage;
-    if (currentPage < 1) currentPage = 1;
+  if (currentPage > lastPage) currentPage = lastPage;
+  if (currentPage < 1) currentPage = 1;
 
-    const start = (currentPage - 1) * entriesPerPage;
-    const pageItems = filtered.slice(start, start + entriesPerPage);
+  const start = (currentPage - 1) * entriesPerPage;
+  const pageItems = filtered.slice(start, start + entriesPerPage);
 
-    // Render filas
-    tbody.empty();
-    pageItems.forEach(item => {
-        const tr = `
-    <tr>
-        <td>${item.idwl ?? ''}</td>
-        <td>${item.patente ?? ''}</td>
-        <td>${item.nombre ?? ''}</td>
+  tbody.empty();
+  pageItems.forEach((w) => {
+    const empresaNombre =
+      cachedEmp.find((e) => e.idemp == w.empresa)?.nombre || "";
+    tbody.append(`
+      <tr>
+        <td>${w.idwl ?? ""}</td>
+        <td>${w.patente ?? ""}</td>
+        <td>${empresaNombre}</td>
         <td>
-            <button class="btn btn-sm btn-warning ctrlbtn" onclick="editWL(${item.idwl})"><i class="bi bi-pencil"></i></button>
-            <button class="btn btn-sm btn-danger ctrlbtn" onclick="deleteWL(${item.idwl})"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-warning" onclick="editWhitelist(${
+            w.idwl
+          })">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deleteWhitelist(${
+            w.idwl
+          })">
+            <i class="bi bi-trash"></i>
+          </button>
         </td>
-    </tr>
-`;
-        tbody.append(tr);
-    });
+      </tr>
+    `);
+  });
 
-    tableInfo.text(`Mostrando ${start + 1 <= total ? start + 1 : 0} a ${Math.min(start + entriesPerPage, total)} de ${total} registros`);
-    $('#currentPage').text(currentPage);
+  tableInfo.text(
+    `Mostrando ${start + 1 <= total ? start + 1 : 0} a ${Math.min(
+      start + entriesPerPage,
+      total
+    )} de ${total} registros`
+  );
 }
 
-/* Carga + filtro */
-async function loadWLTable() {
-    const all = await getWL();
-    cachedWL = Array.isArray(all) ? all : [];
-    const term = searchInput.val().toLowerCase().trim();
+async function loadWhitelistTable() {
+  const whitelist = await getWhitelist();
+  cachedWL = Array.isArray(whitelist) ? whitelist : [];
+  const term = searchInput.val().toLowerCase().trim();
 
-    const filtered = cachedWL.filter(u => {
-        const patente = (u.patente || '').toString().toLowerCase();
-        const nombre = (u.nombre || '').toString().toLowerCase();
-        return patente.includes(term) || nombre.includes(term);
-    });
+  const filtered = cachedWL.filter(
+    (w) =>
+      (w.patente ?? "").toLowerCase().includes(term) ||
+      (cachedEmp.find((e) => e.id == w.empresa)?.nombre ?? "")
+        .toLowerCase()
+        .includes(term)
+  );
 
-    applyPagination(filtered);
+  applyPagination(filtered);
 }
 
-/* --- Modal manejo --- */
+/* --- MODAL --- */
+async function openWhitelistModal(id = null) {
+  $("#whitelistForm")[0].reset();
 
-async function openWLModal(id = null) {
-    $('#wlForm')[0].reset();
-    $('#wlId').val('');
-    $('#wlEmpresa').empty().append('<option value="">Cargando...</option>');
+  // Carga empresas si no están en cache
+  if (cachedEmp.length === 0) {
+    await getEmpresas();
+  }
 
-    // poblar empresas
-    const empresas = await getEmpresas();
-    $('#wlEmpresa').empty();
-    empresas.forEach(e => {
-        $('#wlEmpresa').append(`<option value="${e.idemp}">${e.nombre}</option>`);
-    });
+  // Genera el select de empresas
+  let selectHTML = `<select class="form-select" id="empresa" required>
+                      <option value="">Seleccione empresa</option>`;
+  cachedEmp.forEach((e) => {
+    selectHTML += `<option value="${e.id}">${e.nombre}</option>`;
+  });
+  selectHTML += `</select>`;
 
-    if (id) {
-        const data = await getWLById(id);
-        if (data) {
-            $('#wlModalTitle').text('Editar Entrada');
-            $('#wlId').val(data.idwl || '');
-            $('#wlPatente').val(data.patente || '');
-            // si la API devuelve empresa id en 'idemp' o 'empresa', intenta ambos
-            $('#wlEmpresa').val(data.idemp || data.empresa || '');
-        }
-    } else {
-        $('#wlModalTitle').text('Crear Entrada');
-    }
+  // Reemplaza el input de nombre por el select
+  $("#nombre")
+    .parent()
+    .html(
+      `<label for="empresa" class="form-label">Empresa</label>${selectHTML}`
+    );
 
-    new bootstrap.Modal(document.getElementById('wlModal')).show();
+  if (id) {
+    // EDITAR
+    const item = await getWhitelistById(id);
+    $("#whitelistModalTitle").text("Editar Patente");
+    $("#whitelistId").val(item.idwl);
+    $("#patente").val(item.patente);
+    $("#empresa").val(item.empresa ?? "");
+  } else {
+    // NUEVO
+    $("#whitelistModalTitle").text("Agregar Patente");
+    $("#whitelistId").val("");
+  }
+
+  new bootstrap.Modal(document.getElementById("whitelistModal")).show();
 }
 
-function openWLModalPublic() { openWLModal(null); } // helper si quieres llamar sin nombre
+/* --- CRUD HANDLERS --- */
+async function saveWhitelist() {
+  const id = $("#whitelistId").val();
+  const patente = $("#patente").val().trim();
+  const empresa = $("#empresa").val();
 
-/* --- CRUD handlers (form) --- */
+  if (!patRegEx.test(patente)) {
+    alert("Formatos de patente:\nABCD12\nABCD-12\nAB-CD-12");
+    return;
+  }
 
-async function saveWL() {
-    const id = $('#wlId').val();
-    const patente = $('#wlPatente').val().trim();
-    const empresa = $('#wlEmpresa').val();
+  if (!empresa) {
+    alert("Debe seleccionar una empresa");
+    return;
+  }
 
-    if (!patRegEx.test(patente)) {
-        alert('Formatos de patente:\nABCD12\nABCD-12\nAB-CD-12');
-        return;
-    }
-    if (!empresa) {
-        alert('Selecciona una empresa');
-        return;
-    }
+  const data = { patente, empresa };
 
-    const datos = { patente: patente, empresa: empresa };
+  if (id) {
+    data.id = parseInt(id);
+    await updateWhitelist(data);
+    alert("Patente actualizada");
+  } else {
+    await addWhitelist(data);
+    alert("Patente agregada");
+  }
 
-    if (id) {
-        datos.id = id;
-        const res = await updateWL(datos);
-        if (res && res.error) {
-            alert(res.error);
-        } else {
-            alert('Entrada actualizada');
-        }
-    } else {
-        const res = await addWL(datos);
-        if (res && res.error) {
-            alert(res.error);
-        } else {
-            alert('Entrada creada');
-        }
-    }
+  const modalEl = document.getElementById("whitelistModal");
+  const modal = bootstrap.Modal.getInstance(modalEl);
+  modal.hide();
+  $(".modal-backdrop").remove();
+  $("body").removeClass("modal-open").css("padding-right", "");
 
-    const modalEl = document.getElementById('wlModal');
-    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-    modal.hide();
-    $('.modal-backdrop').remove();
-    $('body').removeClass('modal-open').css('padding-right', '');
-
-    // recarga
-    currentPage = 1;
-    await loadWLTable();
+  currentPage = 1;
+  loadWhitelistTable();
 }
 
-/* --- acciones rápidas --- */
-
-async function editWL(id) { await openWLModal(id); }
-
-async function deleteWL(id) {
-    if (!confirm('¿Eliminar el registro?')) return;
-    const res = await removeWL(id);
-    if (res && res.error) {
-        alert(res.error);
-    } else {
-        alert('Usuario eliminado');
-        await loadWLTable();
-    }
+async function editWhitelist(id) {
+  await openWhitelistModal(id);
 }
 
-/* --- botones de paginación --- */
-$('#firstPage').on('click', () => { currentPage = 1; loadWLTable(); });
-$('#prevPage').on('click', () => { currentPage = Math.max(1, currentPage - 1); loadWLTable(); });
-$('#nextPage').on('click', () => { currentPage = currentPage + 1; loadWLTable(); });
-$('#lastPage').on('click', () => {
-    const total = cachedWL.length;
-    const last = Math.max(1, Math.ceil(total / entriesPerPage));
-    currentPage = last;
-    loadWLTable();
+async function deleteWhitelist(id) {
+  if (!confirm("¿Eliminar esta patente de la lista blanca?")) return;
+  await removeWhitelist(id);
+  alert("Patente eliminada");
+  loadWhitelistTable();
+}
+
+/* --- PAGINACIÓN --- */
+$("#firstPage").on("click", () => {
+  currentPage = 1;
+  loadWhitelistTable();
+});
+$("#prevPage").on("click", () => {
+  currentPage = Math.max(1, currentPage - 1);
+  loadWhitelistTable();
+});
+$("#nextPage").on("click", () => {
+  currentPage++;
+  loadWhitelistTable();
+});
+$("#lastPage").on("click", () => {
+  const total = cachedWL.length;
+  currentPage = Math.max(1, Math.ceil(total / entriesPerPage));
+  loadWhitelistTable();
 });
 
-entriesSelect.on('change', () => { currentPage = 1; loadWLTable(); });
-searchInput.on('keyup', () => { currentPage = 1; loadWLTable(); });
+entriesSelect.on("change", () => {
+  currentPage = 1;
+  loadWhitelistTable();
+});
+searchInput.on("keyup", () => {
+  currentPage = 1;
+  loadWhitelistTable();
+});
 
-/* Init */
-$(document).ready(function () {
-    loadWLTable();
+/* --- INIT --- */
+$(document).ready(() => {
+  loadEmpresasSelect();
+  loadWhitelistTable();
 });
