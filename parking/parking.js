@@ -1,7 +1,8 @@
 const ENV = window.APP_ENV;
 const BASE_URL = window.BASE_URL;
 const urlLocal = window.URL_LOCAL;
-const VALOR_MINUTO = window.VALOR_MINUTO;
+// const VALOR_MINUTO = window.VALOR_MINUTO;
+const VALOR_MINUTO = 30;
 
 // URL para pago en efectivo
 const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
