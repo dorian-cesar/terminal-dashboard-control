@@ -11,12 +11,13 @@ const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
 
 // URLs específicas de ESTA página
 const API_BANOS_BASE = `${BASE_URL}TerminalCalama/PHP/Restroom/`;
-const urlLoad = API_BANOS_BASE + "load.php";
-const urlLoadToday = API_BANOS_BASE + "loadToday.php";
-const urlSave = API_BANOS_BASE + "save.php";
-const urlAddUser = API_BANOS_BASE + "addUser.php";
-const urlLevelUser = API_BANOS_BASE + "addLevelUser.php";
-const urlBoleto = API_BANOS_BASE + "estadoBoleto.php";
+const urlLoad        = `${API_BANOS_BASE}load.php`;
+const urlLoadToday   = `${API_BANOS_BASE}loadToday.php`;
+const urlSave        = `${API_BANOS_BASE}save.php`;
+const urlAddUser     = `${API_BANOS_BASE}addUser.php`;
+const urlLevelUser   = `${API_BANOS_BASE}addLevelUser.php`;
+const urlBoleto      = `${API_BANOS_BASE}estadoBoleto.php`;
+
 
 // URLs locales (impresión y transbank)
 const urlImpresion = urlLocal + '/api/imprimir';

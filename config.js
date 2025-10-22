@@ -5,7 +5,8 @@ const ENVIRONMENT = "prod"; // ← Cambia a "prod" cuando necesites
 const CONFIG = {
     dev: {
         BASE_URL: "http://localhost/",
-        URL_LOCAL: "http://localhost:3000",
+        URL_LOCAL: "http://10.5.20.103:3000",
+        // URL_LOCAL: "http://localhost:3000",
         URL_PAYMENT_EFECTIVO: "https://backend-banios.dev-wit.com/api/boletas-calama/enviar"
     },
     prod: {
