@@ -1,316 +1,175 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Empresas - WIT</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body class="dashboard-page">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="destinos.css" />
+    <script src="config.js"></script>
+    <style>
+      .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body class="dashboard-page">
     <div class="wrapper">
-        <!-- Sidebar -->
-        <nav id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <h3>WIT</h3>
-                <div class="user-info">
-                    <i class="bi bi-x-circle"></i>
-                    <div>
-                        <div class="user-email" id="userEmail"></div>
-                        <div class="user-role" id="userRole"></div>
-                    </div>
-                </div>
+      <!-- Sidebar -->
+      <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <h3>WIT</h3>
+          <div class="user-info">
+            <i class="bi bi-x-circle"></i>
+            <div>
+              <div class="user-email" id="userEmail"></div>
+              <div class="user-role" id="userRole"></div>
             </div>
-
-            <ul class="list-unstyled components">
-                <li>
-                    <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
-                </li>
-                <li>
-                    <a href="banos.html"><i class="bi bi-droplet"></i> Baños</a>
-                </li>
-                <li>
-                    <a href="custodia.html"><i class="bi bi-shield-check"></i> Custodia</a>
-                </li>
-                <li>
-                    <a href="parking.html"><i class="bi bi-car-front"></i> Parking</a>
-                </li>
-                <li>
-                    <a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a>
-                </li>
-                <li>
-                    <a href="caja.html"><i class="bi bi-cash-coin"></i> Caja</a>
-                </li>
-                <li>
-                    <a href="monitoreo.html"><i class="bi bi-display"></i> Monitoreo</a>
-                </li>
-                <li class="menu-section">CONFIGURACIÓN</li>
-                <li class="active">
-                    <a href="empresas.html"><i class="bi bi-building"></i> Empresas</a>
-                </li>
-                <li>
-                    <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
-                </li>
-                <li>
-                    <a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
-                </li>
-                <li>
-                    <a href="listas-blancas.html"><i class="bi bi-list-check"></i> Listas Blancas</a>
-                </li>
-                <li>
-                    <a href="pagos-diarios.html"><i class="bi bi-currency-dollar"></i> Pagos Diarios</a>
-                </li>
-                <li>
-                    <a href="entradas-salidas.html"><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a>
-                </li>
-                <li>
-                    <a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Log Out</a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Page Content -->
-        <div id="content">
-            <div class="top-bar">
-                <h4>Sistema de Control de Terminales Terrestres</h4>
-            </div>
-
-            <div class="container-fluid">
-                <div class="page-header mb-4">
-                    <h2>Empresas</h2>
-                    <p class="text-muted">Gestión de empresas en convenio</p>
-                </div>
-
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div>
-                            <label class="me-2">Mostrar</label>
-                            <select id="entriesPerPage" class="form-select form-select-sm d-inline-block w-auto">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                            </select>
-                            <span class="ms-2">registros</span>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="🔍 Buscar: Ingresa un término">
-                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#companyModal" onclick="openCompanyModal()">
-                                Registrar Empresa
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nombre</th>
-                                        <th>Contacto</th>
-                                        <th>Controles</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="companiesTable">
-                                    <!-- Data will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <div id="tableInfo">Mostrando registros</div>
-                            <div>
-                                <button class="btn btn-sm btn-outline-secondary">Primero</button>
-                                <button class="btn btn-sm btn-outline-secondary">Anterior</button>
-                                <span class="mx-2">1</span>
-                                <button class="btn btn-sm btn-outline-secondary">Siguiente</button>
-                                <button class="btn btn-sm btn-outline-secondary">Último</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+
+        <ul class="list-unstyled components">
+          <li><a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a></li>
+          <li><a href="banos.html"><i class="bi bi-droplet"></i> Baños</a></li>
+          <li><a href="custodia.html"><i class="bi bi-shield-check"></i> Custodia</a></li>
+          <li><a href="parking.html"><i class="bi bi-car-front"></i> Parking</a></li>
+          <li><a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a></li>
+          <li><a href="caja.html"><i class="bi bi-cash-coin"></i> Caja</a></li>
+          <li><a href="monitoreo.html"><i class="bi bi-display"></i> Monitoreo</a></li>
+          <li class="menu-section">CONFIGURACIÓN</li>
+          <li class="active"><a href="empresas.html"><i class="bi bi-building"></i> Empresas</a></li>
+          <li><a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a></li>
+          <li><a href="usuarios.html"><i class="bi bi-people"></i> Usuarios</a></li>
+          <li><a href="listas-blancas.html"><i class="bi bi-list-check"></i> Listas Blancas</a></li>
+          <li><a href="pagos-diarios.html"><i class="bi bi-currency-dollar"></i> Pagos Diarios</a></li>
+          <li><a href="entradas-salidas.html"><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a></li>
+          <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Log Out</a></li>
+        </ul>
+      </nav>
+
+      <!-- Page Content -->
+      <div id="content">
+        <div class="container-fluid">
+          <div class="page-header pt-1">
+            <h2>Listado de Empresas</h2>
+          </div>
+
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div>
+                <span class="me-2" style="color: #a3a3a3">Mostrar</span>
+                <select
+                  id="entriesPerPage"
+                  class="form-select form-select-sm d-inline-block w-auto"
+                >
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                </select>
+                <span class="ms-2" style="color: #a3a3a3">registros</span>
+              </div>
+              <div class="d-flex gap-2">
+                <input
+                  type="text"
+                  id="searchInput"
+                  class="form-control form-control-sm"
+                  placeholder="🔍 Buscar por nombre o contacto"
+                />
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nombre</th>
+                      <th>Contacto</th>
+                    </tr>
+                  </thead>
+                  <tbody id="companiesTable"></tbody>
+                </table>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <div id="tableInfo" style="color: #a3a3a3">Mostrando registros</div>
+                <div>
+                  <button class="btn btn-sm btn-outline-secondary">Primero</button>
+                  <button class="btn btn-sm btn-outline-secondary">Anterior</button>
+                  <span class="mx-2" style="color: #a3a3a3">1</span>
+                  <button class="btn btn-sm btn-outline-secondary">Siguiente</button>
+                  <button class="btn btn-sm btn-outline-secondary">Último</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Company Modal -->
-    <div class="modal fade" id="companyModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="companyModalTitle">Registrar Empresa</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="companyForm">
-                        <input type="hidden" id="companyId">
-                        <div class="mb-3">
-                            <label for="companyName" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="companyName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="companyContact" class="form-label">Contacto</label>
-                            <input type="text" class="form-control" id="companyContact">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveCompany()">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+    <script>
+      const API_URL = "https://andenes.terminal-calama.com/parkingCalama/php/empresa/api.php";
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-const API_URL = "http://localhost/parkingCalama/php/empresas/api.php";
-
-$(document).ready(function() {
-    checkAuth();
-    loadUserInfo();
-    loadCompaniesTable();
-
-    $('#logoutBtn').on('click', function(e) {
-        e.preventDefault();
-        logout();
-    });
-
-    $('#searchInput').on('keyup', function() {
+      $(document).ready(function () {
         loadCompaniesTable();
-    });
-});
+        $("#searchInput").on("keyup", loadCompaniesTable);
+      });
 
-// 📦 Cargar todas las empresas
-async function loadCompaniesTable() {
-    try {
-        const response = await axios.get(API_URL);
-        const companies = response.data;
-        const searchTerm = $('#searchInput').val().toLowerCase();
-        const tbody = $('#companiesTable');
+      async function getCompanies() {
+        try {
+          const res = await axios.get(API_URL);
+          return res.data;
+        } catch (err) {
+          console.error("Error al obtener empresas:", err);
+          return [];
+        }
+      }
+
+      async function loadCompaniesTable() {
+        const companies = await getCompanies();
+        const searchTerm = $("#searchInput").val().toLowerCase();
+        const tbody = $("#companiesTable");
         tbody.empty();
 
-        const filtered = companies.filter(c =>
-            c.nombre.toLowerCase().includes(searchTerm)
+        const filtered = companies.filter(
+          (c) =>
+            c.nombre.toLowerCase().includes(searchTerm) ||
+            c.contacto.toLowerCase().includes(searchTerm)
         );
 
-        filtered.forEach(company => {
-            tbody.append(`
-                <tr>
-                    <td>${company.idemp}</td>
-                    <td>${company.nombre}</td>
-                    <td>${company.contacto || 'No definida'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" onclick="editCompany(${company.idemp})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteCompany(${company.idemp})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `);
+        if (filtered.length === 0) {
+          tbody.append(
+            `<tr><td colspan="3" class="text-center text-muted">No se encontraron registros</td></tr>`
+          );
+          $("#tableInfo").text("Sin registros que mostrar");
+          return;
+        }
+
+        filtered.forEach((c) => {
+          tbody.append(`
+            <tr>
+              <td>${c.idemp}</td>
+              <td>${c.nombre}</td>
+              <td>${c.contacto}</td>
+            </tr>
+          `);
         });
 
-        $('#tableInfo').text(`Mostrando ${filtered.length} registros`);
-    } catch (error) {
-        console.error("Error al cargar empresas:", error);
-        alert("No se pudo cargar la lista de empresas.");
-    }
-}
-
-// ✏️ Editar empresa
-async function editCompany(companyId) {
-    try {
-        const response = await axios.get(`${API_URL}?id=${companyId}`);
-        const company = Array.isArray(response.data) ? response.data[0] : response.data;
-
-        if (!company) {
-            alert("No se encontró la empresa.");
-            return;
-        }
-
-        $('#companyModalTitle').text('Editar Empresa');
-        $('#companyId').val(company.idemp);
-        $('#companyName').val(company.nombre);
-        $('#companyContact').val(company.contacto);
-
-        const modal = new bootstrap.Modal(document.getElementById('companyModal'));
-        modal.show();
-    } catch (error) {
-        console.error("Error al cargar la empresa:", error);
-        alert("No se pudo cargar la información de la empresa.");
-    }
-}
-
-// 💾 Guardar (nuevo o editar)
-
-async function saveCompany() {
-    const companyId = $('#companyId').val();
-    const nombre = $('#companyName').val();
-    const contacto = $('#companyContact').val() || 'NA';
-
-    try {
-        if (companyId) {
-            await axios.put(API_URL, { id: companyId, nombre, contacto });
-            alert("Empresa actualizada exitosamente");
-        } else {
-            await axios.post(API_URL, { nombre, contacto });
-            alert("Empresa registrada exitosamente");
-        }
-
-        // 🧹 Limpia el formulario
-        $('#companyId').val('');
-        $('#companyName').val('');
-        $('#companyContact').val('');
-
-        // ✅ Cierra correctamente el modal y elimina el fondo
-        const modalElement = document.getElementById('companyModal');
-        const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-        modalInstance.hide();
-
-        // 💨 Asegura eliminar el fondo oscuro si quedó pegado
-        $('.modal-backdrop').remove();
-        $('body').removeClass('modal-open').css('padding-right', '');
-
-        // 🔄 Recargar tabla
-        loadCompaniesTable();
-    } catch (error) {
-        console.error("Error al guardar empresa:", error);
-        alert("No se pudo guardar la empresa.");
-    }
-}
-
-
-// ❌ Eliminar empresa
-async function deleteCompany(companyId) {
-    if (confirm('¿Está seguro de eliminar esta empresa?')) {
-        try {
-            // DELETE con id (no idemp)
-            await axios.delete(API_URL, { data: { id: companyId } });
-            alert('Empresa eliminada exitosamente');
-            loadCompaniesTable();
-        } catch (error) {
-            console.error("Error al eliminar empresa:", error);
-            alert('No se pudo eliminar la empresa.');
-        }
-    }
-}
-</script>
-
-
-
-</body>
+        $("#tableInfo").text(`Mostrando ${filtered.length} registros`);
+      }
+    </script>
+  </body>
 </html>
