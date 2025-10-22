@@ -26,6 +26,14 @@ function getCookie(cname) {
   return "";
 }
 
+$(document).ready(function () {
+  $("#destinoBuses").select2({
+    placeholder: "Seleccione un destino",
+    allowClear: true,
+    width: "100%",
+  });
+});
+
 // Inicialización del sistema de pago
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM cargado - Inicializando página...");
@@ -197,7 +205,8 @@ async function pagarAndenConMetodo(metodoPago, autorizacion = null) {
   const input = document.getElementById("andenQRPat").value;
   const cont = document.getElementById("contAnden");
   const empresaSelect = document.getElementById("empresaBuses");
-  const payBtn = document.getElementById("payBtn");
+  const btnPagoEfectivo = document.getElementById("btnPagoEfectivo");
+  const btnPagoTarjeta = document.getElementById("btnPagoTarjeta");
   const date = new Date();
 
   // Validación de id_caja en localStorage
@@ -273,7 +282,9 @@ async function pagarAndenConMetodo(metodoPago, autorizacion = null) {
             <p>Ingrese una patente y calcule para ver los detalles</p>
           </div>
         `;
-        payBtn.disabled = true;
+        // payBtn.disabled = true;
+        btnPagoEfectivo.disabled = true;
+        btnPagoTarjeta.disabled = true;
         cont.classList.remove("loaded");
 
         return result;
@@ -349,7 +360,7 @@ async function calcAndenes() {
   const cont = document.getElementById("contAnden");
   const destinoSelect = document.getElementById("destinoBuses");
   const empresaSelect = document.getElementById("empresaBuses");
-  const payBtn = document.getElementById("payBtn");
+  // const payBtn = document.getElementById("payBtn");
 
   if (!patente) {
     showToast("Ingrese una patente válida.", "warning");
@@ -643,15 +654,21 @@ async function cargarDestinos(tipoDest, lista) {
 
 // Función para listar andenes y destinos (también utiliza la función auxiliar)
 async function listarAndenesDestinos() {
-  const tipoDest = document.getElementById("tipoDestino").value; // Obtener el tipo de destino seleccionado
+  const tipoDest = document.getElementById("tipoDestino").value;
   const lista = document.getElementById("destinoBuses");
 
   if (!tipoDest) {
-    lista.textContent = ""; // Limpia el contenedor
+    lista.textContent = "";
     return;
   }
 
-  cargarDestinos(tipoDest, lista);
+  await cargarDestinos(tipoDest, lista);
+
+  for (let option of lista.options) {
+    if (option.value && option.text.includes(" - ")) {
+      option.text = option.text.split(" - ")[0].trim();
+    }
+  }
 }
 
 // Agregar un evento para que se ejecute al cambiar el tipo de destino
@@ -710,7 +727,7 @@ async function pagarAnden(valorTot = valorTotGlobal) {
   const input = document.getElementById("andenQRPat").value;
   const cont = document.getElementById("contAnden");
   const empresaSelect = document.getElementById("empresaBuses"); // Captura la empresa seleccionada
-  const payBtn = document.getElementById("payBtn");
+  // const payBtn = document.getElementById("payBtn");
   const date = new Date();
 
   // Validación de id_caja en localStorage
@@ -798,7 +815,9 @@ async function pagarAnden(valorTot = valorTotGlobal) {
             <p>Ingrese una patente y calcule para ver los detalles</p>
           </div>
         `;
-        payBtn.disabled = true;
+        // payBtn.disabled = true;
+        btnPagoEfectivo.disabled = true;
+        btnPagoTarjeta.disabled = true;
         cont.classList.remove("loaded");
       } else {
         showToast("Esta patente ya fue cobrada", "warning");
@@ -847,7 +866,7 @@ async function imprimirBoletaTermicaAndenes(datos) {
       }</b></div>
       ${
         datos.autorizacion_tarjeta
-          ? `<div style="margin:2px 0;">AUTORIZACIÓN: <b>${datos.autorizacion_tarjeta}</b></div>`
+          ? `<div style="margin:2px 0;">BOLETA: <b>${datos.autorizacion_tarjeta}</b></div>`
           : ""
       }
       <div style="margin:4px 0;">----------------------------------</div>

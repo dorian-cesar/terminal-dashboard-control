@@ -1,245 +1,279 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WIT - Sistema de Control de Terminales</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="login.css">
-</head>
-<body class="login-page">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <body class="login-page">
     <div class="login-container">
-        <div class="login-card">
-            <!-- Panel Izquierdo - Branding y Características -->
-            <div class="brand-panel">
-                <div class="brand-content">
-                    <div class="brand-header">
-                        <div class="brand-logo"> 
-                            <div class="logo-container">
-                                <img src="wit.png" alt="WIT Logo">
-                            </div>
-                           
-                            <div class="brand-text">
-                                <p class="brand-subtitle">Sistema de Control de Terminales</p>
-                                <p class="brand-description">Innovación con más de 15 años de trabajo</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="features-grid">
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
-                            <div class="feature-text">
-                                <h6>Custodia</h6>
-                                <p>Control de equipaje</p>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-droplet"></i>
-                            </div>
-                            <div class="feature-text">
-                                <h6>Baños</h6>
-                                <p>Servicios sanitarios</p>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-bus-front"></i>
-                            </div>
-                            <div class="feature-text">
-                                <h6>Andenes</h6>
-                                <p>Control de plataformas</p>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-car-front"></i>
-                            </div>
-                            <div class="feature-text">
-                                <h6>Parking</h6>
-                                <p>Estacionamiento</p>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-cash-coin"></i>
-                            </div>
-                            <div class="feature-text">
-                                <h6>Caja</h6>
-                                <p>Gestión de pagos</p>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <i class="bi bi-display"></i>
-                            </div>
-                            <div class="feature-text">
-                                <h6>Monitoreo</h6>
-                                <p>Tiempo real</p>
-                            </div>
-                        </div>
-                    </div>
+      <div class="login-card">
+        <!-- Panel Izquierdo - Branding y Características -->
+        <div class="brand-panel">
+          <div class="brand-content">
+            <div class="brand-header">
+              <div class="brand-logo">
+                <div class="logo-container">
+                  <img src="wit.png" alt="WIT Logo" />
                 </div>
 
-                <div class="company-info">
-                    <h4>SOMOS WIT</h4>
-                    <p>
-                        Empresa de desarrollo de productos y soluciones tecnológicas. 
-                        Especialistas en creación, diseño e implementación de herramientas 
-                        para optimizar procesos empresariales.
-                    </p>
-                    <p>
-                        Fortaleza basada en TIC y NTIC para desarrollo profesional 
-                        y sustentabilidad financiera.
-                    </p>
+                <div class="brand-text">
+                  <p class="brand-subtitle">Sistema de Control de Terminales</p>
+                  <p class="brand-description">
+                    Innovación con más de 15 años de trabajo
+                  </p>
                 </div>
+              </div>
             </div>
 
-            <!-- Panel Derecho - Formulario de Login -->
-            <div class="login-panel">
-                <div class="login-header">
-                    <h2 class="login-title">Bienvenido</h2>
-                    <p class="login-subtitle">Ingresa a tu cuenta</p>
+            <div class="features-grid">
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-shield-check"></i>
                 </div>
-
-                <form id="loginForm" class="login-form">
-                    <div class="form-group">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <div class="input-group">
-                            <i class="bi bi-envelope input-icon"></i>
-                            <input type="email" class="form-control" id="email" placeholder="usuario@wit.la" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="password" class="form-label">Contraseña</label>
-                        <div class="input-group">
-                            <i class="bi bi-lock input-icon"></i>
-                            <input type="password" class="form-control" id="password" placeholder="••••••••" required>
-                        </div>
-                    </div>
-
-                    <div class="btn-group">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-box-arrow-in-right"></i>
-                            Iniciar Sesión
-                        </button>
-                        <button type="button" class="btn btn-outline" id="cancelBtn">
-                            <i class="bi bi-x-circle"></i>
-                            Cancelar
-                        </button>
-                    </div>
-                </form>
-
-                <div class="demo-info">
-                    <h6>Usuarios de Prueba</h6>
-                    <div class="user-cred">
-                        <i class="bi bi-person-check"></i>
-                        <span>admin@wit.la / admin123</span>
-                    </div>
-                    <div class="user-cred">
-                        <i class="bi bi-person"></i>
-                        <span>user@wit.la / user123</span>
-                    </div>
+                <div class="feature-text">
+                  <h6>Custodia</h6>
+                  <p>Control de equipaje</p>
                 </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-droplet"></i>
+                </div>
+                <div class="feature-text">
+                  <h6>Baños</h6>
+                  <p>Servicios sanitarios</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-bus-front"></i>
+                </div>
+                <div class="feature-text">
+                  <h6>Andenes</h6>
+                  <p>Control de plataformas</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-car-front"></i>
+                </div>
+                <div class="feature-text">
+                  <h6>Parking</h6>
+                  <p>Estacionamiento</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-cash-coin"></i>
+                </div>
+                <div class="feature-text">
+                  <h6>Caja</h6>
+                  <p>Gestión de pagos</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-display"></i>
+                </div>
+                <div class="feature-text">
+                  <h6>Monitoreo</h6>
+                  <p>Tiempo real</p>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div class="company-info">
+            <h4>SOMOS WIT</h4>
+            <p>
+              Empresa de desarrollo de productos y soluciones tecnológicas.
+              Especialistas en creación, diseño e implementación de herramientas
+              para optimizar procesos empresariales.
+            </p>
+            <p>
+              Fortaleza basada en TIC y NTIC para desarrollo profesional y
+              sustentabilidad financiera.
+            </p>
+          </div>
         </div>
+
+        <!-- Panel Derecho - Formulario de Login -->
+        <div class="login-panel">
+          <div class="login-header">
+            <h2 class="login-title">Bienvenido</h2>
+            <p class="login-subtitle">Ingresa a tu cuenta</p>
+          </div>
+
+          <form id="loginForm" class="login-form">
+            <div class="form-group">
+              <label for="email" class="form-label">Correo Electrónico</label>
+              <div class="input-group">
+                <i class="bi bi-envelope input-icon"></i>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  placeholder="usuario@wit.la"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password" class="form-label">Contraseña</label>
+              <div class="input-group">
+                <i class="bi bi-lock input-icon"></i>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-box-arrow-in-right"></i>
+                Iniciar Sesión
+              </button>
+              <button type="button" class="btn btn-outline" id="cancelBtn">
+                <i class="bi bi-x-circle"></i>
+                Cancelar
+              </button>
+            </div>
+          </form>
+
+          <div class="demo-info">
+            <h6>Usuarios de Prueba</h6>
+            <div class="user-cred">
+              <i class="bi bi-person-check"></i>
+              <span>admin@wit.la / admin123</span>
+            </div>
+            <div class="user-cred">
+              <i class="bi bi-person"></i>
+              <span>user@wit.la / user123</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="config.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-$(document).ready(function() {
-    // ==================================== CONFIGURACIÓN ====================================
-    const ENV = window.APP_ENV;
-    const BASE_URL = window.BASE_URL;
-    const API_URL = BASE_URL + "parkingCalama/php/login/api.php";
+    <script>
+      $(document).ready(function () {
+        // ==================================== CONFIGURACIÓN ====================================
+        const ENV = window.APP_ENV;
+        const BASE_URL = window.BASE_URL;
+        // const API_URL = BASE_URL + "parkingCalama/php/login/api.php";
+        const API_URL = "http://localhost/parkingCalama/php/login/api.php";
 
-    // Si ya está logueado, redirigir
-    if (localStorage.getItem('token')) {
-        window.location.href = 'dashboard.html';
-        return;
-    }
+        // Si ya está logueado, redirigir
+        if (localStorage.getItem("token")) {
+          window.location.href = "dashboard.html";
+          return;
+        }
 
-    // Envío del formulario
-    $('#loginForm').on('submit', async function(e) {
-        e.preventDefault();
+        // Envío del formulario
+        $("#loginForm").on("submit", async function (e) {
+          e.preventDefault();
 
-        const email = $('#email').val().trim();
-        const password = $('#password').val();
+          const email = $("#email").val().trim();
+          const password = $("#password").val();
 
-        const submitBtn = $(this).find('button[type="submit"]');
-        const originalText = submitBtn.html();
-        submitBtn.html('<i class="bi bi-arrow-repeat spinner"></i> Validando...');
-        submitBtn.prop('disabled', true);
+          const submitBtn = $(this).find('button[type="submit"]');
+          const originalText = submitBtn.html();
+          submitBtn.html(
+            '<i class="bi bi-arrow-repeat spinner"></i> Validando...'
+          );
+          submitBtn.prop("disabled", true);
 
-        try {
-            const response = await axios.post(API_URL, {
+          try {
+            const response = await axios.post(
+              API_URL,
+              {
                 mail: email,
-                pass: password
-            }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
+                pass: password,
+              },
+              {
+                headers: { "Content-Type": "application/json" },
+              }
+            );
 
             // Si el backend devuelve error
             if (response.data.error) {
-                throw new Error(response.data.error);
+              throw new Error(response.data.error);
             }
 
             // Guardar token y datos del usuario
             const { token, user } = response.data;
             console.log(response.data);
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(user));
 
             // 🔐 Guardar token en una cookie llamada "jwt"
             const expirationDays = 1; // 1 día
-            const expires = new Date(Date.now() + expirationDays * 24 * 60 * 60 * 1000).toUTCString();
+            const expires = new Date(
+              Date.now() + expirationDays * 24 * 60 * 60 * 1000
+            ).toUTCString();
             document.cookie = `jwt=${token}; expires=${expires}; path=/; SameSite=Strict; Secure`;
 
             // Efecto de éxito
             submitBtn.html('<i class="bi bi-check-circle"></i> ¡Éxito!');
-            submitBtn.removeClass('btn-primary').addClass('btn-success');
+            submitBtn.removeClass("btn-primary").addClass("btn-success");
 
             setTimeout(() => {
-                window.location.href = 'dashboard.html';
+              window.location.href = "dashboard.html";
             }, 1000);
-
-        } catch (err) {
+          } catch (err) {
             console.error(err);
             submitBtn.html('<i class="bi bi-exclamation-circle"></i> Error');
-            submitBtn.removeClass('btn-primary').addClass('btn-danger');
+            submitBtn.removeClass("btn-primary").addClass("btn-danger");
 
             setTimeout(() => {
-                submitBtn.html(originalText);
-                submitBtn.removeClass('btn-danger').addClass('btn-primary');
-                submitBtn.prop('disabled', false);
-                alert('Credenciales incorrectas. Verifique su correo y contraseña.');
+              submitBtn.html(originalText);
+              submitBtn.removeClass("btn-danger").addClass("btn-primary");
+              submitBtn.prop("disabled", false);
+              alert(
+                "Credenciales incorrectas. Verifique su correo y contraseña."
+              );
             }, 1500);
-        }
-    });
+          }
+        });
 
-    // Botón cancelar
-    $('#cancelBtn').on('click', function() {
-        $('#email').val('');
-        $('#password').val('');
-        $('#email').focus();
-    });
+        // Botón cancelar
+        $("#cancelBtn").on("click", function () {
+          $("#email").val("");
+          $("#password").val("");
+          $("#email").focus();
+        });
 
-    // Animación hover
-    $('.btn').hover(
-        function() { $(this).css('transform', 'translateY(-2px)'); },
-        function() { $(this).css('transform', 'translateY(0)'); }
-    );
+        // Animación hover
+        $(".btn").hover(
+          function () {
+            $(this).css("transform", "translateY(-2px)");
+          },
+          function () {
+            $(this).css("transform", "translateY(0)");
+          }
+        );
 
-    $('#email').focus();
-});
-</script>
-</body>
+        $("#email").focus();
+      });
+    </script>
+  </body>
 </html>
