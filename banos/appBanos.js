@@ -1,3 +1,5 @@
+import { verificarAccesoSeccion } from '../middlewares/seccionesMiddleware.js';
+
 // Variables globales
 let datosGlobales = [];
 
@@ -28,7 +30,17 @@ let metodoPagoSeleccionado = null;
 // Inicialización
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM cargado - Inicializando página...");
+  
+  // --- VERIFICACIÓN DE ACCESO AL CARGAR LA PÁGINA ---
+  // Verificar acceso a la sección "baños" antes de cualquier operación
+  if (!verificarAccesoSeccion('banos')) {
+      // Si no tiene acceso, el middleware ya redirige automáticamente
+      return;
+  }
+  
   console.log("Valores de servicios disponibles:", window.restroom);
+  
+  // Si tiene acceso, continuar con la inicialización normal
   initializePage();
 });
 
