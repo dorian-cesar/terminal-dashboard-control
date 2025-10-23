@@ -166,18 +166,55 @@
                   Mostrando registros
                 </div>
                 <div>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Primero
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    id="firstPageBtn"
+                    onclick="goToPage(1)"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                    ></span>
+                    <span class="btn-text">Primero</span>
                   </button>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Anterior
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    id="prevPageBtn"
+                    onclick="goToPage(currentPage - 1)"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                    ></span>
+                    <span class="btn-text">Anterior</span>
                   </button>
-                  <span class="mx-2" style="color: #a3a3a3">1</span>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Siguiente
+                  <span
+                    class="mx-2"
+                    id="currentPageDisplay"
+                    style="color: #a3a3a3"
+                    >1</span
+                  >
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    id="nextPageBtn"
+                    onclick="goToPage(currentPage + 1)"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                    ></span>
+                    <span class="btn-text">Siguiente</span>
                   </button>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Último
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    id="lastPageBtn"
+                    onclick="goToPage(totalPages)"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                    ></span>
+                    <span class="btn-text">Último</span>
                   </button>
                 </div>
               </div>
@@ -241,10 +278,15 @@
             </button>
             <button
               type="button"
+              id="saveDestinationBtn"
               class="btn btn-primary"
               onclick="saveDestination()"
             >
-              Guardar
+              <span
+                class="spinner-border spinner-border-sm d-none"
+                role="status"
+              ></span>
+              <span class="btn-text">Guardar</span>
             </button>
           </div>
         </div>
@@ -258,9 +300,21 @@
       const API_URL = (BASE_URL || "") + "parkingCalama/php/destinos/api.php";
 
       $(document).ready(function () {
+        // Carga inicial de destinos con paginación
         loadDestinationsTable();
 
-        $("#searchInput").on("keyup", loadDestinationsTable);
+        // Filtrado por búsqueda
+        $("#searchInput").on("keyup", function () {
+          currentPage = 1; // resetear página al buscar
+          loadDestinationsTable();
+        });
+
+        // Cambio de registros por página
+        $("#entriesPerPage").on("change", function () {
+          entriesPerPage = parseInt($(this).val());
+          currentPage = 1;
+          loadDestinationsTable();
+        });
       });
 
       // --- API Functions ---
@@ -309,36 +363,23 @@
 
       // --- Table Rendering ---
       async function loadDestinationsTable() {
+        togglePaginationLoading(true);
+
         const destinations = await getDestinations();
         const searchTerm = $("#searchInput").val().toLowerCase();
-        const tbody = $("#destinationsTable");
-        tbody.empty();
-        const filtered = destinations.filter(
+
+        allDestinations = destinations.filter(
           (d) =>
             d.ciudad.toLowerCase().includes(searchTerm) ||
             d.tipo.toLowerCase().includes(searchTerm)
         );
-        filtered.forEach((d) => {
-          tbody.append(`
-            <tr>
-                <td>${d.iddest}</td>
-                <td>${d.ciudad}</td>
-                <td>$${d.valor.toLocaleString()}</td>
-                <td>${d.tipo}</td>
-                <td>
-                    <button class="btn btn-sm btn-warning" onclick="editDestination(${
-                      d.iddest
-                    })"><i class="bi bi-pencil"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteDestination(${
-                      d.iddest
-                    })"><i class="bi bi-trash"></i></button>
-                </td>
-            </tr>
-        `);
-        });
-        $("#tableInfo").text(
-          `Mostrando 1 a ${filtered.length} de ${filtered.length} registros`
-        );
+
+        totalPages = Math.ceil(allDestinations.length / entriesPerPage);
+
+        // Renderizamos la primera página inmediatamente
+        goToPage(currentPage);
+
+        togglePaginationLoading(false);
       }
 
       // --- Modal Functions ---
@@ -360,40 +401,158 @@
 
       // --- CRUD Actions ---
       async function saveDestination() {
+        const btn = document.getElementById("saveDestinationBtn");
+        toggleButtonLoading(btn, true);
+
         const id = $("#destinationId").val();
         const ciudad = $("#destinationCity").val();
         const valor = parseInt($("#destinationValue").val());
         const tipo = $("#destinationType").val();
         const dest = { ciudad, valor, tipo };
-        if (id) {
-          dest.id = parseInt(id);
-          await updateDestination(dest);
-          alert("Destino actualizado");
-        } else {
-          await addDestination(dest);
-          alert("Destino creado");
+
+        try {
+          if (id) {
+            dest.id = parseInt(id);
+            await updateDestination(dest);
+          } else {
+            await addDestination(dest);
+            alert("Destino creado");
+          }
+
+          // Cerrar modal
+          const modalEl = document.getElementById("destinationModal");
+          const modal =
+            bootstrap.Modal.getInstance(modalEl) ||
+            new bootstrap.Modal(modalEl);
+          modal.hide();
+          $(".modal-backdrop").remove();
+          $("body").removeClass("modal-open").css("padding-right", "");
+
+          loadDestinationsTable();
+        } catch (err) {
+          console.error(err);
+          alert("Error al guardar el destino");
+        } finally {
+          toggleButtonLoading(btn, false);
         }
-
-        // Cerrar modal
-        const modalEl = document.getElementById("destinationModal");
-        const modal =
-          bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-        modal.hide();
-        $(".modal-backdrop").remove();
-        $("body").removeClass("modal-open").css("padding-right", "");
-
-        loadDestinationsTable();
       }
 
       async function editDestination(id) {
         await openDestinationModal(id);
       }
+
       async function deleteDestination(id) {
         if (confirm("¿Eliminar destino?")) {
           await removeDestination(id);
           alert("Destino eliminado");
           loadDestinationsTable();
         }
+      }
+
+      function toggleButtonLoading(btn, loading = true) {
+        const spinner = btn.querySelector(".spinner-border");
+        const text = btn.querySelector(".btn-text");
+        if (loading) {
+          btn.disabled = true;
+          spinner.classList.remove("d-none");
+          text.classList.add("d-none");
+        } else {
+          btn.disabled = false;
+          spinner.classList.add("d-none");
+          text.classList.remove("d-none");
+        }
+      }
+
+      let currentPage = 1;
+      let entriesPerPage = parseInt($("#entriesPerPage").val());
+      let totalPages = 1;
+      let allDestinations = [];
+
+      $("#entriesPerPage").on("change", function () {
+        entriesPerPage = parseInt($(this).val());
+        goToPage(1);
+      });
+
+      async function loadDestinationsTable() {
+        togglePaginationLoading(true);
+
+        const destinations = await getDestinations();
+        allDestinations = destinations.filter(
+          (d) =>
+            d.ciudad
+              .toLowerCase()
+              .includes($("#searchInput").val().toLowerCase()) ||
+            d.tipo.toLowerCase().includes($("#searchInput").val().toLowerCase())
+        );
+
+        totalPages = Math.ceil(allDestinations.length / entriesPerPage);
+        goToPage(currentPage, false);
+
+        togglePaginationLoading(false);
+      }
+
+      function goToPage(page) {
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        currentPage = page;
+
+        renderCurrentPage();
+        $("#currentPageDisplay").text(currentPage);
+      }
+
+      function renderCurrentPage() {
+        const tbody = $("#destinationsTable");
+        tbody.empty();
+        const start = (currentPage - 1) * entriesPerPage;
+        const pageData = allDestinations.slice(start, start + entriesPerPage);
+
+        pageData.forEach((d) => {
+          tbody.append(`
+      <tr>
+        <td>${d.iddest}</td>
+        <td>${d.ciudad}</td>
+        <td>$${d.valor.toLocaleString()}</td>
+        <td>${d.tipo}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editDestination(${
+            d.iddest
+          })"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="deleteDestination(${
+            d.iddest
+          })"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+    `);
+        });
+
+        $("#tableInfo").text(
+          `Mostrando ${start + 1} a ${start + pageData.length} de ${
+            allDestinations.length
+          } registros`
+        );
+      }
+
+      function togglePaginationLoading(loading = true) {
+        const buttons = [
+          "firstPageBtn",
+          "prevPageBtn",
+          "nextPageBtn",
+          "lastPageBtn",
+        ];
+        buttons.forEach((id) => {
+          const btn = document.getElementById(id);
+          const spinner = btn.querySelector(".spinner-border");
+          const text = btn.querySelector(".btn-text");
+          if (loading) {
+            btn.disabled = true;
+            spinner.classList.remove("d-none");
+            text.classList.add("d-none");
+          } else {
+            btn.disabled = false;
+            spinner.classList.add("d-none");
+            text.classList.remove("d-none");
+          }
+        });
       }
     </script>
   </body>
