@@ -499,11 +499,7 @@ async function callApi(datos) {
 }
 
 function generarTokenNumerico() {
-  let token = (Math.floor(Math.random() * 9) + 1).toString();
-  for (let i = 1; i < 10; i++) {
-    token += Math.floor(Math.random() * 10);
-  }
-  return token;
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 function leerDatosServer() {
@@ -577,18 +573,18 @@ async function printQR(voucher) {
       ? `$${window.restroom[tipoSeleccionado]}`
       : "No definido";
 
-  // Ticket HTML con textos agregados
+  // Ticket HTML con fuente mejorada
   const ticketHTML = `
     <div id="ticketImpresion" style="
         width:200px;
         text-align:center;
-        font-family:'Courier New', monospace;
+        font-family:'Arial', 'Helvetica', sans-serif;
         color:#000;
         font-size:14px;
-        line-height:1.3;
+        line-height:1.35;
         padding:5px;
     ">
-      <h3 style="font-size:16px;">TICKET DE ACCESO</h3>
+      <h3 style="font-size:16px; margin-bottom:2px;">TICKET DE ACCESO</h3>
       <div style="margin:2px 0;">${fechaStr} ${horaStr}</div>
       <div style="margin:2px 0;">SERVICIO: <b>${tipoSeleccionado}</b></div>
       <div style="margin:2px 0;">VALOR: <b>${precio}</b></div>
