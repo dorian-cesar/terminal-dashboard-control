@@ -1,5 +1,5 @@
-const BASE = "https://andenes.terminal-calama.com/parkingCalama/php";
-// const BASE = "http://localhost/parkingCalama/php";
+// const BASE = "https://andenes.terminal-calama.com/parkingCalama/php";
+const BASE = "http://localhost/parkingCalama/php";
 const API_URL = BASE + "/whitelist/api.php"; // GET, POST, PUT, DELETE
 const API_EMP = BASE + "/empresas/api.php"; // GET empresas
 
