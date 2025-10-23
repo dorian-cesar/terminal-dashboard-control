@@ -194,22 +194,40 @@
         "https://andenes.terminal-calama.com/parkingCalama/php/movimientos/api.php";
       // const API_URL = "http://localhost/parkingCalama/php/movimientos/api.php";
 
-      $(document).ready(function () {
-        loadMovimientosTable();
-        $("#searchInput").on("keyup", loadMovimientosTable);
+      let currentPage = 1;
+      let entriesPerPage = parseInt($("#entriesPerPage").val());
+      let totalPages = 1;
+      let allMovimientos = [];
+      let filteredMovimientos = [];
+
+      $(document).ready(async function () {
+        // Cargar datos solo una vez
+        allMovimientos = await getMovimientos();
+        filteredMovimientos = [...allMovimientos];
+        totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
+        renderCurrentPage();
+        togglePaginationLoading(false);
+
+        // Filtros
+        $("#searchInput").on("keyup", function () {
+          currentPage = 1;
+          filterMovimientos();
+        });
+
+        $("#entriesPerPage").on("change", function () {
+          entriesPerPage = parseInt($(this).val());
+          totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
+          currentPage = 1;
+          renderCurrentPage();
+          togglePaginationLoading(false);
+        });
       });
 
-      // --- API ---
       async function getMovimientos() {
         try {
           const res = await axios.get(API_URL);
           let data = res.data;
-
-          // Si la API devuelve un solo objeto, conviértelo a array
-          if (!Array.isArray(data)) {
-            data = [data];
-          }
-
+          if (!Array.isArray(data)) data = [data];
           return data;
         } catch (err) {
           console.error("Error al obtener movimientos:", err);
@@ -217,18 +235,34 @@
         }
       }
 
-      // --- Render tabla ---
-      async function loadMovimientosTable() {
-        const movimientos = await getMovimientos();
+      function filterMovimientos() {
         const searchTerm = $("#searchInput").val().toLowerCase();
-        const tbody = $("#movimientosTable");
-        tbody.empty();
-
-        const filtered = movimientos.filter((m) =>
+        filteredMovimientos = allMovimientos.filter((m) =>
           Object.values(m).join(" ").toLowerCase().includes(searchTerm)
         );
+        totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
+        renderCurrentPage();
+        togglePaginationLoading(false);
+      }
 
-        if (filtered.length === 0) {
+      function goToPage(page) {
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        currentPage = page;
+        renderCurrentPage();
+        togglePaginationLoading(false);
+      }
+
+      function renderCurrentPage() {
+        const tbody = $("#movimientosTable");
+        tbody.empty();
+        const start = (currentPage - 1) * entriesPerPage;
+        const pageData = filteredMovimientos.slice(
+          start,
+          start + entriesPerPage
+        );
+
+        if (pageData.length === 0) {
           tbody.append(
             `<tr><td colspan="10" class="text-center text-muted">No se encontraron registros</td></tr>`
           );
@@ -236,24 +270,69 @@
           return;
         }
 
-        filtered.forEach((m) => {
+        pageData.forEach((m) => {
           tbody.append(`
-            <tr>
-              <td>${m.idmov || ""}</td>
-              <td>${m.fechaent || ""}</td>
-              <td>${m.horaent || ""}</td>
-              <td>${m.fechasal || ""}</td>
-              <td>${m.horasal || ""}</td>
-              <td>${m.patente || ""}</td>
-              <td>${m.empresa || ""}</td>
-              <td>${m.tipo || ""}</td>
-              <td>${m.estado || ""}</td>
-              <td>$${(m.valor || 0).toLocaleString("es-CL")}</td>
-            </tr>
-          `);
+      <tr>
+        <td>${m.idmov || ""}</td>
+        <td>${m.fechaent || ""}</td>
+        <td>${m.horaent || ""}</td>
+        <td>${m.fechasal || ""}</td>
+        <td>${m.horasal || ""}</td>
+        <td>${m.patente || ""}</td>
+        <td>${m.empresa || ""}</td>
+        <td>${m.tipo || ""}</td>
+        <td>${m.estado || ""}</td>
+        <td>$${(m.valor || 0).toLocaleString("es-CL")}</td>
+      </tr>
+    `);
         });
 
-        $("#tableInfo").text(`Mostrando ${filtered.length} registros`);
+        $("#tableInfo").text(
+          `Mostrando ${start + 1} a ${start + pageData.length} de ${
+            filteredMovimientos.length
+          } registros`
+        );
+      }
+
+      function togglePaginationLoading(loading = true) {
+        const container = $(
+          ".d-flex.justify-content-between.align-items-center.mt-3 div:last-child"
+        );
+        container.empty();
+
+        const buttons = [
+          { text: "Primero", page: 1 },
+          { text: "Anterior", page: currentPage - 1 },
+          { text: "Siguiente", page: currentPage + 1 },
+          { text: "Último", page: totalPages },
+        ];
+
+        buttons.forEach((b) => {
+          const btn = $(`
+      <button class="btn btn-sm btn-outline-secondary me-1" ${
+        loading || b.page < 1 || b.page > totalPages ? "disabled" : ""
+      }>
+        <span class="spinner-border spinner-border-sm ${
+          loading ? "" : "d-none"
+        }" role="status"></span>
+        <span class="btn-text">${b.text}</span>
+      </button>
+    `);
+
+          btn.on("click", () => {
+            if (!loading && b.page >= 1 && b.page <= totalPages) {
+              goToPage(b.page);
+            }
+          });
+
+          container.append(btn);
+
+          if (b.text === "Anterior") {
+            container.append(
+              `<span class="mx-2" style="color: #a3a3a3" id="currentPageDisplay">${currentPage}</span>`
+            );
+          }
+        });
       }
     </script>
   </body>
