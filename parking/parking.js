@@ -1,3 +1,11 @@
+import { verificarAccesoSeccion } from '../middlewares/seccionesMiddleware.js';
+
+   (function() {
+    if (!verificarAccesoSeccion('parking')) {
+        // Si no tiene acceso, el middleware ya redirige automáticamente
+        return;
+    }
+
 const ENV = window.APP_ENV;
 const BASE_URL = window.BASE_URL;
 const urlLocal = window.URL_LOCAL;
@@ -805,3 +813,4 @@ $(document).ready(function () {
         $("#btnTarjeta").prop("disabled", false).text("💳 Tarjeta");
     });
 });
+})();
