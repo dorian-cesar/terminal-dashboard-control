@@ -886,20 +886,20 @@ async function imprimirBoletaTermicaAndenes(datos) {
   const horaStr = dateAct.toLocaleTimeString("es-CL");
   const destino = datos.destino.split(" - ")[0].trim();
   const patente = datos.patente.toUpperCase();
-  const medio_pago = datos.medio_pago.toUpperCase();
+  const medio_pago = datos.medio_pago?.toUpperCase() || "EFECTIVO";
 
-  // HTML del ticket térmico
+  // HTML del ticket térmico con fuente legible
   const ticketHTML = `
     <div id="ticketImpresion" style="
         width:200px;
         text-align:center;
-        font-family:'Courier New', monospace;
+        font-family:'Arial', 'Helvetica', sans-serif;
         color:#000;
         font-size:13px;
-        line-height:1.3;
-        padding:5px;
+        line-height:1.35;
+        padding:6px;
     ">
-      <h3 style="font-size:15px; font-weight:bold;">TERMINAL CALAMA</h3>
+      <h3 style="font-size:15px; font-weight:700; margin-bottom:2px;">TERMINAL CALAMA</h3>
       <div style="margin:2px 0;">BOLETA DE ANDÉN</div>
       <div style="margin:2px 0;">${fechaStr} ${horaStr}</div>
       <div style="margin:4px 0;">----------------------------------</div>
@@ -907,16 +907,14 @@ async function imprimirBoletaTermicaAndenes(datos) {
       <div style="margin:2px 0;">EMPRESA: <b>${datos.empresaNombre}</b></div>
       <div style="margin:2px 0;">DESTINO: <b>${destino}</b></div>
       <div style="margin:2px 0;">VALOR TOTAL: <b>$${datos.valor}</b></div>
-      <div style="margin:2px 0;">MÉTODO PAGO: <b>${
-        medio_pago || "efectivo"
-      }</b></div>
+      <div style="margin:2px 0;">MÉTODO PAGO: <b>${medio_pago}</b></div>
       ${
         datos.autorizacion_tarjeta
           ? `<div style="margin:2px 0;">BOLETA: <b>${datos.autorizacion_tarjeta}</b></div>`
           : ""
       }
       <div style="margin:4px 0;">----------------------------------</div>
-      <div style="margin-top:4px; font-size:12px;">VÁLIDO COMO BOLETA</div>
+      <div style="margin-top:4px; font-size:12px; font-weight:600;">VÁLIDO COMO BOLETA</div>
       <div style="margin-top:6px; font-size:12px;">¡GRACIAS POR SU VISITA!</div>
     </div>`;
 
@@ -928,11 +926,11 @@ async function imprimirBoletaTermicaAndenes(datos) {
   document.body.appendChild(div);
 
   try {
-    // Capturar el HTML como imagen
+    // Capturar el HTML como imagen de alta resolución
     const canvas = await html2canvas(div, { scale: 4 });
     const imgData = canvas.toDataURL("image/png");
 
-    // Crear PDF tipo térmico (58 mm de ancho)
+    // Crear PDF tipo térmico (58 mm)
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({
       orientation: "portrait",
@@ -950,7 +948,7 @@ async function imprimirBoletaTermicaAndenes(datos) {
       body: JSON.stringify({
         pdfData: pdfBase64,
         printer: "POS58",
-        filename: `boleta_anden_${datos.patente}.pdf`,
+        filename: `boleta_anden_${patente}.pdf`,
       }),
     });
 
