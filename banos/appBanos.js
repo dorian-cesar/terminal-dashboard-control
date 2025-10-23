@@ -1,4 +1,4 @@
-import { verificarAccesoSeccion } from '../middlewares/seccionesMiddleware.js';
+import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
 
 // Variables globales
 let datosGlobales = [];
@@ -14,7 +14,8 @@ const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
 // URLs específicas de ESTA página
 const API_BANOS_BASE = `${BASE_URL}TerminalCalama/PHP/Restroom/`;
 const urlLoad = `${API_BANOS_BASE}load.php`;
-const urlLoadToday = `${API_BANOS_BASE}loadToday.php`;
+const urlLoadToday =
+  "https://andenes.terminal-calama.com/TerminalCalama/PHP/Restroom/loadToday.php";
 const urlSave = `${API_BANOS_BASE}save.php`;
 const urlAddUser = `${API_BANOS_BASE}addUser.php`;
 const urlLevelUser = `${API_BANOS_BASE}addLevelUser.php`;
@@ -30,16 +31,16 @@ let metodoPagoSeleccionado = null;
 // Inicialización
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM cargado - Inicializando página...");
-  
+
   // --- VERIFICACIÓN DE ACCESO AL CARGAR LA PÁGINA ---
   // Verificar acceso a la sección "baños" antes de cualquier operación
-  if (!verificarAccesoSeccion('banos')) {
-      // Si no tiene acceso, el middleware ya redirige automáticamente
-      return;
+  if (!verificarAccesoSeccion("banos")) {
+    // Si no tiene acceso, el middleware ya redirige automáticamente
+    return;
   }
-  
+
   console.log("Valores de servicios disponibles:", window.restroom);
-  
+
   // Si tiene acceso, continuar con la inicialización normal
   initializePage();
 });
