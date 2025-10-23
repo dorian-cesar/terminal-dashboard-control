@@ -4,5 +4,6 @@
   "private": true,
   "scripts": {
     "build": "echo 'no build script'"
-  }
+  },
+  "type": "module"
 }

@@ -124,17 +124,21 @@
           <div class="quick-actions mb-4">
             <h5>Acciones Rápidas</h5>
             <div class="action-buttons">
-              <a href="parking.html" class="action-btn">
+              <a href="./parking/parking.html" class="action-btn">
                 <i class="bi bi-car-front"></i>
                 <span>Gestión Parking</span>
               </a>
-              <a href="caja.html" class="action-btn">
-                <i class="bi bi-cash-coin"></i>
-                <span>Registrar Pago</span>
+              <a href="andenes.html" class="action-btn">
+                <i class="bi bi-bus-front"></i>
+                <span>Gestión Andenes</span>
               </a>
-              <a href="usuarios.html" class="action-btn">
+              <a href="./caja/caja.html" class="action-btn">
+                <i class="bi bi-cash-coin"></i>
+                <span>Control de Caja</span>
+              </a>
+              <a href="./usuarios/usuarios.html" class="action-btn">
                 <i class="bi bi-person-plus"></i>
-                <span>Nuevo Usuario</span>
+                <span>Gestión de Usuario</span>
               </a>
               <a href="empresas.html" class="action-btn">
                 <i class="bi bi-building"></i>
@@ -144,7 +148,7 @@
           </div>
 
           <!-- Stats Cards -->
-          <div class="stats-row">
+          <!-- <div class="stats-row">
             <div class="stat-card">
               <div class="stat-icon bg-primary">
                 <i class="bi bi-people"></i>
@@ -196,11 +200,10 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- Main Content Grid -->
-          <div class="content-grid">
-            <!-- Activity Card -->
+          <!-- <div class="content-grid">
             <div class="card">
               <div class="card-header">
                 <h5 class="mb-0">Actividad Reciente</h5>
@@ -215,12 +218,11 @@
               </div>
               <div class="card-body">
                 <div class="activity-list" id="activityList">
-                  <!-- Activity items aquí -->
+
                 </div>
               </div>
             </div>
 
-            <!-- Performance Card -->
             <div class="card">
               <div class="card-header">
                 <h5 class="mb-0">Rendimiento del Sistema</h5>
@@ -232,11 +234,10 @@
               </div>
               <div class="card-body">
                 <div class="chart-container">
-                  <!-- Gráfico aquí -->
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -256,17 +257,6 @@
         };
         const formattedDate = now.toLocaleDateString("es-ES", options);
         document.getElementById("currentDate").textContent = formattedDate;
-      }
-
-      // Función para simular datos en tiempo real
-      function simulateRealTimeUpdates() {
-        // Simular cambios en las estadísticas
-        setInterval(() => {
-          const users = document.getElementById("activeUsers");
-          const currentUsers = parseInt(users.textContent);
-          const randomChange = Math.random() > 0.7 ? 1 : 0;
-          users.textContent = currentUsers + randomChange;
-        }, 10000);
       }
 
       // Toggle del menú móvil
@@ -322,7 +312,7 @@
         checkAuthOnce();
         updateCurrentDate();
         loadUserInfo();
-        simulateRealTimeUpdates();
+        // simulateRealTimeUpdates();
 
         $("#logoutBtn").on("click", function (e) {
           e.preventDefault();
