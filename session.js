@@ -54,7 +54,7 @@
   }
 
   function redirectToLogin() {
-    alert("Su sesión ha expirado, inicie sesión nuevamente");
+    alert("Su sesión ha expirado o ha sido cerrada, inicie sesión nuevamente");
 
     setTimeout(() => {
       window.location.href = "index.html";

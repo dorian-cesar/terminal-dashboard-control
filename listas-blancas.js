@@ -18,6 +18,14 @@ const tableInfo = $("#tableInfo");
 const searchInput = $("#searchInput");
 const entriesSelect = $("#entriesPerPage");
 
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  document.cookie =
+    "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
+  window.location.href = "index.html";
+}
+
 /* --- API FUNCTIONS --- */
 async function getWhitelist() {
   try {
@@ -318,6 +326,11 @@ $(document).ready(async () => {
   const whitelist = await getWhitelist();
   cachedWL = Array.isArray(whitelist) ? whitelist : [];
   filterAndPaginate();
+
+  $("#logoutBtn").on("click", function (e) {
+    e.preventDefault();
+    logout();
+  });
 });
 
 /* --- BOTÓN LOADING --- */

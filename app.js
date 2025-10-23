@@ -99,10 +99,10 @@ function initializeData() {
 //   return false;
 // }
 
-function logout() {
-  localStorage.removeItem("user");
-  window.location.href = "index.html";
-}
+// function logout() {
+//   localStorage.removeItem("user");
+//   window.location.href = "index.html";
+// }
 
 function checkAuth() {
   const currentUser = localStorage.getItem("user");

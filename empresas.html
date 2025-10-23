@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="destinos.css" />
     <link rel="stylesheet" href="dashboard.css" />
     <script src="config.js"></script>
+    <script src="session.js"></script>
     <style>
       .table-responsive {
         max-height: 400px;
@@ -286,6 +287,19 @@
           entriesPerPage = parseInt(entriesSelect.val());
           applyPagination();
         });
+
+        $("#logoutBtn").on("click", function (e) {
+          e.preventDefault();
+          logout();
+        });
+
+        function logout() {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          document.cookie =
+            "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
+          window.location.href = "index.html";
+        }
 
         // Paginación botones
         $("#firstPage").on("click", async () => await changePage(1));
