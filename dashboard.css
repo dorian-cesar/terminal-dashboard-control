@@ -257,6 +257,15 @@ body {
   width: 100%;
 }
 
+#contentParking {
+  flex: 1;
+  margin-left: 280px;
+  padding: 0;
+  min-height: 100vh;
+  width: calc(100% - 280px);
+  /* width: 100%; */
+}
+
 /* Top Bar - Mejorada para congruencia */
 .top-bar {
   background: var(--gray-800);
