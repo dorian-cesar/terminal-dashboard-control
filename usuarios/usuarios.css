@@ -171,6 +171,158 @@ body.dashboard-page {
     font-style: italic;
 }
 
+/* ===== ESTILOS MEJORADOS PARA EL MODAL (COLOR #334155) ===== */
+.modal-content {
+    background: #334155;
+    border: 1px solid #475569;
+    border-radius: 12px;
+    color: #f1f5f9;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.modal-header {
+    background: #1e293b;
+    border-bottom: 1px solid #475569;
+    color: #f1f5f9;
+    padding: 1.5rem 1.5rem 1rem;
+}
+
+.modal-title {
+    color: #f1f5f9;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    background: #334155;
+    color: #f1f5f9;
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    background: #1e293b;
+    border-top: 1px solid #475569;
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+/* Estilos para los elementos del formulario dentro del modal */
+.modal .form-label {
+    color: #e2e8f0;
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.modal .form-control,
+.modal .form-select {
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #f1f5f9;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.modal .form-control:focus,
+.modal .form-select:focus {
+    background: #1e293b;
+    border-color: #60a5fa;
+    color: #f1f5f9;
+    box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.25);
+    outline: none;
+}
+
+.modal .form-control::placeholder {
+    color: #94a3b8;
+    opacity: 0.8;
+}
+
+/* Mejorar la legibilidad de las opciones del select */
+.modal .form-select option {
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 0.5rem;
+}
+
+/* Botones del modal - Estilo consistente */
+.modal .btn-secondary {
+    background: #475569;
+    border: 1px solid #64748b;
+    color: #f1f5f9;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.modal .btn-secondary:hover {
+    background: #64748b;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal .btn-primary {
+    background: #3b82f6;
+    border: 1px solid #60a5fa;
+    color: #ffffff;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.modal .btn-primary:hover {
+    background: #2563eb;
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Botón de cerrar del modal - Mejor visibilidad */
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.btn-close:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Fondo del modal */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-backdrop.show {
+    opacity: 0.8;
+}
+
+/* Mejorar el enfoque para accesibilidad */
+.modal .form-control:focus-visible,
+.modal .btn:focus-visible,
+.btn-close:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+}
+
+
+/* Mejorar el espaciado entre elementos del formulario */
+.modal .mb-3 {
+    margin-bottom: 1.25rem !important;
+}
+
+/* Efectos sutiles de hover en inputs */
+.modal .form-control:hover,
+.modal .form-select:hover {
+    border-color: #64748b;
+}
+
 /* Responsive */
 @media (max-width: 992px) {
     #content {
@@ -232,6 +384,25 @@ body.dashboard-page {
     .pagination-controls {
         margin-top: 1.5rem;
         padding: 1rem 0 0.5rem 0;
+    }
+    
+    /* Modal responsive */
+    .modal-content {
+        margin: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1.25rem;
+    }
+    
+    .modal-header,
+    .modal-footer {
+        padding: 1.25rem;
+    }
+    
+    .modal .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9rem;
     }
 }
 
