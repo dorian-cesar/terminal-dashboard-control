@@ -168,18 +168,48 @@
                   Mostrando registros
                 </div>
                 <div>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Primero
+                  <button
+                    id="firstPage"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                    ></span>
+                    <span class="btn-text">Primero</span>
                   </button>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Anterior
+                  <button
+                    id="prevPage"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                    ></span>
+                    <span class="btn-text">Anterior</span>
                   </button>
-                  <span class="mx-2" style="color: #a3a3a3">1</span>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Siguiente
+                  <span id="currentPage" class="mx-2" style="color: #a3a3a3"
+                    >1</span
+                  >
+                  <button
+                    id="nextPage"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                    ></span>
+                    <span class="btn-text">Siguiente</span>
                   </button>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Último
+                  <button
+                    id="lastPage"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                    ></span>
+                    <span class="btn-text">Último</span>
                   </button>
                 </div>
               </div>
@@ -228,10 +258,16 @@
             </button>
             <button
               type="button"
+              id="btnGuardar"
               class="btn btn-primary"
               onclick="saveWhitelist()"
             >
-              Guardar
+              <span
+                class="spinner-border spinner-border-sm me-2 d-none"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              <span class="btn-text">Guardar</span>
             </button>
           </div>
         </div>

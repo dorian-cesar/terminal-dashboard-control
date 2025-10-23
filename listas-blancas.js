@@ -111,8 +111,7 @@ function applyPagination(filtered) {
 
   tbody.empty();
   pageItems.forEach((w) => {
-    const empresaNombre =
-      cachedEmp.find((e) => e.idemp == w.empresa)?.nombre || "";
+    const empresaNombre = w.nombre ?? "";
     tbody.append(`
       <tr>
         <td>${w.idwl ?? ""}</td>
@@ -134,6 +133,7 @@ function applyPagination(filtered) {
     `);
   });
 
+  $("#currentPage").text(currentPage);
   tableInfo.text(
     `Mostrando ${start + 1 <= total ? start + 1 : 0} a ${Math.min(
       start + entriesPerPage,
@@ -147,13 +147,13 @@ async function loadWhitelistTable() {
   cachedWL = Array.isArray(whitelist) ? whitelist : [];
   const term = searchInput.val().toLowerCase().trim();
 
-  const filtered = cachedWL.filter(
-    (w) =>
-      (w.patente ?? "").toLowerCase().includes(term) ||
-      (cachedEmp.find((e) => e.id == w.empresa)?.nombre ?? "")
-        .toLowerCase()
-        .includes(term)
-  );
+  const filtered = cachedWL.filter((w) => {
+    const empNombre =
+      cachedEmp.find((e) => e.idemp == w.empresa)?.nombre?.toLowerCase() ?? "";
+    return (
+      (w.patente ?? "").toLowerCase().includes(term) || empNombre.includes(term)
+    );
+  });
 
   applyPagination(filtered);
 }
@@ -162,20 +162,17 @@ async function loadWhitelistTable() {
 async function openWhitelistModal(id = null) {
   $("#whitelistForm")[0].reset();
 
-  // Carga empresas si no están en cache
   if (cachedEmp.length === 0) {
     await getEmpresas();
   }
 
-  // Genera el select de empresas
   let selectHTML = `<select class="form-select" id="empresa" required>
                       <option value="">Seleccione empresa</option>`;
   cachedEmp.forEach((e) => {
-    selectHTML += `<option value="${e.id}">${e.nombre}</option>`;
+    selectHTML += `<option value="${e.idemp}">${e.nombre}</option>`;
   });
   selectHTML += `</select>`;
 
-  // Reemplaza el input de nombre por el select
   $("#nombre")
     .parent()
     .html(
@@ -183,14 +180,12 @@ async function openWhitelistModal(id = null) {
     );
 
   if (id) {
-    // EDITAR
     const item = await getWhitelistById(id);
     $("#whitelistModalTitle").text("Editar Patente");
     $("#whitelistId").val(item.idwl);
     $("#patente").val(item.patente);
     $("#empresa").val(item.empresa ?? "");
   } else {
-    // NUEVO
     $("#whitelistModalTitle").text("Agregar Patente");
     $("#whitelistId").val("");
   }
@@ -200,39 +195,55 @@ async function openWhitelistModal(id = null) {
 
 /* --- CRUD HANDLERS --- */
 async function saveWhitelist() {
-  const id = $("#whitelistId").val();
-  const patente = $("#patente").val().trim();
-  const empresa = $("#empresa").val();
+  const btn = document.getElementById("btnGuardar");
+  const spinner = btn.querySelector(".spinner-border");
+  const text = btn.querySelector(".btn-text");
 
-  if (!patRegEx.test(patente)) {
-    alert("Formatos de patente:\nABCD12\nABCD-12\nAB-CD-12");
-    return;
+  btn.disabled = true;
+  spinner.classList.remove("d-none");
+  text.textContent = "Guardando...";
+
+  try {
+    const id = $("#whitelistId").val();
+    const patente = $("#patente").val().trim().toUpperCase();
+    const empresa = $("#empresa").val();
+
+    if (!patRegEx.test(patente)) {
+      alert("Formatos de patente:\nABCD12\nABCD-12\nAB-CD-12");
+      return;
+    }
+
+    if (!empresa) {
+      alert("Debe seleccionar una empresa");
+      return;
+    }
+
+    const data = { patente, empresa };
+
+    if (id) {
+      data.id = parseInt(id);
+      await updateWhitelist(data);
+    } else {
+      await addWhitelist(data);
+      alert("Patente agregada");
+    }
+
+    const modalEl = document.getElementById("whitelistModal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+    $(".modal-backdrop").remove();
+    $("body").removeClass("modal-open").css("padding-right", "");
+
+    currentPage = 1;
+    loadWhitelistTable();
+  } catch (e) {
+    console.error(e);
+    alert("Error al guardar la patente");
+  } finally {
+    btn.disabled = false;
+    spinner.classList.add("d-none");
+    text.textContent = "Guardar";
   }
-
-  if (!empresa) {
-    alert("Debe seleccionar una empresa");
-    return;
-  }
-
-  const data = { patente, empresa };
-
-  if (id) {
-    data.id = parseInt(id);
-    await updateWhitelist(data);
-    alert("Patente actualizada");
-  } else {
-    await addWhitelist(data);
-    alert("Patente agregada");
-  }
-
-  const modalEl = document.getElementById("whitelistModal");
-  const modal = bootstrap.Modal.getInstance(modalEl);
-  modal.hide();
-  $(".modal-backdrop").remove();
-  $("body").removeClass("modal-open").css("padding-right", "");
-
-  currentPage = 1;
-  loadWhitelistTable();
 }
 
 async function editWhitelist(id) {
@@ -246,22 +257,38 @@ async function deleteWhitelist(id) {
 }
 
 /* --- PAGINACIÓN --- */
-$("#firstPage").on("click", () => {
+$("#firstPage").on("click", async (e) => {
+  const btn = e.currentTarget;
+  toggleButtonLoading(btn, true);
   currentPage = 1;
-  loadWhitelistTable();
+  await loadWhitelistTable();
+  toggleButtonLoading(btn, false);
 });
-$("#prevPage").on("click", () => {
+
+$("#prevPage").on("click", async (e) => {
+  const btn = e.currentTarget;
+  toggleButtonLoading(btn, true);
   currentPage = Math.max(1, currentPage - 1);
-  loadWhitelistTable();
+  await loadWhitelistTable();
+  toggleButtonLoading(btn, false);
 });
-$("#nextPage").on("click", () => {
+
+$("#nextPage").on("click", async (e) => {
+  const btn = e.currentTarget;
+  toggleButtonLoading(btn, true);
   currentPage++;
-  loadWhitelistTable();
+  await loadWhitelistTable();
+  toggleButtonLoading(btn, false);
 });
-$("#lastPage").on("click", () => {
+
+$("#lastPage").on("click", async (e) => {
+  const btn = e.currentTarget;
+  toggleButtonLoading(btn, true);
   const total = cachedWL.length;
+  entriesPerPage = parseInt(entriesSelect.val());
   currentPage = Math.max(1, Math.ceil(total / entriesPerPage));
-  loadWhitelistTable();
+  await loadWhitelistTable();
+  toggleButtonLoading(btn, false);
 });
 
 entriesSelect.on("change", () => {
@@ -278,3 +305,17 @@ $(document).ready(() => {
   loadEmpresasSelect();
   loadWhitelistTable();
 });
+
+function toggleButtonLoading(btn, loading = true) {
+  const spinner = btn.querySelector(".spinner-border");
+  const text = btn.querySelector(".btn-text");
+  if (loading) {
+    btn.disabled = true;
+    spinner.classList.remove("d-none");
+    text.classList.add("d-none");
+  } else {
+    btn.disabled = false;
+    spinner.classList.add("d-none");
+    text.classList.remove("d-none");
+  }
+}
