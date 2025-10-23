@@ -7,10 +7,63 @@ const VOLVER_URL = `../dashboard.html`;
 //api caja
 const API_URL = `${BASE_URL}caja-calama/`;
 
-// EL RESTO DEL CÓDIGO PERMANECE IGUAL...
+// Importar el middleware 
+import { verificarAccesoSeccion } from '../middlewares/seccionesMiddleware.js';
+
+// --- VERIFICACIÓN DE ACCESO AL CARGAR LA PÁGINA ---
 $(document).ready(function () {
+  // Verificar acceso a la sección "caja" antes de cualquier operación
+  if (!verificarAccesoSeccion('caja')) {
+      // Si no tiene acceso, el middleware ya redirige automáticamente
+      return;
+  }
+
+  // Si tiene acceso, continuar con la inicialización normal
   $("#volver").attr("href", VOLVER_URL);
+  inicializarCaja();
 });
+
+function inicializarCaja() {
+  // Verificar estado al cargar la página
+  verificarEstadoCaja();
+
+  // Configurar verificación automática cada 30 segundos
+  setInterval(() => {
+    verificarEstadoCaja();
+  }, 30000);
+
+  // Configurar auto-refresh cada 10 segundos para movimientos si hay caja abierta
+  setInterval(() => {
+    if (localStorage.getItem("id_caja")) {
+      const id = localStorage.getItem("id_caja");
+      cargarMovimientosCaja(id);
+    }
+  }, 10000);
+
+  // Mejorar la experiencia del formulario
+  $("#monto_inicial_modal").on("focus", function () {
+    $(this).select();
+  });
+
+  // Prevenir el cierre del modal si hay errores
+  $("#modalInicio").on("hide.bs.modal", function () {
+    $("#formInicioCaja")[0].reset();
+  });
+
+  // Shortcut keys
+  $(document).on("keydown", function (e) {
+    // F5 para refresh
+    if (e.key === "F5") {
+      e.preventDefault();
+      $("#btnRefresh").click();
+    }
+    // Ctrl+P para imprimir
+    if (e.ctrlKey && e.key === "p") {
+      e.preventDefault();
+      $("#btnImprimir").click();
+    }
+  });
+}
 
 // --- Sistema de Notificaciones (mejorado, crea contenedor si no existe y tiene fallback) ---
 class ToastSystem {
@@ -89,7 +142,7 @@ class UIStateManager {
 
       // Forzar el estado de los botones
       abrirBtn.prop("disabled", false);
-      cerrarBtn.prop("disabled", true);  // Este es el importante
+      cerrarBtn.prop("disabled", true);
       imprimirBtn.prop("disabled", true);
       refreshBtn.prop("disabled", false);
 
@@ -172,7 +225,6 @@ class UIStateManager {
     }
     $("#progressTime").text("--:--:--");
     $("#turnProgress").css("width", "0%");
-    // No es necesario cambiar el color aquí ya que se reseteará cuando se abra una nueva caja
   }
 }
 
@@ -182,7 +234,6 @@ function ahoraChile() {
   });
 }
 
-// Ejemplo: solo fecha
 function fechaHoyChile() {
   return new Date().toLocaleDateString("es-CL", {
     timeZone: "America/Santiago",
@@ -192,7 +243,6 @@ function fechaHoyChile() {
   });
 }
 
-// Ejemplo: hora
 function horaActualChile() {
   return new Date().toLocaleTimeString("es-CL", {
     timeZone: "America/Santiago",
@@ -201,7 +251,6 @@ function horaActualChile() {
     second: "2-digit",
   });
 }
-
 
 async function obtenerNumeroCaja() {
   const url = "http://localhost:3000/api/info-caja";
@@ -220,7 +269,6 @@ async function obtenerNumeroCaja() {
   } catch (err) {
     console.error("Error al obtener NUMERO_CAJA:", err);
 
-    // Mostrar siempre alerta visual + fallback de alerta nativa
     ToastSystem.show(
       "No se pudo conectar con el servidor de identificación de terminal.<br>Verifique la red o contacte a soporte técnico.",
       "error",
@@ -249,9 +297,7 @@ function cargarMovimientosCaja(idCaja) {
       }
 
       if (data.success) {
-        // Actualizar la tabla con los movimientos
         actualizarTablaConMovimientos(data);
-        // Actualizar las estadísticas
         actualizarEstadisticas(data);
       } else {
         console.error("Error en movimientos:", data.error);
@@ -263,7 +309,6 @@ function cargarMovimientosCaja(idCaja) {
 }
 
 function actualizarTablaConMovimientos(movimientos) {
-  // Obtener los datos básicos de la caja actual
   const id = localStorage.getItem("id_caja");
   const fecha =
     $("#tablaCaja tbody tr td:first-child").text().replace("📅 ", "") ||
@@ -290,16 +335,12 @@ function actualizarTablaConMovimientos(movimientos) {
             <td><i class="fas fa-calendar text-gray-400 me-2"></i>${fecha}</td>
             <td><i class="fas fa-clock text-gray-400 me-2"></i>${horaInicio}</td>
             <td><i class="fas fa-clock text-gray-400 me-2"></i>-</td>
-            <td><strong>$${UIStateManager.formatCurrency(
-              monto_inicial
-            )}</strong></td>
+            <td><strong>$${UIStateManager.formatCurrency(monto_inicial)}</strong></td>
             <td>$${UIStateManager.formatCurrency(monto_bano)}</td>
             <td>$${UIStateManager.formatCurrency(monto_custodia)}</td>
             <td>$${UIStateManager.formatCurrency(monto_parking)}</td>
             <td>$${UIStateManager.formatCurrency(monto_andenes)}</td>
-            <td><strong class="text-success">$${UIStateManager.formatCurrency(
-              total
-            )}</strong></td>
+            <td><strong class="text-success">$${UIStateManager.formatCurrency(total)}</strong></td>
             <td>${estadoBadge}</td>
         </tr>
     `);
@@ -335,117 +376,6 @@ function actualizarEstadisticas(movimientos) {
 }
 
 // --- Funciones Principales ---
-function mostrarCaja(data) {
-  const monto_bano = parseFloat(data.monto_bano || 0);
-  const monto_custodia = parseFloat(data.monto_custodia || 0);
-  const monto_parking = parseFloat(data.monto_parking || 0);
-  const monto_andenes = parseFloat(data.monto_andenes || 0);
-  const monto_inicial = parseFloat(data.monto_inicial || 0);
-  const total = monto_inicial + monto_bano + monto_custodia + monto_parking + monto_andenes;
-
-  const estadoBadge = data.estado === "abierta"
-    ? '<span class="badge badge-abierta"><i class="fas fa-play-circle me-1"></i>Abierta</span>'
-    : '<span class="badge badge-cerrada"><i class="fas fa-stop-circle me-1"></i>Cerrada</span>';
-
-  $("#tablaCaja tbody").html(`
-        <tr>
-            <td><i class="fas fa-calendar text-gray-400 me-2"></i>${data.fecha}</td>
-            <td><i class="fas fa-clock text-gray-400 me-2"></i>${data.hora_inicio}</td>
-            <td><i class="fas fa-clock text-gray-400 me-2"></i>${data.hora_cierre || "-"}</td>
-            <td><strong>$${UIStateManager.formatCurrency(monto_inicial)}</strong></td>
-            <td>$${UIStateManager.formatCurrency(monto_bano)}</td>
-            <td>$${UIStateManager.formatCurrency(monto_custodia)}</td>
-            <td>$${UIStateManager.formatCurrency(monto_parking)}</td>
-            <td>$${UIStateManager.formatCurrency(monto_andenes)}</td>
-            <td><strong class="text-success">$${UIStateManager.formatCurrency(total)}</strong></td>
-            <td>${estadoBadge}</td>
-        </tr>
-    `);
-
-  $("#noDataRow").hide();
-  $("#registrosCount").text("1 registro");
-
-  // Actualizar resumen para impresión
-  $("#resumenCaja").html(`
-        <div class="text-center mb-4">
-            <h3 class="mb-1">Terminal de Buses Calama</h3>
-            <p class="text-muted mb-0">Resumen de Caja - ${data.fecha}</p>
-        </div>
-        <div class="row">
-            <div class="col-6">
-                <p><strong>Hora Inicio:</strong> ${data.hora_inicio}</p>
-                ${data.hora_cierre ? `<p><strong>Hora Cierre:</strong> ${data.hora_cierre}</p>` : ""}
-                <p><strong>Estado:</strong> ${data.estado}</p>
-            </div>
-            <div class="col-6 text-end">
-                <p><strong>ID Caja:</strong> ${data.id}</p>
-            </div>
-        </div>
-        <hr>
-        <div class="monto-item">
-            <span>Monto Inicial:</span>
-            <strong>$${UIStateManager.formatCurrency(monto_inicial)}</strong>
-        </div>
-        <div class="monto-item">
-            <span>Ingresos Baños:</span>
-            <span>$${UIStateManager.formatCurrency(monto_bano)}</span>
-        </div>
-        <div class="monto-item">
-            <span>Ingresos Custodia:</span>
-            <span>$${UIStateManager.formatCurrency(monto_custodia)}</span>
-        </div>
-        <div class="monto-item">
-            <span>Ingresos Parking:</span>
-            <span>$${UIStateManager.formatCurrency(monto_parking)}</span>
-        </div>
-        <div class="monto-item">
-            <span>Ingresos Andenes:</span>
-            <span>$${UIStateManager.formatCurrency(monto_andenes)}</span>
-        </div>
-        <hr>
-        <div class="monto-total">
-            <div class="d-flex justify-content-between align-items-center">
-                <span><strong>TOTAL GENERAL:</strong></span>
-                <span class="h4 mb-0 text-success"><strong>$${UIStateManager.formatCurrency(total)}</strong></span>
-            </div>
-        </div>
-        <div class="text-center mt-4 text-muted">
-            <small>Generado el ${fechaHoyChile()} ${horaActualChile()}</small>
-        </div>
-    `);
-}
-
-function limpiarEstadoCaja() {
-  // Limpiar localStorage
-  localStorage.removeItem("id_caja");
-  
-  // Forzar estado cerrado en la UI
-  $("#btnCerrarCaja").prop("disabled", true);
-  $("#btnImprimir").prop("disabled", true);
-  $("#btnAbrirCaja").prop("disabled", false);
-  
-  $("#cajaStatus").removeClass("caja-abierta").addClass("caja-cerrada")
-                 .html('<i class="fas fa-circle"></i> Caja Cerrada');
-  
-  // Resetear estadísticas
-  UIStateManager.resetStats();
-  UIStateManager.stopTurnTimer();
-  
-  // Mostrar tabla vacía
-  $("#noDataRow").show();
-  $("#registrosCount").text("0 registros");
-  $("#tablaCaja tbody").html(`
-        <tr id="noDataRow">
-            <td colspan="10" class="text-center py-5 text-muted">
-                <i class="fas fa-inbox fa-3x mb-3"></i>
-                <br>
-                No hay datos de caja disponibles
-            </td>
-        </tr>
-    `);
-}
-
-// --- Funciones Principales Simplificadas ---
 function mostrarCaja(data) {
   const monto_bano = parseFloat(data.monto_bano || 0);
   const monto_custodia = parseFloat(data.monto_custodia || 0);
@@ -592,7 +522,6 @@ function verificarEstadoCaja() {
     })
     .fail(function (xhr, status, error) {
       console.error("Error al verificar caja:", error);
-      // En caso de error, mantener el estado actual pero intentar de nuevo luego
     });
 }
 
@@ -673,7 +602,6 @@ $("#btnCerrarCaja").on("click", function () {
     return;
   }
 
-  // MOSTRAR SPINNER Y DESACTIVAR INMEDIATAMENTE
   const $btn = $(this);
   const originalText = $btn.html();
   
@@ -694,7 +622,6 @@ $("#btnCerrarCaja").on("click", function () {
     try {
       const data = JSON.parse(res);
       if (data.success) {
-        // Limpiar estado inmediatamente
         limpiarEstadoCaja();
         ToastSystem.show("Caja cerrada correctamente", "success");
       } else {
@@ -702,16 +629,12 @@ $("#btnCerrarCaja").on("click", function () {
       }
     } catch (e) {
       ToastSystem.show("Error al procesar respuesta: " + e.message, "error");
-      // Aún así limpiar el estado local
       limpiarEstadoCaja();
     }
   })
   .fail(function (xhr, status, error) {
     ToastSystem.show("Error de conexión: " + error, "error");
-    // Aún así limpiar el estado local
     limpiarEstadoCaja();
-  })
-  .always(function () {
   });
 });
 
@@ -734,47 +657,4 @@ $("#btnImprimir").on("click", function () {
 $("#btnRefresh").on("click", function () {
   verificarEstadoCaja();
   ToastSystem.show("Datos actualizados", "info", 2000);
-});
-
-// --- Inicialización ---
-$(document).ready(function () {
-  // Verificar estado al cargar la página
-  verificarEstadoCaja();
-
-  // Configurar verificación automática cada 30 segundos
-  setInterval(() => {
-    verificarEstadoCaja();
-  }, 30000);
-
-  // Configurar auto-refresh cada 10 segundos para movimientos si hay caja abierta
-  setInterval(() => {
-    if (localStorage.getItem("id_caja")) {
-      const id = localStorage.getItem("id_caja");
-      cargarMovimientosCaja(id);
-    }
-  }, 10000);
-
-  // Mejorar la experiencia del formulario
-  $("#monto_inicial_modal").on("focus", function () {
-    $(this).select();
-  });
-
-  // Prevenir el cierre del modal si hay errores
-  $("#modalInicio").on("hide.bs.modal", function () {
-    $("#formInicioCaja")[0].reset();
-  });
-
-  // Shortcut keys
-  $(document).on("keydown", function (e) {
-    // F5 para refresh
-    if (e.key === "F5") {
-      e.preventDefault();
-      $("#btnRefresh").click();
-    }
-    // Ctrl+P para imprimir
-    if (e.ctrlKey && e.key === "p") {
-      e.preventDefault();
-      $("#btnImprimir").click();
-    }
-  });
 });

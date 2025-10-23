@@ -90,9 +90,11 @@ function getCurrentPageUsers() {
 function getSelectedSections() {
     const selectedSections = [];
     $('.section-checkbox:checked').each(function() {
-        selectedSections.push($(this).val());
+        // Convertir a minúsculas y trim para eliminar espacios
+        selectedSections.push($(this).val().toLowerCase().trim());
     });
-    return selectedSections.join(', ');
+    // Usar join(',') sin espacio para evitar "andenes, caja"
+    return selectedSections.join(',');
 }
 
 function setSelectedSections(sectionsString) {
@@ -100,9 +102,17 @@ function setSelectedSections(sectionsString) {
     $('.section-checkbox').prop('checked', false);
     
     if (sectionsString) {
-        const sectionsArray = sectionsString.split(',').map(s => s.trim());
+        // Limpiar espacios y dividir
+        const sectionsArray = sectionsString.split(',')
+            .map(s => s.trim().toLowerCase())
+            .filter(s => s !== ''); // Filtrar strings vacíos
+        
         sectionsArray.forEach(section => {
-            $(`.section-checkbox[value="${section}"]`).prop('checked', true);
+            // Buscar el checkbox que coincida (convertir a formato título para comparar)
+            const sectionTitle = section.charAt(0).toUpperCase() + section.slice(1);
+            
+            // Intentar encontrar el checkbox por valor en formato título
+            $(`.section-checkbox[value="${sectionTitle}"]`).prop('checked', true);
         });
     }
 }
@@ -141,13 +151,21 @@ async function loadUsersTable() {
             </tr>
         `);
     } else {
+        // En loadUsersTable(), modifica la parte que muestra las secciones:
         currentUsers.forEach(u => {
+            // Limpiar y formatear las secciones para mostrar
+            const formattedSections = u.seccion.split(',')
+                .map(s => s.trim()) // Eliminar espacios
+                .filter(s => s !== '') // Filtrar vacíos
+                .map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()) // Formato título
+                .join(', '); // Mostrar con espacios para legibilidad
+            
             tbody.append(`
                 <tr>
                     <td>${u.iduser}</td>
                     <td>${u.mail}</td>
                     <td>${u.descriptor}</td>
-                    <td>${u.seccion}</td>
+                    <td>${formattedSections}</td>
                     <td>
                         <button class="btn btn-sm btn-warning" onclick="editUser(${u.iduser})" title="Editar">
                             <i class="bi bi-pencil"></i>
