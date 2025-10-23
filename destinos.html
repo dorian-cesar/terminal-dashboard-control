@@ -299,21 +299,33 @@
     <script>
       const API_URL = (BASE_URL || "") + "parkingCalama/php/destinos/api.php";
 
-      $(document).ready(function () {
-        // Carga inicial de destinos con paginación
-        loadDestinationsTable();
+      let currentPage = 1;
+      let entriesPerPage = parseInt($("#entriesPerPage").val());
+      let totalPages = 1;
+      let allDestinations = [];
+      let filteredDestinations = [];
+
+      $(document).ready(async function () {
+        // Cargar datos solo una vez
+        allDestinations = await getDestinations();
+        filteredDestinations = [...allDestinations];
+        totalPages = Math.ceil(filteredDestinations.length / entriesPerPage);
+        renderCurrentPage();
+        togglePaginationLoading(false);
 
         // Filtrado por búsqueda
         $("#searchInput").on("keyup", function () {
-          currentPage = 1; // resetear página al buscar
-          loadDestinationsTable();
+          currentPage = 1;
+          filterDestinations();
         });
 
         // Cambio de registros por página
         $("#entriesPerPage").on("change", function () {
           entriesPerPage = parseInt($(this).val());
+          totalPages = Math.ceil(filteredDestinations.length / entriesPerPage);
           currentPage = 1;
-          loadDestinationsTable();
+          renderCurrentPage();
+          togglePaginationLoading(false);
         });
       });
 
@@ -327,6 +339,7 @@
           return [];
         }
       }
+
       async function getDestinationById(id) {
         try {
           const res = await axios.get(`${API_URL}?id=${id}`);
@@ -336,6 +349,7 @@
           return null;
         }
       }
+
       async function addDestination(destination) {
         try {
           await axios.post(API_URL, destination);
@@ -344,6 +358,7 @@
           alert("Error al agregar");
         }
       }
+
       async function updateDestination(destination) {
         try {
           await axios.put(API_URL, destination);
@@ -352,6 +367,7 @@
           alert("Error al actualizar");
         }
       }
+
       async function removeDestination(id) {
         try {
           await axios.delete(API_URL, { data: { id } });
@@ -361,25 +377,96 @@
         }
       }
 
-      // --- Table Rendering ---
-      async function loadDestinationsTable() {
-        togglePaginationLoading(true);
-
-        const destinations = await getDestinations();
+      // --- Filtrado ---
+      function filterDestinations() {
         const searchTerm = $("#searchInput").val().toLowerCase();
-
-        allDestinations = destinations.filter(
+        filteredDestinations = allDestinations.filter(
           (d) =>
             d.ciudad.toLowerCase().includes(searchTerm) ||
             d.tipo.toLowerCase().includes(searchTerm)
         );
-
-        totalPages = Math.ceil(allDestinations.length / entriesPerPage);
-
-        // Renderizamos la primera página inmediatamente
-        goToPage(currentPage);
-
+        totalPages = Math.ceil(filteredDestinations.length / entriesPerPage);
+        renderCurrentPage();
         togglePaginationLoading(false);
+      }
+
+      // --- Paginación ---
+      function goToPage(page) {
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        currentPage = page;
+        renderCurrentPage();
+        togglePaginationLoading(false);
+      }
+
+      function renderCurrentPage() {
+        const tbody = $("#destinationsTable");
+        tbody.empty();
+        const start = (currentPage - 1) * entriesPerPage;
+        const pageData = filteredDestinations.slice(
+          start,
+          start + entriesPerPage
+        );
+
+        if (pageData.length === 0) {
+          tbody.append(
+            `<tr><td colspan="5" class="text-center text-muted">No se encontraron registros</td></tr>`
+          );
+          $("#tableInfo").text("Sin registros que mostrar");
+          return;
+        }
+
+        pageData.forEach((d) => {
+          tbody.append(`
+        <tr>
+          <td>${d.iddest}</td>
+          <td>${d.ciudad}</td>
+          <td>$${d.valor != null ? d.valor.toLocaleString() : "-"}</td>
+          <td>${d.tipo}</td>
+          <td>
+            <button class="btn btn-sm btn-warning" onclick="editDestination(${
+              d.iddest
+            })"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteDestination(${
+              d.iddest
+            })"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+      `);
+        });
+
+        $("#tableInfo").text(
+          `Mostrando ${start + 1} a ${start + pageData.length} de ${
+            filteredDestinations.length
+          } registros`
+        );
+
+        // Actualizar número de página
+        $("#currentPageDisplay").text(currentPage);
+      }
+
+      // --- Botones de paginación ---
+      function togglePaginationLoading(loading = true) {
+        const buttons = [
+          "firstPageBtn",
+          "prevPageBtn",
+          "nextPageBtn",
+          "lastPageBtn",
+        ];
+        buttons.forEach((id) => {
+          const btn = document.getElementById(id);
+          const spinner = btn.querySelector(".spinner-border");
+          const text = btn.querySelector(".btn-text");
+          if (loading) {
+            btn.disabled = true;
+            spinner.classList.remove("d-none");
+            text.classList.add("d-none");
+          } else {
+            btn.disabled = false;
+            spinner.classList.add("d-none");
+            text.classList.remove("d-none");
+          }
+        });
       }
 
       // --- Modal Functions ---
@@ -405,15 +492,35 @@
         toggleButtonLoading(btn, true);
 
         const id = $("#destinationId").val();
-        const ciudad = $("#destinationCity").val();
-        const valor = parseInt($("#destinationValue").val());
+        const ciudad = $("#destinationCity").val().trim();
+        const valorStr = $("#destinationValue").val().trim();
         const tipo = $("#destinationType").val();
+
+        // Validación de campos vacíos
+        if (!ciudad) {
+          alert("La ciudad es obligatoria");
+          toggleButtonLoading(btn, false);
+          return;
+        }
+        if (!valorStr) {
+          alert("El valor es obligatorio");
+          toggleButtonLoading(btn, false);
+          return;
+        }
+        if (!tipo) {
+          alert("El tipo es obligatorio");
+          toggleButtonLoading(btn, false);
+          return;
+        }
+
+        const valor = parseInt(valorStr);
         const dest = { ciudad, valor, tipo };
 
         try {
           if (id) {
             dest.id = parseInt(id);
             await updateDestination(dest);
+            alert("Destino actualizado");
           } else {
             await addDestination(dest);
             alert("Destino creado");
@@ -428,7 +535,18 @@
           $(".modal-backdrop").remove();
           $("body").removeClass("modal-open").css("padding-right", "");
 
-          loadDestinationsTable();
+          // Actualizar tabla localmente sin recargar API
+          if (!id) {
+            allDestinations.push({
+              ...dest,
+              iddest: allDestinations.length + 1,
+            });
+          } else {
+            const idx = allDestinations.findIndex((d) => d.iddest == id);
+            if (idx >= 0)
+              allDestinations[idx] = { ...dest, iddest: parseInt(id) };
+          }
+          filterDestinations();
         } catch (err) {
           console.error(err);
           alert("Error al guardar el destino");
@@ -445,7 +563,9 @@
         if (confirm("¿Eliminar destino?")) {
           await removeDestination(id);
           alert("Destino eliminado");
-          loadDestinationsTable();
+          // Actualizar arreglo local
+          allDestinations = allDestinations.filter((d) => d.iddest != id);
+          filterDestinations();
         }
       }
 
@@ -461,98 +581,6 @@
           spinner.classList.add("d-none");
           text.classList.remove("d-none");
         }
-      }
-
-      let currentPage = 1;
-      let entriesPerPage = parseInt($("#entriesPerPage").val());
-      let totalPages = 1;
-      let allDestinations = [];
-
-      $("#entriesPerPage").on("change", function () {
-        entriesPerPage = parseInt($(this).val());
-        goToPage(1);
-      });
-
-      async function loadDestinationsTable() {
-        togglePaginationLoading(true);
-
-        const destinations = await getDestinations();
-        allDestinations = destinations.filter(
-          (d) =>
-            d.ciudad
-              .toLowerCase()
-              .includes($("#searchInput").val().toLowerCase()) ||
-            d.tipo.toLowerCase().includes($("#searchInput").val().toLowerCase())
-        );
-
-        totalPages = Math.ceil(allDestinations.length / entriesPerPage);
-        goToPage(currentPage, false);
-
-        togglePaginationLoading(false);
-      }
-
-      function goToPage(page) {
-        if (page < 1) page = 1;
-        if (page > totalPages) page = totalPages;
-        currentPage = page;
-
-        renderCurrentPage();
-        $("#currentPageDisplay").text(currentPage);
-      }
-
-      function renderCurrentPage() {
-        const tbody = $("#destinationsTable");
-        tbody.empty();
-        const start = (currentPage - 1) * entriesPerPage;
-        const pageData = allDestinations.slice(start, start + entriesPerPage);
-
-        pageData.forEach((d) => {
-          tbody.append(`
-      <tr>
-        <td>${d.iddest}</td>
-        <td>${d.ciudad}</td>
-        <td>$${d.valor.toLocaleString()}</td>
-        <td>${d.tipo}</td>
-        <td>
-          <button class="btn btn-sm btn-warning" onclick="editDestination(${
-            d.iddest
-          })"><i class="bi bi-pencil"></i></button>
-          <button class="btn btn-sm btn-danger" onclick="deleteDestination(${
-            d.iddest
-          })"><i class="bi bi-trash"></i></button>
-        </td>
-      </tr>
-    `);
-        });
-
-        $("#tableInfo").text(
-          `Mostrando ${start + 1} a ${start + pageData.length} de ${
-            allDestinations.length
-          } registros`
-        );
-      }
-
-      function togglePaginationLoading(loading = true) {
-        const buttons = [
-          "firstPageBtn",
-          "prevPageBtn",
-          "nextPageBtn",
-          "lastPageBtn",
-        ];
-        buttons.forEach((id) => {
-          const btn = document.getElementById(id);
-          const spinner = btn.querySelector(".spinner-border");
-          const text = btn.querySelector(".btn-text");
-          if (loading) {
-            btn.disabled = true;
-            spinner.classList.remove("d-none");
-            text.classList.add("d-none");
-          } else {
-            btn.disabled = false;
-            spinner.classList.add("d-none");
-            text.classList.remove("d-none");
-          }
-        });
       }
     </script>
   </body>
