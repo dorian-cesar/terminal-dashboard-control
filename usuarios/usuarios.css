@@ -245,6 +245,98 @@ body.dashboard-page {
     padding: 0.5rem;
 }
 
+/* ===== ESTILOS MEJORADOS PARA LOS CHECKBOXES DE SECCIONES ===== */
+.sections-checkbox-group {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.sections-checkbox-group .form-check {
+    margin-bottom: 0;
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    padding: 0.75rem;
+}
+
+.sections-checkbox-group .form-check:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sections-checkbox-group .form-check-input {
+    background-color: #334155;
+    border: 2px solid #64748b;
+    border-radius: 6px;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 1rem;
+    margin-top: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.sections-checkbox-group .form-check-input:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+
+.sections-checkbox-group .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    border-color: #3b82f6;
+}
+
+.sections-checkbox-group .form-check-label {
+    color: #e2e8f0;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+    flex-grow: 1;
+    font-size: 1rem;
+}
+
+.sections-checkbox-group .form-check-label:hover {
+    color: #f1f5f9;
+}
+
+.sections-checkbox-group .form-check-input:checked + .form-check-label {
+    color: #f1f5f9;
+    font-weight: 500;
+}
+
+.sections-checkbox-group .bi {
+    font-size: 1.3em;
+    width: 1.75em;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+    margin-right: 0.75rem;
+}
+
+.sections-checkbox-group .form-check-input:checked + .form-check-label .bi {
+    color: #3b82f6;
+}
+
+/* Texto de ayuda */
+.modal .form-text {
+    color: #94a3b8 !important;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: block;
+}
+
 /* Botones del modal - Estilo consistente */
 .modal .btn-secondary {
     background: #475569;
@@ -306,11 +398,11 @@ body.dashboard-page {
 /* Mejorar el enfoque para accesibilidad */
 .modal .form-control:focus-visible,
 .modal .btn:focus-visible,
-.btn-close:focus-visible {
+.btn-close:focus-visible,
+.sections-checkbox-group .form-check-input:focus-visible {
     outline: 2px solid #60a5fa;
     outline-offset: 2px;
 }
-
 
 /* Mejorar el espaciado entre elementos del formulario */
 .modal .mb-3 {
@@ -362,6 +454,13 @@ body.dashboard-page {
     .pagination-controls > div:last-child {
         order: 1;
     }
+    
+    /* Checkboxes en una sola columna en tablets */
+    .sections-checkbox-group {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 1.25rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -403,6 +502,33 @@ body.dashboard-page {
     .modal .btn {
         padding: 0.625rem 1.25rem;
         font-size: 0.9rem;
+    }
+    
+    /* Checkboxes más compactos en móviles */
+    .sections-checkbox-group {
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+    
+    .sections-checkbox-group .form-check {
+        padding: 0.5rem;
+        min-height: 2.25rem;
+    }
+    
+    .sections-checkbox-group .form-check-input {
+        width: 1.4em;
+        height: 1.4em;
+        margin-right: 0.75rem;
+    }
+    
+    .sections-checkbox-group .bi {
+        font-size: 1.2em;
+        width: 1.5em;
+        margin-right: 0.5rem;
+    }
+    
+    .sections-checkbox-group .form-check-label {
+        font-size: 0.95rem;
     }
 }
 

@@ -9,6 +9,9 @@ let entriesPerPage = 10;
 let allUsers = [];
 let filteredUsers = [];
 
+// Lista de secciones disponibles
+const availableSections = ['Baños', 'Custodia', 'Parking', 'Andenes', 'Caja'];
+
 // --- Cargar tabla ---
 async function getUsers() {
     try {
@@ -81,6 +84,27 @@ function getCurrentPageUsers() {
     const start = (currentPage - 1) * entriesPerPage;
     const end = start + entriesPerPage;
     return filteredUsers.slice(start, end);
+}
+
+// --- Funciones para manejar secciones ---
+function getSelectedSections() {
+    const selectedSections = [];
+    $('.section-checkbox:checked').each(function() {
+        selectedSections.push($(this).val());
+    });
+    return selectedSections.join(', ');
+}
+
+function setSelectedSections(sectionsString) {
+    // Limpiar todos los checkboxes primero
+    $('.section-checkbox').prop('checked', false);
+    
+    if (sectionsString) {
+        const sectionsArray = sectionsString.split(',').map(s => s.trim());
+        sectionsArray.forEach(section => {
+            $(`.section-checkbox[value="${section}"]`).prop('checked', true);
+        });
+    }
 }
 
 // --- Cargar tabla con paginación ---
@@ -172,6 +196,9 @@ function goToLastPage() {
 // --- Modal ---
 async function openUserModal(userId = null) {
     $('#userForm')[0].reset();
+    
+    // Limpiar checkboxes
+    setSelectedSections('');
 
     if (userId) {
         const user = await getUserById(userId);
@@ -180,7 +207,9 @@ async function openUserModal(userId = null) {
         $('#userEmailInput').val(user.mail);
         $('#userPassInput').val('');
         $('#userLevelInput').val(user.nivel);
-        $('#userSectionInput').val(user.seccion);
+        
+        // Establecer secciones seleccionadas
+        setSelectedSections(user.seccion);
     } else {
         $('#userModalTitle').text('Crear Usuario');
         $('#userId').val('');
@@ -195,7 +224,13 @@ async function saveUser() {
     const mail = $('#userEmailInput').val();
     const pass = $('#userPassInput').val();
     const lvl = parseInt($('#userLevelInput').val());
-    const seccion = $('#userSectionInput').val();
+    const seccion = getSelectedSections(); // Obtener secciones seleccionadas
+
+    // Validar que al menos una sección esté seleccionada
+    if (!seccion) {
+        alert('Por favor, selecciona al menos una sección de acceso');
+        return;
+    }
 
     const user = { mail, lvl, seccion };
     if (pass) user.pass = pass;

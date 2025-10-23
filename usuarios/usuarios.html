@@ -149,8 +149,40 @@
               </select>
             </div>
             <div class="mb-3">
-              <label for="userSectionInput" class="form-label">Sección</label>
-              <input type="text" class="form-control" id="userSectionInput" required />
+              <label class="form-label">Secciones de Acceso</label>
+              <div class="sections-checkbox-group">
+                <div class="form-check">
+                  <input class="form-check-input section-checkbox" type="checkbox" value="Baños" id="sectionBanos">
+                  <label class="form-check-label" for="sectionBanos">
+                    <i class="bi bi-droplet me-2"></i>Baños
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input section-checkbox" type="checkbox" value="Custodia" id="sectionCustodia">
+                  <label class="form-check-label" for="sectionCustodia">
+                    <i class="bi bi-shield-check me-2"></i>Custodia
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input section-checkbox" type="checkbox" value="Parking" id="sectionParking">
+                  <label class="form-check-label" for="sectionParking">
+                    <i class="bi bi-car-front me-2"></i>Parking
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input section-checkbox" type="checkbox" value="Andenes" id="sectionAndenes">
+                  <label class="form-check-label" for="sectionAndenes">
+                    <i class="bi bi-signpost me-2"></i>Andenes
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input section-checkbox" type="checkbox" value="Caja" id="sectionCaja">
+                  <label class="form-check-label" for="sectionCaja">
+                    <i class="bi bi-cash-coin me-2"></i>Caja
+                  </label>
+                </div>
+              </div>
+              <small class="form-text text-muted">Selecciona las secciones a las que tendrá acceso el usuario</small>
             </div>
           </form>
         </div>
