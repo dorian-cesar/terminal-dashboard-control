@@ -1,4 +1,12 @@
+import { verificarAccesoSeccion } from '../middlewares/seccionesMiddleware.js';
+
 (() => {
+
+    if (!verificarAccesoSeccion('custodia')) {
+        // Si no tiene acceso, el middleware ya redirige automáticamente
+        return;
+    }
+    
     // ==================================== CONFIGURACIÓN ====================================
     const ENV = window.APP_ENV;
     const BASE_URL = window.BASE_URL;
