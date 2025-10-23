@@ -161,17 +161,31 @@
                   Mostrando registros
                 </div>
                 <div>
-                  <button class="btn btn-sm btn-outline-secondary">
+                  <button
+                    id="firstPage"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
                     Primero
                   </button>
-                  <button class="btn btn-sm btn-outline-secondary">
+                  <button
+                    id="prevPage"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
                     Anterior
                   </button>
-                  <span class="mx-2" style="color: #a3a3a3">1</span>
-                  <button class="btn btn-sm btn-outline-secondary">
+                  <span id="currentPage" class="mx-2" style="color: #a3a3a3"
+                    >1</span
+                  >
+                  <button
+                    id="nextPage"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
                     Siguiente
                   </button>
-                  <button class="btn btn-sm btn-outline-secondary">
+                  <button
+                    id="lastPage"
+                    class="btn btn-sm btn-outline-secondary"
+                  >
                     Último
                   </button>
                 </div>
@@ -245,12 +259,55 @@
     <script>
       const API_URL =
         "https://andenes.terminal-calama.com/parkingCalama/php/empresas/api.php";
+      // const API_URL = "http://localhost/parkingCalama/php/empresas/api.php";
 
-      $(document).ready(function () {
-        loadCompaniesTable();
-        $("#searchInput").on("keyup", loadCompaniesTable);
+      let cachedCompanies = [];
+      let currentPage = 1;
+      let entriesPerPage = parseInt($("#entriesPerPage").val() || 10);
+
+      const tbody = $("#companiesTable");
+      const tableInfo = $("#tableInfo");
+      const searchInput = $("#searchInput");
+      const entriesSelect = $("#entriesPerPage");
+
+      $(document).ready(async () => {
+        await loadCompaniesCache();
+        applyPagination();
+
+        searchInput.on("keyup", () => {
+          currentPage = 1;
+          applyPagination();
+        });
+
+        entriesSelect.on("change", () => {
+          currentPage = 1;
+          entriesPerPage = parseInt(entriesSelect.val());
+          applyPagination();
+        });
+
+        // Paginación botones
+        $("#firstPage").on("click", async () => await changePage(1));
+        $("#prevPage").on(
+          "click",
+          async () => await changePage(Math.max(1, currentPage - 1))
+        );
+        $("#nextPage").on("click", async () => {
+          const last = Math.max(
+            1,
+            Math.ceil(cachedCompanies.length / entriesPerPage)
+          );
+          await changePage(Math.min(last, currentPage + 1));
+        });
+        $("#lastPage").on("click", async () => {
+          const last = Math.max(
+            1,
+            Math.ceil(cachedCompanies.length / entriesPerPage)
+          );
+          await changePage(last);
+        });
       });
 
+      // --- API FUNCTIONS ---
       async function getCompanies() {
         try {
           const res = await axios.get(API_URL);
@@ -298,53 +355,76 @@
         }
       }
 
-      // --- Tabla ---
-      async function loadCompaniesTable() {
-        const companies = await getCompanies();
-        const searchTerm = $("#searchInput").val().toLowerCase();
-        const tbody = $("#companiesTable");
-        tbody.empty();
+      // --- CACHÉ Y PAGINACIÓN ---
+      async function loadCompaniesCache() {
+        cachedCompanies = await getCompanies();
+      }
 
-        const filtered = companies.filter(
+      function applyPagination() {
+        const term = searchInput.val().toLowerCase().trim();
+        const filtered = cachedCompanies.filter(
           (c) =>
-            c.nombre.toLowerCase().includes(searchTerm) ||
-            c.contacto.toLowerCase().includes(searchTerm)
+            c.nombre.toLowerCase().includes(term) ||
+            c.contacto.toLowerCase().includes(term)
         );
 
-        if (filtered.length === 0) {
+        const total = filtered.length;
+        const lastPage = Math.max(1, Math.ceil(total / entriesPerPage));
+        if (currentPage > lastPage) currentPage = lastPage;
+        if (currentPage < 1) currentPage = 1;
+
+        const start = (currentPage - 1) * entriesPerPage;
+        const pageItems = filtered.slice(start, start + entriesPerPage);
+
+        tbody.empty();
+        if (pageItems.length === 0) {
           tbody.append(
             `<tr><td colspan="4" class="text-center text-muted">No se encontraron registros</td></tr>`
           );
-          $("#tableInfo").text("Sin registros que mostrar");
-          return;
+        } else {
+          pageItems.forEach((c) => {
+            tbody.append(`
+          <tr>
+            <td>${c.idemp}</td>
+            <td>${c.nombre}</td>
+            <td>${c.contacto}</td>
+            <td>
+              <button class="btn btn-sm btn-warning" onclick="editCompany(${c.idemp})">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="deleteCompany(${c.idemp})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `);
+          });
         }
 
-        filtered.forEach((c) => {
-          tbody.append(`
-            <tr>
-              <td>${c.idemp}</td>
-              <td>${c.nombre}</td>
-              <td>${c.contacto}</td>
-              <td>
-                <button class="btn btn-sm btn-warning" onclick="editCompany(${c.idemp})">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteCompany(${c.idemp})">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            </tr>
-          `);
-        });
-
-        $("#tableInfo").text(`Mostrando ${filtered.length} registros`);
+        tableInfo.text(
+          `Mostrando ${start + 1 <= total ? start + 1 : 0} a ${Math.min(
+            start + entriesPerPage,
+            total
+          )} de ${total} registros`
+        );
+        $("#currentPage").text(currentPage);
       }
 
-      // --- Modal ---
+      async function changePage(page) {
+        const btn = document.activeElement;
+        toggleButtonLoading(btn, true);
+        currentPage = page;
+        applyPagination();
+        toggleButtonLoading(btn, false);
+      }
+
+      // --- MODAL ---
       async function openCompanyModal(id = null) {
         $("#companyForm")[0].reset();
         if (id) {
-          const company = await getCompanyById(id);
+          const company =
+            cachedCompanies.find((c) => c.idemp == id) ||
+            (await getCompanyById(id));
           $("#companyModalTitle").text("Editar Empresa");
           $("#companyId").val(company.idemp);
           $("#companyName").val(company.nombre);
@@ -358,28 +438,52 @@
 
       // --- CRUD ---
       async function saveCompany() {
-        const id = $("#companyId").val();
-        const nombre = $("#companyName").val();
-        const contacto = $("#companyContact").val();
-        const company = { nombre, contacto };
+        const btn = document.querySelector("#companyModal .btn-primary");
+        toggleButtonLoading(btn, true);
 
-        if (id) {
-          company.id = parseInt(id);
-          await updateCompany(company);
-          alert("Empresa actualizada");
-        } else {
-          await addCompany(company);
-          alert("Empresa creada");
+        const id = $("#companyId").val();
+        const nombre = $("#companyName").val().trim();
+        const contacto = $("#companyContact").val().trim();
+
+        // Validación campos vacíos
+        if (!nombre || !contacto) {
+          alert("Todos los campos son obligatorios");
+          toggleButtonLoading(btn, false);
+          return;
         }
 
-        const modalEl = document.getElementById("companyModal");
-        const modal =
-          bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-        modal.hide();
-        $(".modal-backdrop").remove();
-        $("body").removeClass("modal-open").css("padding-right", "");
+        const company = { nombre, contacto };
+        try {
+          if (id) {
+            company.id = parseInt(id);
+            await updateCompany(company);
+            const index = cachedCompanies.findIndex((c) => c.idemp == id);
+            if (index >= 0) cachedCompanies[index] = company;
+            alert("Empresa actualizada");
+          } else {
+            await addCompany(company);
+            cachedCompanies.push({
+              idemp: cachedCompanies.length
+                ? Math.max(...cachedCompanies.map((c) => c.idemp)) + 1
+                : 1,
+              ...company,
+            });
+            alert("Empresa creada");
+          }
 
-        loadCompaniesTable();
+          const modalEl = document.getElementById("companyModal");
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          modal.hide();
+          $(".modal-backdrop").remove();
+          $("body").removeClass("modal-open").css("padding-right", "");
+
+          applyPagination();
+        } catch (err) {
+          console.error(err);
+          alert("Error al guardar empresa");
+        } finally {
+          toggleButtonLoading(btn, false);
+        }
       }
 
       async function editCompany(id) {
@@ -387,10 +491,40 @@
       }
 
       async function deleteCompany(id) {
-        if (confirm("¿Eliminar empresa?")) {
-          await removeCompany(id);
-          alert("Empresa eliminada");
-          loadCompaniesTable();
+        if (!confirm("¿Eliminar empresa?")) return;
+        await removeCompany(id);
+        cachedCompanies = cachedCompanies.filter((c) => c.idemp != id);
+        applyPagination();
+        alert("Empresa eliminada");
+      }
+
+      // --- BOTÓN SPINNER ---
+      function toggleButtonLoading(btn, loading = true) {
+        if (!btn) return;
+        let spinner = btn.querySelector(".spinner-border");
+        if (!spinner) {
+          spinner = document.createElement("span");
+          spinner.className = "spinner-border spinner-border-sm me-1 d-none";
+          btn.prepend(spinner);
+        }
+        if (!btn.querySelector(".btn-text")) {
+          const text = document.createElement("span");
+          text.className = "btn-text";
+          text.textContent = btn.innerText;
+          btn.appendChild(text);
+          btn.childNodes[1].remove(); // quitar texto duplicado
+        }
+
+        const textSpan = btn.querySelector(".btn-text");
+
+        if (loading) {
+          btn.disabled = true;
+          spinner.classList.remove("d-none");
+          textSpan.classList.add("d-none");
+        } else {
+          btn.disabled = false;
+          spinner.classList.add("d-none");
+          textSpan.classList.remove("d-none");
         }
       }
     </script>
