@@ -361,26 +361,8 @@
                 }
             }
         });
-
-        // Cargar el sidebar dinámicamente
-        fetch('./componentes/sidebar.html')
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error('No se pudo cargar el sidebar');
-                }
-                return res.text();
-            })
-            .then(html => {
-                document.getElementById('sidebar').innerHTML = html;
-            })
-            .catch(error => {
-                console.error('Error cargando el sidebar:', error);
-                // Si no se puede cargar el sidebar, ajustar el layout
-                document.getElementById('sidebar').style.display = 'none';
-                document.querySelector('.main-content').style.marginLeft = '0';
-                document.querySelector('.main-content::before').style.left = '0';
-                document.querySelector('.main-content::before').style.width = '100%';
-            });
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="componentes/sidebar.js"></script>
 </body>
 </html>
