@@ -993,3 +993,33 @@ body {
     gap: 1.5rem;
   }
 }
+
+.logout-section {
+  margin-top: auto; /* Empuja el botón hacia la parte inferior */
+  padding: 1rem;
+  border-top: 1px solid var(--gray-700);
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--accent-danger);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--accent-danger);
+}
+
+/* Asegurar que el sidebar tenga flexbox para el posicionamiento */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}

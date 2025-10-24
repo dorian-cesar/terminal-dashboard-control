@@ -1,11 +1,13 @@
 const ENV = window.APP_ENV;
 const BASE_URL = window.BASE_URL;
+const URL_LOCAL = window.URL_LOCAL;
 
 // URLs específicas de ESTA página
 const VOLVER_URL = `../dashboard.html`;
 
 //api caja
 const API_URL = `${BASE_URL}caja-calama/`;
+const API_CAJA = `${URL_LOCAL}/api/info-caja`;
 
 // Importar el middleware 
 import { verificarAccesoSeccion } from '../middlewares/seccionesMiddleware.js';
@@ -253,13 +255,11 @@ function horaActualChile() {
 }
 
 async function obtenerNumeroCaja() {
-  const url = "http://localhost:3000/api/info-caja";
-
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000);
 
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(API_CAJA, { signal: controller.signal });
     clearTimeout(timeout);
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
