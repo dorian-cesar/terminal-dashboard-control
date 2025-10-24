@@ -140,6 +140,13 @@
                   placeholder="••••••••"
                   required
                 />
+                <button
+                  class="btn btn-outline-secondary p-0"
+                  type="button"
+                  id="togglePassword"
+                >
+                  <i class="bi bi-eye"></i>
+                </button>
               </div>
             </div>
 
@@ -272,6 +279,19 @@
         );
 
         $("#email").focus();
+
+        $("#togglePassword").on("click", function () {
+          const passwordInput = $("#password");
+          const icon = $(this).find("i");
+
+          if (passwordInput.attr("type") === "password") {
+            passwordInput.attr("type", "text");
+            icon.removeClass("bi-eye").addClass("bi-eye-slash");
+          } else {
+            passwordInput.attr("type", "password");
+            icon.removeClass("bi-eye-slash").addClass("bi-eye");
+          }
+        });
       });
     </script>
   </body>
