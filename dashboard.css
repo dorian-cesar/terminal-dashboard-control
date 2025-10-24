@@ -1023,3 +1023,15 @@ body {
   flex-direction: column;
   height: 100vh;
 }
+
+.logout-section {
+  position: relative;
+  z-index: 1000 !important;
+}
+
+.logout-btn {
+  position: relative;
+  z-index: 1001 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
