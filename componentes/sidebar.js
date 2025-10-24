@@ -22,21 +22,20 @@ $(document).ready(function () {
 });
 
 function initializeSidebarComplete() {
-  
   // 1. Cargar info del usuario
   loadUserInfo();
   
   // 2. Aplicar permisos
   applyUserPermissions();
   
-  // 3. Configurar eventos (DE ÚLTIMO, después de que todo esté listo)
-  setupSidebarEvents();
+  // 3. Resaltar página actual
+  highlightCurrentPage();
   
+  // 4. Configurar eventos (DE ÚLTIMO, después de que todo esté listo)
+  setupSidebarEvents();
 }
 
 function setupSidebarEvents() {
-  console.log("🔗 Configurando eventos del sidebar...");
-  
   // Toggle del menú móvil
   $("#mobileMenuToggle").on("click", function () {
     $("#sidebar").toggleClass("active");
@@ -95,15 +94,12 @@ function applyUserPermissions() {
         setTimeout(() => {
           const remaining = $(".config-section:visible").length;
           if (remaining === 0) {
-            console.log("✅ Sección CONFIGURACIÓN ocultada correctamente");
           } else {
-            console.warn(`⚠️ ${remaining} elementos aún visibles, forzando ocultamiento`);
             $(".config-section").css('display', 'none');
           }
         }, 300);
         
       } else {
-        console.log("👑 Mostrando sección CONFIGURACIÓN para administrador");
         configElements.show();
       }
     } catch (e) {
@@ -112,8 +108,35 @@ function applyUserPermissions() {
   }
 }
 
+function highlightCurrentPage() {
+  // Obtener la ruta actual
+  const currentPath = window.location.pathname;
+  const currentPage = currentPath.split('/').pop() || 'dashboard.html';
+  
+  // Remover clase active de todos los elementos
+  $(".components li").removeClass("active");
+  
+  // Buscar y marcar como activo el elemento correspondiente
+  $(".components li a").each(function() {
+    const linkHref = $(this).attr('href');
+    
+    // Comparar si el href coincide con la página actual
+    if (linkHref === currentPage || 
+        (currentPage === '' && linkHref === 'dashboard.html') ||
+        (linkHref.includes(currentPage) && currentPage !== '')) {
+      
+      $(this).parent().addClass("active");
+      return false; // Salir del bucle una vez encontrado
+    }
+  });
+  
+  // Si no se encontró coincidencia, activar dashboard por defecto
+  if ($(".components li.active").length === 0) {
+    $(".components li:first").addClass("active");
+  }
+}
+
 function logout() {
-  console.log("🔓 Ejecutando logout...");
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
