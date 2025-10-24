@@ -419,7 +419,7 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
       datos.result.posicion || "-";
     document.getElementById(
       "resumenTiempo"
-    ).textContent = `${datos.diffDays} Días`;
+    ).textContent = `${datos.diffDays} Días (Primer día ya pagado)`;
 
     // Resetear selección
     document.querySelectorAll(".card-pago-option").forEach((card) => {
@@ -469,7 +469,6 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
           '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
 
         // MANTENER EL BOTÓN PRINCIPAL EN LOADING TAMBIÉN
-        // (ya debería estarlo desde el submit, pero por si acaso)
         setBtnLiberarLoading(true);
 
         try {
@@ -479,7 +478,10 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
           // 2. Si el pago fue exitoso, completar el proceso de entrega
           await completarProcesoEntrega(datosPagoActual);
 
-          // 3. Si todo OK, restaurar UI y cerrar modal
+          // 3. IMPORTANTE: Limpiar UI y restaurar botones DESPUÉS de completarProcesoEntrega
+          clearPaymentUI();
+
+          // 4. Restaurar botón del modal y cerrarlo
           btn.innerHTML = originalHTML;
           btn.disabled = false;
 
@@ -515,7 +517,7 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
           // (Opcional) log adicional con raw para soporte
           if (error.gatewayRaw) console.info("Gateway raw:", error.gatewayRaw);
 
-          // IMPORTANTE: Restaurar estado del botón pero NO continuar con la entrega
+          // ✅ IMPORTANTE: Restaurar ambos botones en caso de error
           btn.innerHTML = originalHTML;
           btn.disabled = false;
           resetBtnLiberar(); // Restaurar botón principal
@@ -892,9 +894,7 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
       alert(
         "Hubo un error en el proceso de entrega. Contacte al administrador."
       );
-    } finally {
-      // SIEMPRE RESTAURAR EL BOTÓN AL FINAL, INCLUSO SI HAY ERROR
-      clearPaymentUI();
+      throw error; // Propagar el error para que lo capture el llamador
     }
   }
 
