@@ -364,5 +364,16 @@
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="componentes/sidebar.js"></script>
+    <script>
+        // Este script debe ir en CADA página HTML donde se use el sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+        // Esperar a que el sidebar se cargue completamente
+        setTimeout(() => {
+            if (typeof highlightCurrentPage === 'function') {
+            highlightCurrentPage();
+            }
+        }, 300);
+        });
+    </script>
 </body>
 </html>

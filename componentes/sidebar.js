@@ -22,16 +22,17 @@ $(document).ready(function () {
 });
 
 function initializeSidebarComplete() {
-  
   // 1. Cargar info del usuario
   loadUserInfo();
   
   // 2. Aplicar permisos
   applyUserPermissions();
   
-  // 3. Configurar eventos (DE ÚLTIMO, después de que todo esté listo)
-  setupSidebarEvents();
+  // 3. Resaltar página actual
+  highlightCurrentPage();
   
+  // 4. Configurar eventos (DE ÚLTIMO, después de que todo esté listo)
+  setupSidebarEvents();
 }
 
 function setupSidebarEvents() {
@@ -104,6 +105,34 @@ function applyUserPermissions() {
     } catch (e) {
       console.error("Error aplicando permisos:", e);
     }
+  }
+}
+
+function highlightCurrentPage() {
+  // Obtener la ruta actual
+  const currentPath = window.location.pathname;
+  const currentPage = currentPath.split('/').pop() || 'dashboard.html';
+  
+  // Remover clase active de todos los elementos
+  $(".components li").removeClass("active");
+  
+  // Buscar y marcar como activo el elemento correspondiente
+  $(".components li a").each(function() {
+    const linkHref = $(this).attr('href');
+    
+    // Comparar si el href coincide con la página actual
+    if (linkHref === currentPage || 
+        (currentPage === '' && linkHref === 'dashboard.html') ||
+        (linkHref.includes(currentPage) && currentPage !== '')) {
+      
+      $(this).parent().addClass("active");
+      return false; // Salir del bucle una vez encontrado
+    }
+  });
+  
+  // Si no se encontró coincidencia, activar dashboard por defecto
+  if ($(".components li.active").length === 0) {
+    $(".components li:first").addClass("active");
   }
 }
 
