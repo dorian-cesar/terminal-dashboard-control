@@ -242,6 +242,6 @@ function removeVehicle(patente) {
 }
 
 // Initialize data on page load
-window.jQuery(document).ready(() => {
-  initializeData();
-});
+// window.jQuery(document).ready(() => {
+//   initializeData();
+// });
