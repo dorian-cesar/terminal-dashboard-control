@@ -8,7 +8,7 @@ $(document).ready(function () {
   }
   
   // Cargar el sidebar
-  sidebarContainer.load("componentes/sidebar.html", function(response, status, xhr) {
+  sidebarContainer.load("sidebar.html", function(response, status, xhr) {
     if (status === "error") {
       console.error("❌ Error cargando sidebar:", xhr.status, xhr.statusText);
       return;
