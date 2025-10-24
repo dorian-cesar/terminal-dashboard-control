@@ -35,8 +35,6 @@ function initializeSidebarComplete() {
 }
 
 function setupSidebarEvents() {
-  console.log("🔗 Configurando eventos del sidebar...");
-  
   // Toggle del menú móvil
   $("#mobileMenuToggle").on("click", function () {
     $("#sidebar").toggleClass("active");
@@ -95,15 +93,12 @@ function applyUserPermissions() {
         setTimeout(() => {
           const remaining = $(".config-section:visible").length;
           if (remaining === 0) {
-            console.log("✅ Sección CONFIGURACIÓN ocultada correctamente");
           } else {
-            console.warn(`⚠️ ${remaining} elementos aún visibles, forzando ocultamiento`);
             $(".config-section").css('display', 'none');
           }
         }, 300);
         
       } else {
-        console.log("👑 Mostrando sección CONFIGURACIÓN para administrador");
         configElements.show();
       }
     } catch (e) {
@@ -113,7 +108,6 @@ function applyUserPermissions() {
 }
 
 function logout() {
-  console.log("🔓 Ejecutando logout...");
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
