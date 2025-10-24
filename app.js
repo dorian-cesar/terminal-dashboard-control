@@ -1,88 +1,88 @@
 // Initialize default data
-function initializeData() {
-  if (!localStorage.getItem("users")) {
-    const defaultUsers = [
-      {
-        id: 1,
-        email: "admin@wit.la",
-        password: "admin123",
-        role: "Administrador",
-        sections: [
-          "banos",
-          "custodias",
-          "parking",
-          "andenes",
-          "caja",
-          "configuracion",
-        ],
-      },
-      {
-        id: 2,
-        email: "user@wit.la",
-        password: "user123",
-        role: "Usuario",
-        sections: ["parking", "andenes", "caja"],
-      },
-      {
-        id: 3,
-        email: "dgonzalez@wit.la",
-        password: "pass123",
-        role: "Administrador",
-        sections: [
-          "banos",
-          "custodias",
-          "parking",
-          "andenes",
-          "caja",
-          "configuracion",
-        ],
-      },
-    ];
-    localStorage.setItem("users", JSON.stringify(defaultUsers));
-  }
+// function initializeData() {
+//   if (!localStorage.getItem("users")) {
+//     const defaultUsers = [
+//       {
+//         id: 1,
+//         email: "admin@wit.la",
+//         password: "admin123",
+//         role: "Administrador",
+//         sections: [
+//           "banos",
+//           "custodias",
+//           "parking",
+//           "andenes",
+//           "caja",
+//           "configuracion",
+//         ],
+//       },
+//       {
+//         id: 2,
+//         email: "user@wit.la",
+//         password: "user123",
+//         role: "Usuario",
+//         sections: ["parking", "andenes", "caja"],
+//       },
+//       {
+//         id: 3,
+//         email: "dgonzalez@wit.la",
+//         password: "pass123",
+//         role: "Administrador",
+//         sections: [
+//           "banos",
+//           "custodias",
+//           "parking",
+//           "andenes",
+//           "caja",
+//           "configuracion",
+//         ],
+//       },
+//     ];
+//     localStorage.setItem("users", JSON.stringify(defaultUsers));
+//   }
 
-  if (!localStorage.getItem("companies")) {
-    const defaultCompanies = [
-      { id: 1, nombre: "Havana-vida", contacto: "No definida" },
-      { id: 2, nombre: "Tur-Bus", contacto: "NA" },
-      { id: 3, nombre: "Pullman", contacto: "NA" },
-      { id: 4, nombre: "Particulares", contacto: "NA" },
-      { id: 5, nombre: "Taxis", contacto: "NA" },
-    ];
-    localStorage.setItem("companies", JSON.stringify(defaultCompanies));
-  }
+//   if (!localStorage.getItem("companies")) {
+//     const defaultCompanies = [
+//       { id: 1, nombre: "Havana-vida", contacto: "No definida" },
+//       { id: 2, nombre: "Tur-Bus", contacto: "NA" },
+//       { id: 3, nombre: "Pullman", contacto: "NA" },
+//       { id: 4, nombre: "Particulares", contacto: "NA" },
+//       { id: 5, nombre: "Taxis", contacto: "NA" },
+//     ];
+//     localStorage.setItem("companies", JSON.stringify(defaultCompanies));
+//   }
 
-  if (!localStorage.getItem("destinations")) {
-    const defaultDestinations = [
-      { id: 1, ciudad: "Valparaiso", valor: 2000, tipo: "nacional" },
-      { id: 2, ciudad: "Mendoza", valor: 16000, tipo: "internacional" },
-      { id: 3, ciudad: "Rancagua", valor: 5000, tipo: "nacional" },
-      { id: 4, ciudad: "Valdivia", valor: 12000, tipo: "nacional" },
-      { id: 5, ciudad: "SALTA", valor: 14000, tipo: "internacional" },
-    ];
-    localStorage.setItem("destinations", JSON.stringify(defaultDestinations));
-  }
+//   if (!localStorage.getItem("destinations")) {
+//     const defaultDestinations = [
+//       { id: 1, ciudad: "Valparaiso", valor: 2000, tipo: "nacional" },
+//       { id: 2, ciudad: "Mendoza", valor: 16000, tipo: "internacional" },
+//       { id: 3, ciudad: "Rancagua", valor: 5000, tipo: "nacional" },
+//       { id: 4, ciudad: "Valdivia", valor: 12000, tipo: "nacional" },
+//       { id: 5, ciudad: "SALTA", valor: 14000, tipo: "internacional" },
+//     ];
+//     localStorage.setItem("destinations", JSON.stringify(defaultDestinations));
+//   }
 
-  if (!localStorage.getItem("vehicles")) {
-    const defaultVehicles = [
-      {
-        patente: "ABCD12",
-        empresaId: 2,
-        destinoId: 1,
-        horaIngreso: "08:30",
-        estado: "activo",
-      },
-      {
-        patente: "WXYZ98",
-        empresaId: 3,
-        destinoId: 4,
-        horaIngreso: "10:15",
-        estado: "activo",
-      },
-    ];
-    localStorage.setItem("vehicles", JSON.stringify(defaultVehicles));
-  }
-}
+//   if (!localStorage.getItem("vehicles")) {
+//     const defaultVehicles = [
+//       {
+//         patente: "ABCD12",
+//         empresaId: 2,
+//         destinoId: 1,
+//         horaIngreso: "08:30",
+//         estado: "activo",
+//       },
+//       {
+//         patente: "WXYZ98",
+//         empresaId: 3,
+//         destinoId: 4,
+//         horaIngreso: "10:15",
+//         estado: "activo",
+//       },
+//     ];
+//     localStorage.setItem("vehicles", JSON.stringify(defaultVehicles));
+//   }
+// }
 
 // Authentication functions
 // function login(email, password) {

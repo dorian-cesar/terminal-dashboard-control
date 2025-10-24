@@ -122,26 +122,28 @@ async function loadUsersTable() {
     if (allUsers.length === 0) {
         allUsers = await getUsers();
     }
-    
+
     const searchTerm = $('#searchInput').val().toLowerCase();
     const tbody = $('#usersTable');
     tbody.empty();
 
-    // Filtrar usuarios
-    filteredUsers = allUsers.filter(u =>
+    // 🔹 Excluir Superusuarios (nivel 15 o descriptor = 'Superusuario')
+    let visibleUsers = allUsers.filter(u =>
+        parseInt(u.nivel) !== 15 && u.descriptor.toLowerCase() !== 'superusuario'
+    );
+
+    // 🔹 Aplicar búsqueda sobre el conjunto filtrado
+    filteredUsers = visibleUsers.filter(u =>
         u.mail.toLowerCase().includes(searchTerm) ||
         u.seccion.toLowerCase().includes(searchTerm)
     );
 
-    // Resetear a página 1 al buscar o cambiar número de registros
     if (searchTerm || filteredUsers.length !== allUsers.length) {
         currentPage = 1;
     }
 
-    // Obtener usuarios de la página actual
     const currentUsers = getCurrentPageUsers();
 
-    // Renderizar tabla
     if (currentUsers.length === 0) {
         tbody.append(`
             <tr>
@@ -151,15 +153,13 @@ async function loadUsersTable() {
             </tr>
         `);
     } else {
-        // En loadUsersTable(), modifica la parte que muestra las secciones:
         currentUsers.forEach(u => {
-            // Limpiar y formatear las secciones para mostrar
             const formattedSections = u.seccion.split(',')
-                .map(s => s.trim()) // Eliminar espacios
-                .filter(s => s !== '') // Filtrar vacíos
-                .map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()) // Formato título
-                .join(', '); // Mostrar con espacios para legibilidad
-            
+                .map(s => s.trim())
+                .filter(s => s !== '')
+                .map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+                .join(', ');
+
             tbody.append(`
                 <tr>
                     <td>${u.iduser}</td>
@@ -179,7 +179,6 @@ async function loadUsersTable() {
         });
     }
 
-    // Actualizar controles
     updatePaginationInfo();
     updatePaginationButtons();
 }
