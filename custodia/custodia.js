@@ -239,6 +239,31 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
     });
   }
 
+  // Función para poblar el select de bultos usando valoresBulto de valores.js
+  function poblarSelectBultos() {
+    const selectBulto = document.getElementById("bulto");
+    if (!selectBulto || typeof valoresBulto === "undefined") {
+      console.warn("Select bulto no encontrado o valoresBulto no definido");
+      return;
+    }
+
+    // Limpiar opciones existentes (excepto la primera que es "Seleccione un tamaño...")
+    while (selectBulto.children.length > 1) {
+      selectBulto.removeChild(selectBulto.lastChild);
+    }
+
+    // Agregar opciones dinámicamente desde valoresBulto
+    Object.keys(valoresBulto).forEach((tipoBulto) => {
+      const precio = valoresBulto[tipoBulto];
+      const option = document.createElement("option");
+      option.value = tipoBulto;
+      option.textContent = `${tipoBulto} ($${precio.toLocaleString()})`;
+      selectBulto.appendChild(option);
+    });
+
+    console.log("Select de bultos poblado exitosamente");
+  }
+
   //==================================== UI ============================================
   function initMatriz(matCont) {
     const matX = 8,
@@ -996,6 +1021,9 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
     const formulario = document.getElementById("formulario");
     const contBarcode = document.getElementById("contBarcode");
 
+    // Poblar select de bultos dinámicamente
+    poblarSelectBultos();
+
     // Inicializar JsBarcode placeholder
     if (
       document.getElementById("barcode") &&
@@ -1019,6 +1047,24 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
     if (document.getElementById("tabla-body")) actualizarTabla();
     if (matCont) cargarEstado();
 
+    // Inicializar JsBarcode placeholder
+    if (
+      document.getElementById("barcode") &&
+      typeof JsBarcode !== "undefined"
+    ) {
+      try {
+        JsBarcode("#barcode", "wit.la", {
+          format: "CODE128",
+          displayValue: true,
+          width: 2,
+          height: 50,
+          margin: 10,
+        });
+      } catch (e) {
+        console.warn("JsBarcode init error", e);
+      }
+    }
+
     // Exportar funciones globales
     window.custodia = {
       reactivarBoton,
@@ -1029,6 +1075,7 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
       enviarPdfAlServidor,
       operacionAtomica,
       actualizarEstadoFrontend,
+      poblarSelectBultos,
     };
   });
 })();
