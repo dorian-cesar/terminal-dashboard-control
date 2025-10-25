@@ -34,10 +34,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // --- VERIFICACIÓN DE ACCESO AL CARGAR LA PÁGINA ---
   // Verificar acceso a la sección "baños" antes de cualquier operación
-  if (!verificarAccesoSeccion("banos")) {
-    // Si no tiene acceso, el middleware ya redirige automáticamente
-    return;
-  }
+  // if (!verificarAccesoSeccion("banos")) {
+  //   // Si no tiene acceso, el middleware ya redirige automáticamente
+  //   return;
+  // }
 
   console.log("Valores de servicios disponibles:", window.restroom);
 
