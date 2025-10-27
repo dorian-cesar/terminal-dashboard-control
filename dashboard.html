@@ -17,21 +17,6 @@
 
     <!-- Page Content -->
     <div id="content">
-      <div class="top-bar">
-        <button class="mobile-menu-toggle" id="mobileMenuToggle">
-          <i class="bi bi-list"></i>
-        </button>
-        <h1 style="font-size: x-large">
-          Sistema de Control de Terminal Calama
-        </h1>
-        <div class="top-bar-actions">
-          <div class="search-box">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Buscar..." />
-          </div>
-        </div>
-      </div>
-
       <div class="container-fluid">
         <div class="page-header">
           <div>
@@ -43,27 +28,27 @@
           <div class="date-display" id="currentDate"></div>
         </div>
 
-        <!-- Quick Actions (sin cambios) -->
+        <!-- Quick Actions con identificadores de sección -->
         <div class="quick-actions mb-4">
           <h5>Acciones Rápidas</h5>
-          <div class="action-buttons">
-            <a href="./parking/parking.html" class="action-btn">
+          <div class="action-buttons" id="quickActionsContainer">
+            <a href="./parking/parking.html" class="action-btn" data-seccion="parking">
               <i class="bi bi-car-front"></i>
               <span>Gestión Parking</span>
             </a>
-            <a href="andenes.html" class="action-btn">
+            <a href="andenes.html" class="action-btn" data-seccion="andenes">
               <i class="bi bi-bus-front"></i>
               <span>Gestión Andenes</span>
             </a>
-            <a href="./caja/caja.html" class="action-btn">
+            <a href="./caja/caja.html" class="action-btn" data-seccion="caja">
               <i class="bi bi-cash-coin"></i>
               <span>Control de Caja</span>
             </a>
-            <a href="./banos/banos.html" class="action-btn">
+            <a href="./banos/banos.html" class="action-btn" data-seccion="banos">
               <i class="bi bi-water"></i>
               <span>Gestión Baños</span>
             </a>
-            <a href="./custodia/custodia.html" class="action-btn">
+            <a href="./custodia/custodia.html" class="action-btn" data-seccion="custodia">
               <i class="bi bi-lock"></i>
               <span>Gestión Custodia</span>
             </a>
@@ -92,9 +77,68 @@
         now.toLocaleDateString("es-ES", options);
     }
 
+    function filterQuickActions() {
+      const userData = localStorage.getItem('user');
+      
+      if (!userData) {
+        console.warn("No hay información de usuario, mostrando todas las acciones");
+        return;
+      }
+
+      try {
+        const user = JSON.parse(userData);
+        const seccionesPermitidas = user.secciones || [];
+        
+        console.log("🔐 Filtrando acciones rápidas para:", user.mail);
+        console.log("✅ Secciones permitidas:", seccionesPermitidas);
+        
+        // Si el usuario es administrador (nivel 0), mostrar todas las acciones
+        if (user.nivel === 0) {
+          console.log("👑 Administrador - mostrando todas las acciones");
+          return; // No filtrar nada
+        }
+        
+        // Ocultar TODAS las acciones primero
+        $(".action-btn[data-seccion]").hide();
+        
+        // Mostrar SOLO las acciones que están en el array seccionesPermitidas
+        seccionesPermitidas.forEach(seccionPermitida => {
+          const accionElement = $(`.action-btn[data-seccion="${seccionPermitida}"]`);
+          
+          if (accionElement.length) {
+            accionElement.show();
+            console.log(`👉 Mostrando acción: ${seccionPermitida}`);
+          } else {
+            console.warn(`⚠️ Acción no encontrada: ${seccionPermitida}`);
+          }
+        });
+        
+        // Contar acciones visibles
+        const accionesVisibles = $(".action-btn[data-seccion]:visible").length;
+        console.log(`📈 Acciones rápidas visibles: ${accionesVisibles}`);
+        
+        // Si no hay acciones visibles, mostrar un mensaje
+        if (accionesVisibles === 0) {
+          $("#quickActionsContainer").html(
+            '<div class="text-center text-muted py-3">' +
+            '<i class="bi bi-info-circle"></i> No tienes acciones rápidas disponibles' +
+            '</div>'
+          );
+        }
+        
+      } catch (error) {
+        console.error("❌ Error filtrando acciones rápidas:", error);
+      }
+    }
+
     $(document).ready(function () {
       checkAuthOnce();
       updateCurrentDate();
+      
+      // Esperar a que el sidebar se cargue y luego filtrar las acciones rápidas
+      setTimeout(() => {
+        filterQuickActions();
+      }, 500);
     });
   </script>
 </body>
