@@ -181,6 +181,51 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module" src="teclado-virtual.js"></script>
+    <virtual-keyboard data-mode="dock"></virtual-keyboard>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const teclado = document.querySelector("virtual-keyboard");
+        const campos = document.querySelectorAll("#email, #password");
+
+        // 🔹 Ocultar inmediatamente al cargar
+        setTimeout(() => teclado.hide(), 0);
+
+        // 🔹 SOLUCIÓN: Usar mousedown en lugar de click para los inputs
+        campos.forEach((input) => {
+          input.addEventListener("mousedown", (e) => {
+            e.stopPropagation();
+            // Mostrar el teclado después de un pequeño delay
+            setTimeout(() => {
+              teclado.show(input);
+            }, 50);
+          });
+          
+          // También mantener focus para navegación con teclado
+          input.addEventListener("focus", () => {
+            teclado.show(input);
+          });
+        });
+
+        // 🔹 Ocultar teclado SOLO cuando se hace clic fuera
+        document.addEventListener("mousedown", (e) => {
+          const esInput = e.target.matches("#email, #password") || 
+                        e.target.closest("#email, #password");
+          const esTeclado = e.target.closest("virtual-keyboard");
+          
+          if (!esInput && !esTeclado) {
+            teclado.hide();
+          }
+        });
+
+        // 🔹 También ocultar al presionar ESC
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            teclado.hide();
+          }
+        });
+      });
+    </script>
     <script>
       $(document).ready(function () {
         // ==================================== CONFIGURACIÓN ====================================
