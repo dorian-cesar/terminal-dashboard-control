@@ -202,30 +202,30 @@
     // const API_MOV_URL = "http://localhost/parkingCalama/php/movimientos/api.php";
     function verificarNivelMinimo(nivelMinimoRequerido = 10) {
       try {
-          const userData = localStorage.getItem('user');
-          
-          if (!userData) {
-              alert('Usuario no autenticado. Será redirigido al login.');
-              window.location.href = 'index.html';
-              return false;
-          }
+        const userData = localStorage.getItem('user');
 
-          const usuario = JSON.parse(userData);
-          
-          if (usuario.nivel < nivelMinimoRequerido) {
-              window.location.href = 'index.html';
-              return false;
-          }
-
-          return true;
-      } catch (error) {
-          console.error('Error verificando nivel:', error);
-          alert('Error de permisos. Será redirigido al login.');
+        if (!userData) {
+          alert('Usuario no autenticado. Será redirigido al login.');
           window.location.href = 'index.html';
           return false;
+        }
+
+        const usuario = JSON.parse(userData);
+
+        if (usuario.nivel < nivelMinimoRequerido) {
+          window.location.href = 'index.html';
+          return false;
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Error verificando nivel:', error);
+        alert('Error de permisos. Será redirigido al login.');
+        window.location.href = 'index.html';
+        return false;
       }
     }
-    
+
     function verificarNivel10() {
       return verificarNivelMinimo(10);
     }
@@ -310,6 +310,10 @@
         if (!Array.isArray(data)) {
           data = [data];
         }
+        data.sort((a, b) => {
+          return (b.idmov || 0) - (a.idmov || 0);
+        });
+
         console.log("Movimientos obtenidos:", data.length);
         return data;
       } catch (err) {
