@@ -1,105 +1,102 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - WIT</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
-    />
-    <link rel="stylesheet" href="dashboard.css" />
-  </head>
-  <body class="dashboard-page">
-    <div class="wrapper">
-      <!-- Sidebar dinámico -->
-      <div id="sidebar-container"></div>
 
-      <!-- Page Content -->
-      <div id="content">
-        <div class="top-bar">
-          <button class="mobile-menu-toggle" id="mobileMenuToggle">
-            <i class="bi bi-list"></i>
-          </button>
-          <h1 style="font-size: x-large">
-            Sistema de Control de Terminal Calama
-          </h1>
-          <div class="top-bar-actions">
-            <div class="search-box">
-              <i class="bi bi-search"></i>
-              <input type="text" placeholder="Buscar..." />
-            </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - WIT</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+
+<body class="dashboard-page">
+  <div class="wrapper">
+    <!-- Sidebar dinámico -->
+    <div id="sidebar-container"></div>
+
+    <!-- Page Content -->
+    <div id="content">
+      <div class="top-bar">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+          <i class="bi bi-list"></i>
+        </button>
+        <h1 style="font-size: x-large">
+          Sistema de Control de Terminal Calama
+        </h1>
+        <div class="top-bar-actions">
+          <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar..." />
           </div>
         </div>
+      </div>
 
-        <div class="container-fluid">
-          <div class="page-header">
-            <div>
-              <h2>Dashboard</h2>
-              <p class="text">
-                Bienvenido al sistema de control de terminales terrestres
-              </p>
-            </div>
-            <div class="date-display" id="currentDate"></div>
+      <div class="container-fluid">
+        <div class="page-header">
+          <div>
+            <h2>Dashboard</h2>
+            <p class="text">
+              Bienvenido al sistema de control de terminales terrestres
+            </p>
           </div>
+          <div class="date-display" id="currentDate"></div>
+        </div>
 
-          <!-- Quick Actions (sin cambios) -->
-          <div class="quick-actions mb-4">
-            <h5>Acciones Rápidas</h5>
-            <div class="action-buttons">
-              <a href="./parking/parking.html" class="action-btn">
-                <i class="bi bi-car-front"></i>
-                <span>Gestión Parking</span>
-              </a>
-              <a href="andenes.html" class="action-btn">
-                <i class="bi bi-bus-front"></i>
-                <span>Gestión Andenes</span>
-              </a>
-              <a href="./caja/caja.html" class="action-btn">
-                <i class="bi bi-cash-coin"></i>
-                <span>Control de Caja</span>
-              </a>
-              <a href="./usuarios/usuarios.html" class="action-btn">
-                <i class="bi bi-person-plus"></i>
-                <span>Gestión de Usuario</span>
-              </a>
-              <a href="empresas.html" class="action-btn">
-                <i class="bi bi-building"></i>
-                <span>Agregar Empresa</span>
-              </a>
-            </div>
+        <!-- Quick Actions (sin cambios) -->
+        <div class="quick-actions mb-4">
+          <h5>Acciones Rápidas</h5>
+          <div class="action-buttons">
+            <a href="./parking/parking.html" class="action-btn">
+              <i class="bi bi-car-front"></i>
+              <span>Gestión Parking</span>
+            </a>
+            <a href="andenes.html" class="action-btn">
+              <i class="bi bi-bus-front"></i>
+              <span>Gestión Andenes</span>
+            </a>
+            <a href="./caja/caja.html" class="action-btn">
+              <i class="bi bi-cash-coin"></i>
+              <span>Control de Caja</span>
+            </a>
+            <a href="./banos/banos.html" class="action-btn">
+              <i class="bi bi-water"></i>
+              <span>Gestión Baños</span>
+            </a>
+            <a href="./custodia/custodia.html" class="action-btn">
+              <i class="bi bi-lock"></i>
+              <span>Gestión Custodia</span>
+            </a>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="session.js"></script>
-    <script src="sidebar.js"></script>
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="session.js"></script>
+  <script src="sidebar.js"></script>
 
-    <script>
-      function updateCurrentDate() {
-        const now = new Date();
-        const options = {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        };
-        document.getElementById("currentDate").textContent =
-          now.toLocaleDateString("es-ES", options);
-      }
+  <script>
+    function updateCurrentDate() {
+      const now = new Date();
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      document.getElementById("currentDate").textContent =
+        now.toLocaleDateString("es-ES", options);
+    }
 
-      $(document).ready(function () {
-        checkAuthOnce();
-        updateCurrentDate();
-      });
-    </script>
-  </body>
+    $(document).ready(function () {
+      checkAuthOnce();
+      updateCurrentDate();
+    });
+  </script>
+</body>
+
 </html>
