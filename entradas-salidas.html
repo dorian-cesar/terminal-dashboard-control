@@ -200,6 +200,35 @@
     const API_MOV_URL = "https://andenes.terminal-calama.com/parkingCalama/php/movimientos/api.php";
     // const API_URL = "http://localhost/parkingCalama/php/movimientos/api.php";
     // const API_MOV_URL = "http://localhost/parkingCalama/php/movimientos/api.php";
+    function verificarNivelMinimo(nivelMinimoRequerido = 10) {
+      try {
+          const userData = localStorage.getItem('user');
+          
+          if (!userData) {
+              alert('Usuario no autenticado. Será redirigido al login.');
+              window.location.href = 'index.html';
+              return false;
+          }
+
+          const usuario = JSON.parse(userData);
+          
+          if (usuario.nivel < nivelMinimoRequerido) {
+              window.location.href = 'index.html';
+              return false;
+          }
+
+          return true;
+      } catch (error) {
+          console.error('Error verificando nivel:', error);
+          alert('Error de permisos. Será redirigido al login.');
+          window.location.href = 'index.html';
+          return false;
+      }
+    }
+    
+    function verificarNivel10() {
+      return verificarNivelMinimo(10);
+    }
 
     let currentPage = 1;
     let entriesPerPage = parseInt($("#entriesPerPage").val());
@@ -221,7 +250,9 @@
     });
 
     $(document).ready(async function () {
-      // Cargar datos solo una vez
+      if (!verificarNivel10()) {
+        return; // Detener ejecución si no tiene permisos
+      }
       allMovimientos = await getMovimientos();
       filteredMovimientos = [...allMovimientos];
       totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
