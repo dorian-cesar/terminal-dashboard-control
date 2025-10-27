@@ -188,17 +188,30 @@
         const teclado = document.querySelector("virtual-keyboard");
         const campos = document.querySelectorAll("#email, #password");
 
-        // Ocultar inmediatamente al cargar
+        // 🔹 Ocultar inmediatamente al cargar
         teclado.hide();
 
-        // Mostrar teclado al hacer focus en los inputs
+        // 🔹 QUITAR EL FOCUS INICIAL de cualquier input
+        setTimeout(() => {
+          if (document.activeElement) {
+            document.activeElement.blur();
+          }
+        }, 100);
+
+        // 🔹 Mostrar teclado SOLO cuando se hace click/focus en los inputs
         campos.forEach((input) => {
           input.addEventListener("focus", () => {
             teclado.show(input);
           });
+          
+          // También prevenir que se muestre accidentalmente
+          input.addEventListener("click", (e) => {
+            e.stopPropagation();
+            teclado.show(input);
+          });
         });
 
-        // Ocultar teclado cuando se hace clic fuera
+        // 🔹 Ocultar teclado cuando se hace clic fuera
         document.addEventListener("click", (e) => {
           const esInput = e.target.matches("#email, #password");
           const esTeclado = e.target.closest("virtual-keyboard");
@@ -208,7 +221,7 @@
           }
         });
 
-        // Ocultar con ESC
+        // 🔹 Ocultar con ESC
         document.addEventListener("keydown", (e) => {
           if (e.key === "Escape") {
             teclado.hide();
@@ -312,8 +325,6 @@
             $(this).css("transform", "translateY(0)");
           }
         );
-
-        $("#email").focus();
 
         $("#togglePassword").on("click", function () {
           const passwordInput = $("#password");
