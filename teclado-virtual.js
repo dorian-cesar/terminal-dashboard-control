@@ -12,13 +12,16 @@ vkTemplate.innerHTML = `
       position: fixed;
       left: 0;
       right: 0;
-      bottom: 0;
+      bottom: 10px; /* 🔹 CAMBIO: De 0 a 10px para separar del borde */
       z-index: 9999;
       display: none;
       justify-content: center;
+      align-items: flex-end; /* 🔹 NUEVO: Alinear al fondo */
       pointer-events: none;
       -webkit-tap-highlight-color: transparent;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      padding: 0 10px; /* 🔹 NUEVO: Padding lateral */
+      box-sizing: border-box;
     }
     
     :host([visible]) {
@@ -27,14 +30,18 @@ vkTemplate.innerHTML = `
     }
     
     .vk-container {
-      width: min(1100px, calc(100% - 20px));
+      width: min(1100px, 100%); /* 🔹 CAMBIO: 100% en lugar de calc */
       background: linear-gradient(180deg,var(--vk-bg), #fff);
-      border-radius: var(--vk-radius) var(--vk-radius) 0 0;
-      box-shadow: var(--vk-key-shadow);
+      border-radius: var(--vk-radius);
+      box-shadow: 
+        0 -4px 20px rgba(0,0,0,0.15), 
+        var(--vk-key-shadow);
       padding: 12px;
       margin: 0 auto;
       user-select: none;
       pointer-events: auto;
+      max-height: 350px; /* 🔹 NUEVO: Limitar altura máxima */
+      overflow-y: auto; /* 🔹 NUEVO: Scroll si es necesario */
     }
     
     .vk-row { 
@@ -47,7 +54,7 @@ vkTemplate.innerHTML = `
       background: var(--vk-key-bg);
       border: 1px solid var(--vk-key-border);
       border-radius: 10px;
-      padding: 12px 10px;
+      padding: 12px 8px; /* 🔹 AJUSTE: Padding horizontal reducido */
       font-size: 1.05rem;
       min-height: 48px;
       box-shadow: 0 2px 0 rgba(0,0,0,0.02) inset;
@@ -58,6 +65,7 @@ vkTemplate.innerHTML = `
       justify-content: center;
       border: none;
       outline: none;
+      min-width: 0; /* 🔹 NUEVO: Permitir que se reduzca */
     }
     
     button.key:active { 
@@ -78,22 +86,85 @@ vkTemplate.innerHTML = `
     
     .small { font-size: 0.78rem; opacity: 0.85; }
     
-    @media(max-width:900px){
-      button.key{font-size:1rem;min-height:44px}
+    /* 🔹 MEJORAS RESPONSIVE */
+    @media(max-width: 900px){
+      :host {
+        bottom: 5px;
+        padding: 0 5px;
+      }
+      
+      .vk-container {
+        padding: 10px;
+        max-height: 320px;
+      }
+      
+      button.key {
+        font-size: 1rem;
+        min-height: 44px;
+        padding: 10px 6px;
+      }
     }
     
-    @media(max-width:480px){
-      button.key{font-size:0.95rem;min-height:40px}
+    @media(max-width: 768px){
+      .vk-container {
+        max-height: 300px;
+      }
+      
+      button.key {
+        font-size: 0.95rem;
+        min-height: 42px;
+        padding: 8px 4px;
+      }
+      
+      .key.space {
+        grid-column: span 4; /* 🔹 AJUSTE: Space más pequeño en móvil */
+      }
+    }
+    
+    @media(max-width: 480px){
+      :host {
+        bottom: 2px;
+        padding: 0 2px;
+      }
+      
+      .vk-container {
+        padding: 8px;
+        max-height: 280px;
+        border-radius: 10px 10px 0 0; /* 🔹 CAMBIO: Solo redondeo arriba en móvil */
+      }
+      
+      button.key {
+        font-size: 0.9rem;
+        min-height: 40px;
+        padding: 6px 3px;
+      }
+      
+      .vk-row {
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+    }
+
+    /* 🔹 NUEVO: Para pantallas muy pequeñas */
+    @media(max-width: 360px){
+      .vk-container {
+        max-height: 250px;
+      }
+      
+      button.key {
+        font-size: 0.85rem;
+        min-height: 38px;
+      }
+      
+      .key.space {
+        grid-column: span 3;
+      }
     }
   </style>
 
   <div class="vk-container" role="application" aria-label="Teclado virtual">
     <div class="vk-topbar">
       <div class="vk-title">Teclado — Español (Latinoamérica)</div>
-      <div class="vk-controls">
-        <button class="small key" data-action="toggle-mode">Modo</button>
-        <button class="small key" data-action="hide">Cerrar ✕</button>
-      </div>
     </div>
     <div class="vk-rows"></div>
   </div>
@@ -154,21 +225,21 @@ class VirtualKeyboard extends HTMLElement {
 
   _createLayouts() {
     const base = [
-      ["`","1","2","3","4","5","6","7","8","9","0","-","=","Backspace"],
+      ["`","1","2","3","4","5","6","7","8","9","0","-","=","⌫"],
       ["Tab","q","w","e","r","t","y","u","i","o","p","[","]","\\\\"],
       ["Caps","a","s","d","f","g","h","j","k","l","ñ",";","'","Enter"],
       ["Shift","z","x","c","v","b","n","m",",",".","/","Shift"],
-      ["Ctrl","Win","Alt","Space","AltGr","Menu","Ctrl"]
+      ["Ctrl","@","Alt","Space"]
     ];
     const shift = [
-      ["~","!","@","#","$","%","^","&","*","(",")","_","+","Backspace"],
+      ["~","!","@","#","$","%","^","&","*","(",")","_","+","⌫"],
       ["Tab","Q","W","E","R","T","Y","U","I","O","P","{","}","|"],
       ["Caps","A","S","D","F","G","H","J","K","L","Ñ",":","\"","Enter"],
       ["Shift","Z","X","C","V","B","N","M","<",">","?","Shift"],
       ["Ctrl","Win","Alt","Space","AltGr","Menu","Ctrl"]
     ];
     const alt = [
-      ["º","1","2","3","4","5","6","7","8","9","0","-","=","Backspace"],
+      ["º","1","2","3","4","5","6","7","8","9","0","-","=","⌫"],
       ["Tab","q","w","e","r","t","y","u","i","o","p","[","]","\\\\"],
       ["Caps","á","é","í","ó","ú","ü","¿","¡","°","ç",";","'","Enter"],
       ["Shift","ß","ñ","œ","@","#","$","¢","€","£","/","Shift"],
@@ -232,7 +303,7 @@ class VirtualKeyboard extends HTMLElement {
       return; 
     }
     
-    if(key==="Backspace") return this._send("Backspace");
+    if(key==="⌫") return this._send("Backspace");
     if(key==="Enter") return this._send("Enter");
     if(key==="Space") return this._send(" ");
     
