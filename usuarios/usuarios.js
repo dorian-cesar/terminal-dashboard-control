@@ -3,6 +3,36 @@ const BASE_URL = window.BASE_URL;
 
 const API_URL = `${BASE_URL}parkingCalama/php/users/api.php`;
 
+function verificarNivelMinimo(nivelMinimoRequerido = 10) {
+    try {
+        const userData = localStorage.getItem('user');
+        
+        if (!userData) {
+            alert('Usuario no autenticado. Será redirigido al login.');
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        const usuario = JSON.parse(userData);
+        
+        if (usuario.nivel < nivelMinimoRequerido) {
+            window.location.href = '../index.html';
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error verificando nivel:', error);
+        alert('Error de permisos. Será redirigido al login.');
+        window.location.href = '../index.html';
+        return false;
+    }
+}
+
+function verificarNivel10() {
+    return verificarNivelMinimo(10);
+}
+
 // Variables de paginación
 let currentPage = 1;
 let entriesPerPage = 10;
@@ -324,7 +354,14 @@ function loadUserInfo() {
   }
 }
 
+// 🔹 $(document).ready() AL FINAL - después de definir todas las funciones
 $(document).ready(function () {
+  // 🔹 VERIFICACIÓN PRINCIPAL
+  if (!verificarNivel10()) {
+    return;
+  }
+
+  // 🔹 Si pasa la verificación, cargar el contenido normal
   loadUsersTable();
   loadUserInfo();
 
