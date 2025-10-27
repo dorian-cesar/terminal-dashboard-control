@@ -1,591 +1,399 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Destinos - WIT</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
-    />
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="destinos.css" />
-    <link rel="stylesheet" href="dashboard.css" />
-    <script src="config.js"></script>
-    <script src="session.js"></script>
-    <style>
-      /* Scroll para tablas largas */
-      .table-responsive {
-        max-height: 400px;
-        overflow-y: auto;
-      }
-    </style>
-  </head>
-  <body class="dashboard-page">
-    <div class="wrapper">
-      <!-- Sidebar -->
-      <nav id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-          <div class="brand-logo-sidebar">
-            <div class="logo-container-sidebar">
-              <img src="wit.png" alt="WIT Logo" />
-            </div>
-          </div>
-          <div class="user-info">
-            <i class="bi bi-person-circle"></i>
-            <div>
-              <div class="user-email" id="userEmail">admin@wit.la</div>
-              <div class="user-role" id="userRole">Administrador</div>
-            </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Destinos - WIT</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="destinos.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <script src="config.js"></script>
+  <script src="session.js"></script>
+  <style>
+    /* Scroll para tablas largas */
+    .table-responsive {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo-sidebar">
+          <div class="logo-container-sidebar">
+            <img src="wit.png" alt="WIT Logo" />
           </div>
         </div>
+        <div class="user-info">
+          <i class="bi bi-person-circle"></i>
+          <div>
+            <div class="user-email" id="userEmail">admin@wit.la</div>
+            <div class="user-role" id="userRole">Administrador</div>
+          </div>
+        </div>
+      </div>
 
-        <ul class="list-unstyled components">
-          <li class="active">
-            <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
-          </li>
-          <li>
-            <a href="./banos/banos.html"><i class="bi bi-droplet"></i> Baños</a>
-          </li>
-          <li>
-            <a href="./custodia/custodia.html"
-              ><i class="bi bi-shield-check"></i> Custodia</a
-            >
-          </li>
-          <li>
-            <a href="./parking/parking.html"
-              ><i class="bi bi-car-front"></i> Parking</a
-            >
-          </li>
-          <li>
-            <a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a>
-          </li>
-          <li>
-            <a href="./caja/caja.html"><i class="bi bi-cash-coin"></i> Caja</a>
-          </li>
-          <li>
-            <a href="404.html"><i class="bi bi-display"></i> Monitoreo</a>
-          </li>
-          <li class="menu-section">CONFIGURACIÓN</li>
-          <li>
-            <a href="empresas.html"><i class="bi bi-building"></i> Empresas</a>
-          </li>
-          <li>
-            <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
-          </li>
-          <li>
-            <a href="./usuarios/usuarios.html"
-              ><i class="bi bi-people"></i> Usuarios</a
-            >
-          </li>
-          <li>
-            <a href="listas-blancas.html"
-              ><i class="bi bi-list-check"></i> Listas Blancas</a
-            >
-          </li>
-          <!-- <li>
+      <ul class="list-unstyled components">
+        <li class="active">
+          <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
+        </li>
+        <li>
+          <a href="./banos/banos.html"><i class="bi bi-droplet"></i> Baños</a>
+        </li>
+        <li>
+          <a href="./custodia/custodia.html"><i class="bi bi-shield-check"></i> Custodia</a>
+        </li>
+        <li>
+          <a href="./parking/parking.html"><i class="bi bi-car-front"></i> Parking</a>
+        </li>
+        <li>
+          <a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a>
+        </li>
+        <li>
+          <a href="./caja/caja.html"><i class="bi bi-cash-coin"></i> Caja</a>
+        </li>
+        <li>
+          <a href="404.html"><i class="bi bi-display"></i> Monitoreo</a>
+        </li>
+        <li class="menu-section">CONFIGURACIÓN</li>
+        <li>
+          <a href="empresas.html"><i class="bi bi-building"></i> Empresas</a>
+        </li>
+        <li>
+          <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
+        </li>
+        <li>
+          <a href="./usuarios/usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
+        </li>
+        <li>
+          <a href="listas-blancas.html"><i class="bi bi-list-check"></i> Listas Blancas</a>
+        </li>
+        <!-- <li>
             <a href="404.html"
               ><i class="bi bi-currency-dollar"></i> Pagos Diarios</a
             >
           </li> -->
-          <li>
-            <a href="entradas-salidas.html"
-              ><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a
-            >
-          </li>
-          <li>
-            <a href="#" id="logoutBtn"
-              ><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a
-            >
-          </li>
-        </ul>
-      </nav>
+        <li>
+          <a href="entradas-salidas.html"><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a>
+        </li>
+        <li>
+          <a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+        </li>
+      </ul>
+    </nav>
 
-      <!-- Page Content -->
-      <div id="content">
-        <!-- <div class="top-bar">
+    <!-- Page Content -->
+    <div id="content">
+      <!-- <div class="top-bar">
           <h4>Sistema de Control de Terminales Terrestres</h4>
         </div> -->
 
-        <div class="container-fluid">
-          <div class="page-header pt-1">
-            <h2>Mantenedor de Destinos</h2>
-          </div>
+      <div class="container-fluid">
+        <div class="page-header pt-1">
+          <h2>Mantenedor de Destinos</h2>
+        </div>
 
-          <div class="card">
-            <div
-              class="card-header d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <span class="me-2" style="color: #a3a3a3">Mostrar</span>
-                <select
-                  id="entriesPerPage"
-                  class="form-select form-select-sm d-inline-block w-auto"
-                >
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                </select>
-                <span class="ms-2" style="color: #a3a3a3">registros</span>
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+              <span class="me-2" style="color: #a3a3a3">Mostrar</span>
+              <select id="entriesPerPage" class="form-select form-select-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <span class="ms-2" style="color: #a3a3a3">registros</span>
+            </div>
+            <div class="d-flex gap-2">
+              <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="🔍 Buscar" />
+              <button class="btn btn-primary btn-sm" onclick="openDestinationModal()">
+                Crear Destino
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Ciudad</th>
+                    <th>Valor</th>
+                    <th>Tipo</th>
+                    <th>Controles</th>
+                  </tr>
+                </thead>
+                <tbody id="destinationsTable"></tbody>
+              </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <div id="tableInfo" style="color: #a3a3a3">
+                Mostrando registros
               </div>
-              <div class="d-flex gap-2">
-                <input
-                  type="text"
-                  id="searchInput"
-                  class="form-control form-control-sm"
-                  placeholder="🔍 Buscar"
-                />
-                <button
-                  class="btn btn-primary btn-sm"
-                  onclick="openDestinationModal()"
-                >
-                  Crear Destino
+              <div>
+                <button class="btn btn-sm btn-outline-secondary" id="firstPageBtn" onclick="goToPage(1)">
+                  <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                  <span class="btn-text">Primero</span>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" id="prevPageBtn" onclick="goToPage(currentPage - 1)">
+                  <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                  <span class="btn-text">Anterior</span>
+                </button>
+                <span class="mx-2" id="currentPageDisplay" style="color: #a3a3a3">1</span>
+                <button class="btn btn-sm btn-outline-secondary" id="nextPageBtn" onclick="goToPage(currentPage + 1)">
+                  <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                  <span class="btn-text">Siguiente</span>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" id="lastPageBtn" onclick="goToPage(totalPages)">
+                  <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                  <span class="btn-text">Último</span>
                 </button>
               </div>
             </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Ciudad</th>
-                      <th>Valor</th>
-                      <th>Tipo</th>
-                      <th>Controles</th>
-                    </tr>
-                  </thead>
-                  <tbody id="destinationsTable"></tbody>
-                </table>
-              </div>
-              <div
-                class="d-flex justify-content-between align-items-center mt-3"
-              >
-                <div id="tableInfo" style="color: #a3a3a3">
-                  Mostrando registros
-                </div>
-                <div>
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    id="firstPageBtn"
-                    onclick="goToPage(1)"
-                  >
-                    <span
-                      class="spinner-border spinner-border-sm d-none"
-                      role="status"
-                    ></span>
-                    <span class="btn-text">Primero</span>
-                  </button>
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    id="prevPageBtn"
-                    onclick="goToPage(currentPage - 1)"
-                  >
-                    <span
-                      class="spinner-border spinner-border-sm d-none"
-                      role="status"
-                    ></span>
-                    <span class="btn-text">Anterior</span>
-                  </button>
-                  <span
-                    class="mx-2"
-                    id="currentPageDisplay"
-                    style="color: #a3a3a3"
-                    >1</span
-                  >
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    id="nextPageBtn"
-                    onclick="goToPage(currentPage + 1)"
-                  >
-                    <span
-                      class="spinner-border spinner-border-sm d-none"
-                      role="status"
-                    ></span>
-                    <span class="btn-text">Siguiente</span>
-                  </button>
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    id="lastPageBtn"
-                    onclick="goToPage(totalPages)"
-                  >
-                    <span
-                      class="spinner-border spinner-border-sm d-none"
-                      role="status"
-                    ></span>
-                    <span class="btn-text">Último</span>
-                  </button>
-                </div>
-              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Destination Modal -->
+  <div class="modal fade" id="destinationModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="destinationModalTitle">
+            Crear Destino
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="destinationForm">
+            <input type="hidden" id="destinationId" />
+            <div class="mb-3">
+              <label for="destinationCity" class="form-label">Ciudad</label>
+              <input type="text" class="form-control" id="destinationCity" required />
             </div>
-          </div>
+            <div class="mb-3">
+              <label for="destinationValue" class="form-label">Valor</label>
+              <input type="number" class="form-control" id="destinationValue" required />
+            </div>
+            <div class="mb-3">
+              <label for="destinationType" class="form-label">Tipo</label>
+              <select class="form-select" id="destinationType" required>
+                <option value="nacional">Nacional</option>
+                <option value="internacional">Internacional</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="button" id="saveDestinationBtn" class="btn btn-primary" onclick="saveDestination()">
+            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+            <span class="btn-text">Guardar</span>
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Destination Modal -->
-    <div class="modal fade" id="destinationModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="destinationModalTitle">
-              Crear Destino
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form id="destinationForm">
-              <input type="hidden" id="destinationId" />
-              <div class="mb-3">
-                <label for="destinationCity" class="form-label">Ciudad</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="destinationCity"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="destinationValue" class="form-label">Valor</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  id="destinationValue"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="destinationType" class="form-label">Tipo</label>
-                <select class="form-select" id="destinationType" required>
-                  <option value="nacional">Nacional</option>
-                  <option value="internacional">Internacional</option>
-                </select>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              id="saveDestinationBtn"
-              class="btn btn-primary"
-              onclick="saveDestination()"
-            >
-              <span
-                class="spinner-border spinner-border-sm d-none"
-                role="status"
-              ></span>
-              <span class="btn-text">Guardar</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const API_URL = (BASE_URL || "") + "parkingCalama/php/destinos/api.php";
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-      const API_URL = (BASE_URL || "") + "parkingCalama/php/destinos/api.php";
+    let currentPage = 1;
+    let entriesPerPage = parseInt($("#entriesPerPage").val());
+    let totalPages = 1;
+    let allDestinations = [];
+    let filteredDestinations = [];
 
-      let currentPage = 1;
-      let entriesPerPage = parseInt($("#entriesPerPage").val());
-      let totalPages = 1;
-      let allDestinations = [];
-      let filteredDestinations = [];
+    $(document).ready(async function () {
+      // Cargar datos solo una vez
+      allDestinations = await getDestinations();
+      filteredDestinations = [...allDestinations];
+      totalPages = Math.ceil(filteredDestinations.length / entriesPerPage);
+      renderCurrentPage();
+      togglePaginationLoading(false);
+      loadUserInfo()
 
-      $(document).ready(async function () {
-        // Cargar datos solo una vez
-        allDestinations = await getDestinations();
-        filteredDestinations = [...allDestinations];
-        totalPages = Math.ceil(filteredDestinations.length / entriesPerPage);
-        renderCurrentPage();
-        togglePaginationLoading(false);
-
-        // Filtrado por búsqueda
-        $("#searchInput").on("keyup", function () {
-          currentPage = 1;
-          filterDestinations();
-        });
-
-        // Cambio de registros por página
-        $("#entriesPerPage").on("change", function () {
-          entriesPerPage = parseInt($(this).val());
-          totalPages = Math.ceil(filteredDestinations.length / entriesPerPage);
-          currentPage = 1;
-          renderCurrentPage();
-          togglePaginationLoading(false);
-        });
-
-        $("#logoutBtn").on("click", function (e) {
-          e.preventDefault();
-          logout();
-        });
+      // Filtrado por búsqueda
+      $("#searchInput").on("keyup", function () {
+        currentPage = 1;
+        filterDestinations();
       });
 
-      function logout() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        document.cookie =
-          "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
-        window.location.href = "index.html";
-      }
-
-      // --- API Functions ---
-      async function getDestinations() {
-        try {
-          const res = await axios.get(API_URL);
-          return res.data;
-        } catch (err) {
-          console.error(err);
-          return [];
-        }
-      }
-
-      async function getDestinationById(id) {
-        try {
-          const res = await axios.get(`${API_URL}?id=${id}`);
-          return res.data;
-        } catch (err) {
-          console.error(err);
-          return null;
-        }
-      }
-
-      async function addDestination(destination) {
-        try {
-          await axios.post(API_URL, destination);
-        } catch (e) {
-          console.error(e);
-          alert("Error al agregar");
-        }
-      }
-
-      async function updateDestination(destination) {
-        try {
-          await axios.put(API_URL, destination);
-        } catch (e) {
-          console.error(e);
-          alert("Error al actualizar");
-        }
-      }
-
-      async function removeDestination(id) {
-        try {
-          await axios.delete(API_URL, { data: { id } });
-        } catch (e) {
-          console.error(e);
-          alert("Error al eliminar");
-        }
-      }
-
-      // --- Filtrado ---
-      function filterDestinations() {
-        const searchTerm = $("#searchInput").val().toLowerCase();
-        filteredDestinations = allDestinations.filter(
-          (d) =>
-            d.ciudad.toLowerCase().includes(searchTerm) ||
-            d.tipo.toLowerCase().includes(searchTerm)
-        );
+      // Cambio de registros por página
+      $("#entriesPerPage").on("change", function () {
+        entriesPerPage = parseInt($(this).val());
         totalPages = Math.ceil(filteredDestinations.length / entriesPerPage);
+        currentPage = 1;
         renderCurrentPage();
         togglePaginationLoading(false);
-      }
+      });
 
-      // --- Paginación ---
-      function goToPage(page) {
-        if (page < 1) page = 1;
-        if (page > totalPages) page = totalPages;
-        currentPage = page;
-        renderCurrentPage();
-        togglePaginationLoading(false);
-      }
+      $("#logoutBtn").on("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+    });
 
-      function renderCurrentPage() {
-        const tbody = $("#destinationsTable");
-        tbody.empty();
-        const start = (currentPage - 1) * entriesPerPage;
-        const pageData = filteredDestinations.slice(
-          start,
-          start + entriesPerPage
-        );
-
-        if (pageData.length === 0) {
-          tbody.append(
-            `<tr><td colspan="5" class="text-center text-muted">No se encontraron registros</td></tr>`
-          );
-          $("#tableInfo").text("Sin registros que mostrar");
-          return;
+    function loadUserInfo() {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          $("#userEmail").text(user.mail || "Usuario");
+          $("#userRole").text(`Nivel: ${user.nivel}`);
+        } catch (e) {
+          console.error("Error parsing user data:", e);
         }
+      } else {
+        console.warn("No se encontró información del usuario");
+      }
+    }
 
-        pageData.forEach((d) => {
-          tbody.append(`
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      document.cookie =
+        "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
+      window.location.href = "index.html";
+    }
+
+    // --- API Functions ---
+    async function getDestinations() {
+      try {
+        const res = await axios.get(API_URL);
+        return res.data;
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    }
+
+    async function getDestinationById(id) {
+      try {
+        const res = await axios.get(`${API_URL}?id=${id}`);
+        return res.data;
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    }
+
+    async function addDestination(destination) {
+      try {
+        await axios.post(API_URL, destination);
+      } catch (e) {
+        console.error(e);
+        alert("Error al agregar");
+      }
+    }
+
+    async function updateDestination(destination) {
+      try {
+        await axios.put(API_URL, destination);
+      } catch (e) {
+        console.error(e);
+        alert("Error al actualizar");
+      }
+    }
+
+    async function removeDestination(id) {
+      try {
+        await axios.delete(API_URL, { data: { id } });
+      } catch (e) {
+        console.error(e);
+        alert("Error al eliminar");
+      }
+    }
+
+    // --- Filtrado ---
+    function filterDestinations() {
+      const searchTerm = $("#searchInput").val().toLowerCase();
+      filteredDestinations = allDestinations.filter(
+        (d) =>
+          d.ciudad.toLowerCase().includes(searchTerm) ||
+          d.tipo.toLowerCase().includes(searchTerm)
+      );
+      totalPages = Math.ceil(filteredDestinations.length / entriesPerPage);
+      renderCurrentPage();
+      togglePaginationLoading(false);
+    }
+
+    // --- Paginación ---
+    function goToPage(page) {
+      if (page < 1) page = 1;
+      if (page > totalPages) page = totalPages;
+      currentPage = page;
+      renderCurrentPage();
+      togglePaginationLoading(false);
+    }
+
+    function renderCurrentPage() {
+      const tbody = $("#destinationsTable");
+      tbody.empty();
+      const start = (currentPage - 1) * entriesPerPage;
+      const pageData = filteredDestinations.slice(
+        start,
+        start + entriesPerPage
+      );
+
+      if (pageData.length === 0) {
+        tbody.append(
+          `<tr><td colspan="5" class="text-center text-muted">No se encontraron registros</td></tr>`
+        );
+        $("#tableInfo").text("Sin registros que mostrar");
+        return;
+      }
+
+      pageData.forEach((d) => {
+        tbody.append(`
         <tr>
           <td>${d.iddest}</td>
           <td>${d.ciudad}</td>
           <td>$${d.valor != null ? d.valor.toLocaleString() : "-"}</td>
           <td>${d.tipo}</td>
           <td>
-            <button class="btn btn-sm btn-warning" onclick="editDestination(${
-              d.iddest
-            })"><i class="bi bi-pencil"></i></button>
-            <button class="btn btn-sm btn-danger" onclick="deleteDestination(${
-              d.iddest
-            })"><i class="bi bi-trash"></i></button>
+            <button class="btn btn-sm btn-warning" onclick="editDestination(${d.iddest
+          })"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteDestination(${d.iddest
+          })"><i class="bi bi-trash"></i></button>
           </td>
         </tr>
       `);
-        });
+      });
 
-        $("#tableInfo").text(
-          `Mostrando ${start + 1} a ${start + pageData.length} de ${
-            filteredDestinations.length
-          } registros`
-        );
+      $("#tableInfo").text(
+        `Mostrando ${start + 1} a ${start + pageData.length} de ${filteredDestinations.length
+        } registros`
+      );
 
-        // Actualizar número de página
-        $("#currentPageDisplay").text(currentPage);
-      }
+      // Actualizar número de página
+      $("#currentPageDisplay").text(currentPage);
+    }
 
-      // --- Botones de paginación ---
-      function togglePaginationLoading(loading = true) {
-        const buttons = [
-          "firstPageBtn",
-          "prevPageBtn",
-          "nextPageBtn",
-          "lastPageBtn",
-        ];
-        buttons.forEach((id) => {
-          const btn = document.getElementById(id);
-          const spinner = btn.querySelector(".spinner-border");
-          const text = btn.querySelector(".btn-text");
-          if (loading) {
-            btn.disabled = true;
-            spinner.classList.remove("d-none");
-            text.classList.add("d-none");
-          } else {
-            btn.disabled = false;
-            spinner.classList.add("d-none");
-            text.classList.remove("d-none");
-          }
-        });
-      }
-
-      // --- Modal Functions ---
-      async function openDestinationModal(destId = null) {
-        $("#destinationForm")[0].reset();
-        if (destId) {
-          const dest = await getDestinationById(destId);
-          $("#destinationModalTitle").text("Editar Destino");
-          $("#destinationId").val(dest.iddest);
-          $("#destinationCity").val(dest.ciudad);
-          $("#destinationValue").val(dest.valor);
-          $("#destinationType").val(dest.tipo);
-        } else {
-          $("#destinationModalTitle").text("Crear Destino");
-          $("#destinationId").val("");
-        }
-        new bootstrap.Modal(document.getElementById("destinationModal")).show();
-      }
-
-      // --- CRUD Actions ---
-      async function saveDestination() {
-        const btn = document.getElementById("saveDestinationBtn");
-        toggleButtonLoading(btn, true);
-
-        const id = $("#destinationId").val();
-        const ciudad = $("#destinationCity").val().trim();
-        const valorStr = $("#destinationValue").val().trim();
-        const tipo = $("#destinationType").val();
-
-        // Validación de campos vacíos
-        if (!ciudad) {
-          alert("La ciudad es obligatoria");
-          toggleButtonLoading(btn, false);
-          return;
-        }
-        if (!valorStr) {
-          alert("El valor es obligatorio");
-          toggleButtonLoading(btn, false);
-          return;
-        }
-        if (!tipo) {
-          alert("El tipo es obligatorio");
-          toggleButtonLoading(btn, false);
-          return;
-        }
-
-        const valor = parseInt(valorStr);
-        const dest = { ciudad, valor, tipo };
-
-        try {
-          if (id) {
-            dest.id = parseInt(id);
-            await updateDestination(dest);
-            alert("Destino actualizado");
-          } else {
-            await addDestination(dest);
-            alert("Destino creado");
-          }
-
-          // Cerrar modal
-          const modalEl = document.getElementById("destinationModal");
-          const modal =
-            bootstrap.Modal.getInstance(modalEl) ||
-            new bootstrap.Modal(modalEl);
-          modal.hide();
-          $(".modal-backdrop").remove();
-          $("body").removeClass("modal-open").css("padding-right", "");
-
-          // Actualizar tabla localmente sin recargar API
-          if (!id) {
-            allDestinations.push({
-              ...dest,
-              iddest: allDestinations.length + 1,
-            });
-          } else {
-            const idx = allDestinations.findIndex((d) => d.iddest == id);
-            if (idx >= 0)
-              allDestinations[idx] = { ...dest, iddest: parseInt(id) };
-          }
-          filterDestinations();
-        } catch (err) {
-          console.error(err);
-          alert("Error al guardar el destino");
-        } finally {
-          toggleButtonLoading(btn, false);
-        }
-      }
-
-      async function editDestination(id) {
-        await openDestinationModal(id);
-      }
-
-      async function deleteDestination(id) {
-        if (confirm("¿Eliminar destino?")) {
-          await removeDestination(id);
-          alert("Destino eliminado");
-          // Actualizar arreglo local
-          allDestinations = allDestinations.filter((d) => d.iddest != id);
-          filterDestinations();
-        }
-      }
-
-      function toggleButtonLoading(btn, loading = true) {
+    // --- Botones de paginación ---
+    function togglePaginationLoading(loading = true) {
+      const buttons = [
+        "firstPageBtn",
+        "prevPageBtn",
+        "nextPageBtn",
+        "lastPageBtn",
+      ];
+      buttons.forEach((id) => {
+        const btn = document.getElementById(id);
         const spinner = btn.querySelector(".spinner-border");
         const text = btn.querySelector(".btn-text");
         if (loading) {
@@ -597,7 +405,123 @@
           spinner.classList.add("d-none");
           text.classList.remove("d-none");
         }
+      });
+    }
+
+    // --- Modal Functions ---
+    async function openDestinationModal(destId = null) {
+      $("#destinationForm")[0].reset();
+      if (destId) {
+        const dest = await getDestinationById(destId);
+        $("#destinationModalTitle").text("Editar Destino");
+        $("#destinationId").val(dest.iddest);
+        $("#destinationCity").val(dest.ciudad);
+        $("#destinationValue").val(dest.valor);
+        $("#destinationType").val(dest.tipo);
+      } else {
+        $("#destinationModalTitle").text("Crear Destino");
+        $("#destinationId").val("");
       }
-    </script>
-  </body>
+      new bootstrap.Modal(document.getElementById("destinationModal")).show();
+    }
+
+    // --- CRUD Actions ---
+    async function saveDestination() {
+      const btn = document.getElementById("saveDestinationBtn");
+      toggleButtonLoading(btn, true);
+
+      const id = $("#destinationId").val();
+      const ciudad = $("#destinationCity").val().trim();
+      const valorStr = $("#destinationValue").val().trim();
+      const tipo = $("#destinationType").val();
+
+      // Validación de campos vacíos
+      if (!ciudad) {
+        alert("La ciudad es obligatoria");
+        toggleButtonLoading(btn, false);
+        return;
+      }
+      if (!valorStr) {
+        alert("El valor es obligatorio");
+        toggleButtonLoading(btn, false);
+        return;
+      }
+      if (!tipo) {
+        alert("El tipo es obligatorio");
+        toggleButtonLoading(btn, false);
+        return;
+      }
+
+      const valor = parseInt(valorStr);
+      const dest = { ciudad, valor, tipo };
+
+      try {
+        if (id) {
+          dest.id = parseInt(id);
+          await updateDestination(dest);
+          alert("Destino actualizado");
+        } else {
+          await addDestination(dest);
+          alert("Destino creado");
+        }
+
+        // Cerrar modal
+        const modalEl = document.getElementById("destinationModal");
+        const modal =
+          bootstrap.Modal.getInstance(modalEl) ||
+          new bootstrap.Modal(modalEl);
+        modal.hide();
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open").css("padding-right", "");
+
+        // Actualizar tabla localmente sin recargar API
+        if (!id) {
+          allDestinations.push({
+            ...dest,
+            iddest: allDestinations.length + 1,
+          });
+        } else {
+          const idx = allDestinations.findIndex((d) => d.iddest == id);
+          if (idx >= 0)
+            allDestinations[idx] = { ...dest, iddest: parseInt(id) };
+        }
+        filterDestinations();
+      } catch (err) {
+        console.error(err);
+        alert("Error al guardar el destino");
+      } finally {
+        toggleButtonLoading(btn, false);
+      }
+    }
+
+    async function editDestination(id) {
+      await openDestinationModal(id);
+    }
+
+    async function deleteDestination(id) {
+      if (confirm("¿Eliminar destino?")) {
+        await removeDestination(id);
+        alert("Destino eliminado");
+        // Actualizar arreglo local
+        allDestinations = allDestinations.filter((d) => d.iddest != id);
+        filterDestinations();
+      }
+    }
+
+    function toggleButtonLoading(btn, loading = true) {
+      const spinner = btn.querySelector(".spinner-border");
+      const text = btn.querySelector(".btn-text");
+      if (loading) {
+        btn.disabled = true;
+        spinner.classList.remove("d-none");
+        text.classList.add("d-none");
+      } else {
+        btn.disabled = false;
+        spinner.classList.add("d-none");
+        text.classList.remove("d-none");
+      }
+    }
+  </script>
+</body>
+
 </html>

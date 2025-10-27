@@ -1,293 +1,281 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Entradas y Salidas - WIT</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
-    />
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="destinos.css" />
-    <link rel="stylesheet" href="dashboard.css" />
-    <script src="config.js"></script>
-    <script src="session.js"></script>
-    <style>
-      .table-responsive {
-        max-height: 450px;
-        overflow-y: auto;
-      }
-    </style>
-  </head>
 
-  <body class="dashboard-page">
-    <div class="wrapper">
-      <!-- Sidebar -->
-      <nav id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-          <div class="brand-logo-sidebar">
-            <div class="logo-container-sidebar">
-              <img src="wit.png" alt="WIT Logo" />
-            </div>
-          </div>
-          <div class="user-info">
-            <i class="bi bi-person-circle"></i>
-            <div>
-              <div class="user-email" id="userEmail">admin@wit.la</div>
-              <div class="user-role" id="userRole">Administrador</div>
-            </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entradas y Salidas - WIT</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="destinos.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <script src="config.js"></script>
+  <script src="session.js"></script>
+  <style>
+    .table-responsive {
+      max-height: 450px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo-sidebar">
+          <div class="logo-container-sidebar">
+            <img src="wit.png" alt="WIT Logo" />
           </div>
         </div>
+        <div class="user-info">
+          <i class="bi bi-person-circle"></i>
+          <div>
+            <div class="user-email" id="userEmail">admin@wit.la</div>
+            <div class="user-role" id="userRole">Administrador</div>
+          </div>
+        </div>
+      </div>
 
-        <ul class="list-unstyled components">
-          <li class="active">
-            <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
-          </li>
-          <li>
-            <a href="./banos/banos.html"><i class="bi bi-droplet"></i> Baños</a>
-          </li>
-          <li>
-            <a href="./custodia/custodia.html"
-              ><i class="bi bi-shield-check"></i> Custodia</a
-            >
-          </li>
-          <li>
-            <a href="./parking/parking.html"
-              ><i class="bi bi-car-front"></i> Parking</a
-            >
-          </li>
-          <li>
-            <a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a>
-          </li>
-          <li>
-            <a href="./caja/caja.html"><i class="bi bi-cash-coin"></i> Caja</a>
-          </li>
-          <li>
-            <a href="404.html"><i class="bi bi-display"></i> Monitoreo</a>
-          </li>
-          <li class="menu-section">CONFIGURACIÓN</li>
-          <li>
-            <a href="empresas.html"><i class="bi bi-building"></i> Empresas</a>
-          </li>
-          <li>
-            <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
-          </li>
-          <li>
-            <a href="./usuarios/usuarios.html"
-              ><i class="bi bi-people"></i> Usuarios</a
-            >
-          </li>
-          <li>
-            <a href="listas-blancas.html"
-              ><i class="bi bi-list-check"></i> Listas Blancas</a
-            >
-          </li>
-          <!-- <li>
+      <ul class="list-unstyled components">
+        <li class="active">
+          <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
+        </li>
+        <li>
+          <a href="./banos/banos.html"><i class="bi bi-droplet"></i> Baños</a>
+        </li>
+        <li>
+          <a href="./custodia/custodia.html"><i class="bi bi-shield-check"></i> Custodia</a>
+        </li>
+        <li>
+          <a href="./parking/parking.html"><i class="bi bi-car-front"></i> Parking</a>
+        </li>
+        <li>
+          <a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a>
+        </li>
+        <li>
+          <a href="./caja/caja.html"><i class="bi bi-cash-coin"></i> Caja</a>
+        </li>
+        <li>
+          <a href="404.html"><i class="bi bi-display"></i> Monitoreo</a>
+        </li>
+        <li class="menu-section">CONFIGURACIÓN</li>
+        <li>
+          <a href="empresas.html"><i class="bi bi-building"></i> Empresas</a>
+        </li>
+        <li>
+          <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
+        </li>
+        <li>
+          <a href="./usuarios/usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
+        </li>
+        <li>
+          <a href="listas-blancas.html"><i class="bi bi-list-check"></i> Listas Blancas</a>
+        </li>
+        <!-- <li>
             <a href="404.html"
               ><i class="bi bi-currency-dollar"></i> Pagos Diarios</a
             >
           </li> -->
-          <li>
-            <a href="entradas-salidas.html"
-              ><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a
-            >
-          </li>
-          <li>
-            <a href="#" id="logoutBtn"
-              ><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a
-            >
-          </li>
-        </ul>
-      </nav>
+        <li>
+          <a href="entradas-salidas.html"><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a>
+        </li>
+        <li>
+          <a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+        </li>
+      </ul>
+    </nav>
 
-      <!-- Page Content -->
-      <div id="content">
-        <div class="container-fluid">
-          <div class="page-header pt-1">
-            <h2>Movimientos de Entradas y Salidas</h2>
+    <!-- Page Content -->
+    <div id="content">
+      <div class="container-fluid">
+        <div class="page-header pt-1">
+          <h2>Movimientos de Entradas y Salidas</h2>
+        </div>
+
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+              <span class="me-2" style="color: #a3a3a3">Mostrar</span>
+              <select id="entriesPerPage" class="form-select form-select-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <span class="ms-2" style="color: #a3a3a3">registros</span>
+            </div>
+            <div class="d-flex gap-2">
+              <input type="text" id="searchInput" class="form-control form-control-sm"
+                placeholder="🔍 Buscar por patente, empresa o tipo" />
+            </div>
           </div>
 
-          <div class="card">
-            <div
-              class="card-header d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <span class="me-2" style="color: #a3a3a3">Mostrar</span>
-                <select
-                  id="entriesPerPage"
-                  class="form-select form-select-sm d-inline-block w-auto"
-                >
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                </select>
-                <span class="ms-2" style="color: #a3a3a3">registros</span>
-              </div>
-              <div class="d-flex gap-2">
-                <input
-                  type="text"
-                  id="searchInput"
-                  class="form-control form-control-sm"
-                  placeholder="🔍 Buscar por patente, empresa o tipo"
-                />
-              </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover table-striped align-middle">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Fecha Entrada</th>
+                    <th>Hora Entrada</th>
+                    <th>Fecha Salida</th>
+                    <th>Hora Salida</th>
+                    <th>Patente</th>
+                    <th>Empresa</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody id="movimientosTable"></tbody>
+              </table>
             </div>
 
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Fecha Entrada</th>
-                      <th>Hora Entrada</th>
-                      <th>Fecha Salida</th>
-                      <th>Hora Salida</th>
-                      <th>Patente</th>
-                      <th>Empresa</th>
-                      <th>Tipo</th>
-                      <th>Estado</th>
-                      <th>Valor</th>
-                    </tr>
-                  </thead>
-                  <tbody id="movimientosTable"></tbody>
-                </table>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <div id="tableInfo" style="color: #a3a3a3">
+                Mostrando registros
               </div>
-
-              <div
-                class="d-flex justify-content-between align-items-center mt-3"
-              >
-                <div id="tableInfo" style="color: #a3a3a3">
-                  Mostrando registros
-                </div>
-                <div>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Primero
-                  </button>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Anterior
-                  </button>
-                  <span class="mx-2" style="color: #a3a3a3">1</span>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Siguiente
-                  </button>
-                  <button class="btn btn-sm btn-outline-secondary">
-                    Último
-                  </button>
-                </div>
+              <div>
+                <button class="btn btn-sm btn-outline-secondary">
+                  Primero
+                </button>
+                <button class="btn btn-sm btn-outline-secondary">
+                  Anterior
+                </button>
+                <span class="mx-2" style="color: #a3a3a3">1</span>
+                <button class="btn btn-sm btn-outline-secondary">
+                  Siguiente
+                </button>
+                <button class="btn btn-sm btn-outline-secondary">
+                  Último
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <script>
-      const API_URL =
-        "https://andenes.terminal-calama.com/parkingCalama/php/movimientos/api.php";
-      // const API_URL = "http://localhost/parkingCalama/php/movimientos/api.php";
+  <script>
+    const API_URL =
+      "https://andenes.terminal-calama.com/parkingCalama/php/movimientos/api.php";
+    // const API_URL = "http://localhost/parkingCalama/php/movimientos/api.php";
 
-      let currentPage = 1;
-      let entriesPerPage = parseInt($("#entriesPerPage").val());
-      let totalPages = 1;
-      let allMovimientos = [];
-      let filteredMovimientos = [];
+    let currentPage = 1;
+    let entriesPerPage = parseInt($("#entriesPerPage").val());
+    let totalPages = 1;
+    let allMovimientos = [];
+    let filteredMovimientos = [];
 
-      $(document).ready(async function () {
-        // Cargar datos solo una vez
-        allMovimientos = await getMovimientos();
-        filteredMovimientos = [...allMovimientos];
-        totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
-        renderCurrentPage();
-        togglePaginationLoading(false);
+    $(document).ready(async function () {
+      // Cargar datos solo una vez
+      allMovimientos = await getMovimientos();
+      filteredMovimientos = [...allMovimientos];
+      totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
+      renderCurrentPage();
+      togglePaginationLoading(false);
+      loadUserInfo()
 
-        // Filtros
-        $("#searchInput").on("keyup", function () {
-          currentPage = 1;
-          filterMovimientos();
-        });
-
-        $("#entriesPerPage").on("change", function () {
-          entriesPerPage = parseInt($(this).val());
-          totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
-          currentPage = 1;
-          renderCurrentPage();
-          togglePaginationLoading(false);
-        });
-
-        $("#logoutBtn").on("click", function (e) {
-          e.preventDefault();
-          logout();
-        });
+      // Filtros
+      $("#searchInput").on("keyup", function () {
+        currentPage = 1;
+        filterMovimientos();
       });
 
-      function logout() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        document.cookie =
-          "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
-        window.location.href = "index.html";
-      }
-
-      async function getMovimientos() {
-        try {
-          const res = await axios.get(API_URL);
-          let data = res.data;
-          if (!Array.isArray(data)) data = [data];
-          return data;
-        } catch (err) {
-          console.error("Error al obtener movimientos:", err);
-          return [];
-        }
-      }
-
-      function filterMovimientos() {
-        const searchTerm = $("#searchInput").val().toLowerCase();
-        filteredMovimientos = allMovimientos.filter((m) =>
-          Object.values(m).join(" ").toLowerCase().includes(searchTerm)
-        );
+      $("#entriesPerPage").on("change", function () {
+        entriesPerPage = parseInt($(this).val());
         totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
+        currentPage = 1;
         renderCurrentPage();
         togglePaginationLoading(false);
-      }
+      });
 
-      function goToPage(page) {
-        if (page < 1) page = 1;
-        if (page > totalPages) page = totalPages;
-        currentPage = page;
-        renderCurrentPage();
-        togglePaginationLoading(false);
-      }
+      $("#logoutBtn").on("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+    });
 
-      function renderCurrentPage() {
-        const tbody = $("#movimientosTable");
-        tbody.empty();
-        const start = (currentPage - 1) * entriesPerPage;
-        const pageData = filteredMovimientos.slice(
-          start,
-          start + entriesPerPage
-        );
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      document.cookie =
+        "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
+      window.location.href = "index.html";
+    }
 
-        if (pageData.length === 0) {
-          tbody.append(
-            `<tr><td colspan="10" class="text-center text-muted">No se encontraron registros</td></tr>`
-          );
-          $("#tableInfo").text("Sin registros que mostrar");
-          return;
+    function loadUserInfo() {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          $("#userEmail").text(user.mail || "Usuario");
+          $("#userRole").text(`Nivel: ${user.nivel}`);
+        } catch (e) {
+          console.error("Error parsing user data:", e);
         }
+      } else {
+        console.warn("No se encontró información del usuario");
+      }
+    }
 
-        pageData.forEach((m) => {
-          tbody.append(`
+    async function getMovimientos() {
+      try {
+        const res = await axios.get(API_URL);
+        let data = res.data;
+        if (!Array.isArray(data)) data = [data];
+        return data;
+      } catch (err) {
+        console.error("Error al obtener movimientos:", err);
+        return [];
+      }
+    }
+
+    function filterMovimientos() {
+      const searchTerm = $("#searchInput").val().toLowerCase();
+      filteredMovimientos = allMovimientos.filter((m) =>
+        Object.values(m).join(" ").toLowerCase().includes(searchTerm)
+      );
+      totalPages = Math.ceil(filteredMovimientos.length / entriesPerPage);
+      renderCurrentPage();
+      togglePaginationLoading(false);
+    }
+
+    function goToPage(page) {
+      if (page < 1) page = 1;
+      if (page > totalPages) page = totalPages;
+      currentPage = page;
+      renderCurrentPage();
+      togglePaginationLoading(false);
+    }
+
+    function renderCurrentPage() {
+      const tbody = $("#movimientosTable");
+      tbody.empty();
+      const start = (currentPage - 1) * entriesPerPage;
+      const pageData = filteredMovimientos.slice(
+        start,
+        start + entriesPerPage
+      );
+
+      if (pageData.length === 0) {
+        tbody.append(
+          `<tr><td colspan="10" class="text-center text-muted">No se encontraron registros</td></tr>`
+        );
+        $("#tableInfo").text("Sin registros que mostrar");
+        return;
+      }
+
+      pageData.forEach((m) => {
+        tbody.append(`
         <tr>
           <td>${m.idmov || ""}</td>
           <td>${m.fechaent || ""}</td>
@@ -301,55 +289,53 @@
           <td>$${(m.valor || 0).toLocaleString("es-CL")}</td>
         </tr>
       `);
-        });
+      });
 
-        $("#tableInfo").text(
-          `Mostrando ${start + 1} a ${start + pageData.length} de ${
-            filteredMovimientos.length
-          } registros`
-        );
-      }
+      $("#tableInfo").text(
+        `Mostrando ${start + 1} a ${start + pageData.length} de ${filteredMovimientos.length
+        } registros`
+      );
+    }
 
-      function togglePaginationLoading(loading = true) {
-        const container = $(
-          ".d-flex.justify-content-between.align-items-center.mt-3 div:last-child"
-        );
-        container.empty();
+    function togglePaginationLoading(loading = true) {
+      const container = $(
+        ".d-flex.justify-content-between.align-items-center.mt-3 div:last-child"
+      );
+      container.empty();
 
-        const buttons = [
-          { text: "Primero", page: 1 },
-          { text: "Anterior", page: currentPage - 1 },
-          { text: "Siguiente", page: currentPage + 1 },
-          { text: "Último", page: totalPages },
-        ];
+      const buttons = [
+        { text: "Primero", page: 1 },
+        { text: "Anterior", page: currentPage - 1 },
+        { text: "Siguiente", page: currentPage + 1 },
+        { text: "Último", page: totalPages },
+      ];
 
-        buttons.forEach((b) => {
-          const btn = $(`
-        <button class="btn btn-sm btn-outline-secondary me-1" ${
-          loading || b.page < 1 || b.page > totalPages ? "disabled" : ""
-        }>
-          <span class="spinner-border spinner-border-sm ${
-            loading ? "" : "d-none"
+      buttons.forEach((b) => {
+        const btn = $(`
+        <button class="btn btn-sm btn-outline-secondary me-1" ${loading || b.page < 1 || b.page > totalPages ? "disabled" : ""
+          }>
+          <span class="spinner-border spinner-border-sm ${loading ? "" : "d-none"
           }" role="status"></span>
           <span class="btn-text">${b.text}</span>
         </button>
       `);
 
-          btn.on("click", () => {
-            if (!loading && b.page >= 1 && b.page <= totalPages) {
-              goToPage(b.page);
-            }
-          });
-
-          container.append(btn);
-
-          if (b.text === "Anterior") {
-            container.append(
-              `<span class="mx-2" style="color: #a3a3a3" id="currentPageDisplay">${currentPage}</span>`
-            );
+        btn.on("click", () => {
+          if (!loading && b.page >= 1 && b.page <= totalPages) {
+            goToPage(b.page);
           }
         });
-      }
-    </script>
-  </body>
+
+        container.append(btn);
+
+        if (b.text === "Anterior") {
+          container.append(
+            `<span class="mx-2" style="color: #a3a3a3" id="currentPageDisplay">${currentPage}</span>`
+          );
+        }
+      });
+    }
+  </script>
+</body>
+
 </html>

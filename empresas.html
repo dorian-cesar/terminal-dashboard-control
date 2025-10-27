@@ -1,405 +1,355 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Empresas - WIT</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
-    />
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="destinos.css" />
-    <link rel="stylesheet" href="dashboard.css" />
-    <script src="config.js"></script>
-    <script src="session.js"></script>
-    <style>
-      .table-responsive {
-        max-height: 400px;
-        overflow-y: auto;
-      }
-    </style>
-  </head>
-  <body class="dashboard-page">
-    <div class="wrapper">
-      <!-- Sidebar (igual que antes) -->
-      <nav id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-          <div class="brand-logo-sidebar">
-            <div class="logo-container-sidebar">
-              <img src="wit.png" alt="WIT Logo" />
-            </div>
-          </div>
-          <div class="user-info">
-            <i class="bi bi-person-circle"></i>
-            <div>
-              <div class="user-email" id="userEmail">admin@wit.la</div>
-              <div class="user-role" id="userRole">Administrador</div>
-            </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Empresas - WIT</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="destinos.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <script src="config.js"></script>
+  <script src="session.js"></script>
+  <style>
+    .table-responsive {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+  <div class="wrapper">
+    <!-- Sidebar (igual que antes) -->
+    <nav id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo-sidebar">
+          <div class="logo-container-sidebar">
+            <img src="wit.png" alt="WIT Logo" />
           </div>
         </div>
+        <div class="user-info">
+          <i class="bi bi-person-circle"></i>
+          <div>
+            <div class="user-email" id="userEmail">admin@wit.la</div>
+            <div class="user-role" id="userRole">Administrador</div>
+          </div>
+        </div>
+      </div>
 
-        <ul class="list-unstyled components">
-          <li class="active">
-            <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
-          </li>
-          <li>
-            <a href="./banos/banos.html"><i class="bi bi-droplet"></i> Baños</a>
-          </li>
-          <li>
-            <a href="./custodia/custodia.html"
-              ><i class="bi bi-shield-check"></i> Custodia</a
-            >
-          </li>
-          <li>
-            <a href="./parking/parking.html"
-              ><i class="bi bi-car-front"></i> Parking</a
-            >
-          </li>
-          <li>
-            <a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a>
-          </li>
-          <li>
-            <a href="./caja/caja.html"><i class="bi bi-cash-coin"></i> Caja</a>
-          </li>
-          <li>
-            <a href="404.html"><i class="bi bi-display"></i> Monitoreo</a>
-          </li>
-          <li class="menu-section">CONFIGURACIÓN</li>
-          <li>
-            <a href="empresas.html"><i class="bi bi-building"></i> Empresas</a>
-          </li>
-          <li>
-            <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
-          </li>
-          <li>
-            <a href="./usuarios/usuarios.html"
-              ><i class="bi bi-people"></i> Usuarios</a
-            >
-          </li>
-          <li>
-            <a href="listas-blancas.html"
-              ><i class="bi bi-list-check"></i> Listas Blancas</a
-            >
-          </li>
-          <!-- <li>
+      <ul class="list-unstyled components">
+        <li class="active">
+          <a href="dashboard.html"><i class="bi bi-grid"></i> Dashboard</a>
+        </li>
+        <li>
+          <a href="./banos/banos.html"><i class="bi bi-droplet"></i> Baños</a>
+        </li>
+        <li>
+          <a href="./custodia/custodia.html"><i class="bi bi-shield-check"></i> Custodia</a>
+        </li>
+        <li>
+          <a href="./parking/parking.html"><i class="bi bi-car-front"></i> Parking</a>
+        </li>
+        <li>
+          <a href="andenes.html"><i class="bi bi-signpost"></i> Andenes</a>
+        </li>
+        <li>
+          <a href="./caja/caja.html"><i class="bi bi-cash-coin"></i> Caja</a>
+        </li>
+        <li>
+          <a href="404.html"><i class="bi bi-display"></i> Monitoreo</a>
+        </li>
+        <li class="menu-section">CONFIGURACIÓN</li>
+        <li>
+          <a href="empresas.html"><i class="bi bi-building"></i> Empresas</a>
+        </li>
+        <li>
+          <a href="destinos.html"><i class="bi bi-geo-alt"></i> Destinos</a>
+        </li>
+        <li>
+          <a href="./usuarios/usuarios.html"><i class="bi bi-people"></i> Usuarios</a>
+        </li>
+        <li>
+          <a href="listas-blancas.html"><i class="bi bi-list-check"></i> Listas Blancas</a>
+        </li>
+        <!-- <li>
             <a href="404.html"
               ><i class="bi bi-currency-dollar"></i> Pagos Diarios</a
             >
           </li> -->
-          <li>
-            <a href="entradas-salidas.html"
-              ><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a
-            >
-          </li>
-          <li>
-            <a href="#" id="logoutBtn"
-              ><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a
-            >
-          </li>
-        </ul>
-      </nav>
+        <li>
+          <a href="entradas-salidas.html"><i class="bi bi-arrow-left-right"></i> Entradas y Salidas</a>
+        </li>
+        <li>
+          <a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+        </li>
+      </ul>
+    </nav>
 
-      <!-- Page Content -->
-      <div id="content">
-        <div class="container-fluid">
-          <div class="page-header pt-1">
-            <h2>Mantenedor de Empresas</h2>
+    <!-- Page Content -->
+    <div id="content">
+      <div class="container-fluid">
+        <div class="page-header pt-1">
+          <h2>Mantenedor de Empresas</h2>
+        </div>
+
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+              <span class="me-2" style="color: #a3a3a3">Mostrar</span>
+              <select id="entriesPerPage" class="form-select form-select-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <span class="ms-2" style="color: #a3a3a3">registros</span>
+            </div>
+            <div class="d-flex gap-2">
+              <input type="text" id="searchInput" class="form-control form-control-sm"
+                placeholder="🔍 Buscar por nombre o contacto" />
+              <button class="btn btn-primary btn-sm" onclick="openCompanyModal()">
+                Crear Empresa
+              </button>
+            </div>
           </div>
 
-          <div class="card">
-            <div
-              class="card-header d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <span class="me-2" style="color: #a3a3a3">Mostrar</span>
-                <select
-                  id="entriesPerPage"
-                  class="form-select form-select-sm d-inline-block w-auto"
-                >
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                </select>
-                <span class="ms-2" style="color: #a3a3a3">registros</span>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Contacto</th>
+                    <th>Controles</th>
+                  </tr>
+                </thead>
+                <tbody id="companiesTable"></tbody>
+              </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <div id="tableInfo" style="color: #a3a3a3">
+                Mostrando registros
               </div>
-              <div class="d-flex gap-2">
-                <input
-                  type="text"
-                  id="searchInput"
-                  class="form-control form-control-sm"
-                  placeholder="🔍 Buscar por nombre o contacto"
-                />
-                <button
-                  class="btn btn-primary btn-sm"
-                  onclick="openCompanyModal()"
-                >
-                  Crear Empresa
+              <div>
+                <button id="firstPage" class="btn btn-sm btn-outline-secondary">
+                  Primero
+                </button>
+                <button id="prevPage" class="btn btn-sm btn-outline-secondary">
+                  Anterior
+                </button>
+                <span id="currentPage" class="mx-2" style="color: #a3a3a3">1</span>
+                <button id="nextPage" class="btn btn-sm btn-outline-secondary">
+                  Siguiente
+                </button>
+                <button id="lastPage" class="btn btn-sm btn-outline-secondary">
+                  Último
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Nombre</th>
-                      <th>Contacto</th>
-                      <th>Controles</th>
-                    </tr>
-                  </thead>
-                  <tbody id="companiesTable"></tbody>
-                </table>
-              </div>
-              <div
-                class="d-flex justify-content-between align-items-center mt-3"
-              >
-                <div id="tableInfo" style="color: #a3a3a3">
-                  Mostrando registros
-                </div>
-                <div>
-                  <button
-                    id="firstPage"
-                    class="btn btn-sm btn-outline-secondary"
-                  >
-                    Primero
-                  </button>
-                  <button
-                    id="prevPage"
-                    class="btn btn-sm btn-outline-secondary"
-                  >
-                    Anterior
-                  </button>
-                  <span id="currentPage" class="mx-2" style="color: #a3a3a3"
-                    >1</span
-                  >
-                  <button
-                    id="nextPage"
-                    class="btn btn-sm btn-outline-secondary"
-                  >
-                    Siguiente
-                  </button>
-                  <button
-                    id="lastPage"
-                    class="btn btn-sm btn-outline-secondary"
-                  >
-                    Último
-                  </button>
-                </div>
-              </div>
+  <!-- Company Modal -->
+  <div class="modal fade" id="companyModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="companyModalTitle">Crear Empresa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="companyForm">
+            <input type="hidden" id="companyId" />
+            <div class="mb-3">
+              <label for="companyName" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="companyName" required />
             </div>
-          </div>
+            <div class="mb-3">
+              <label for="companyContact" class="form-label">Contacto</label>
+              <input type="text" class="form-control" id="companyContact" required />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" onclick="saveCompany()">
+            Guardar
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Company Modal -->
-    <div class="modal fade" id="companyModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="companyModalTitle">Crear Empresa</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form id="companyForm">
-              <input type="hidden" id="companyId" />
-              <div class="mb-3">
-                <label for="companyName" class="form-label">Nombre</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="companyName"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="companyContact" class="form-label">Contacto</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="companyContact"
-                  required
-                />
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="saveCompany()"
-            >
-              Guardar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <!-- JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const API_URL =
+      "https://andenes.terminal-calama.com/parkingCalama/php/empresas/api.php";
+    // const API_URL = "http://localhost/parkingCalama/php/empresas/api.php";
 
-    <script>
-      const API_URL =
-        "https://andenes.terminal-calama.com/parkingCalama/php/empresas/api.php";
-      // const API_URL = "http://localhost/parkingCalama/php/empresas/api.php";
+    let cachedCompanies = [];
+    let currentPage = 1;
+    let entriesPerPage = parseInt($("#entriesPerPage").val() || 10);
 
-      let cachedCompanies = [];
-      let currentPage = 1;
-      let entriesPerPage = parseInt($("#entriesPerPage").val() || 10);
+    const tbody = $("#companiesTable");
+    const tableInfo = $("#tableInfo");
+    const searchInput = $("#searchInput");
+    const entriesSelect = $("#entriesPerPage");
 
-      const tbody = $("#companiesTable");
-      const tableInfo = $("#tableInfo");
-      const searchInput = $("#searchInput");
-      const entriesSelect = $("#entriesPerPage");
+    $(document).ready(async () => {
+      await loadCompaniesCache();
+      applyPagination();
+      loadUserInfo();
 
-      $(document).ready(async () => {
-        await loadCompaniesCache();
+      searchInput.on("keyup", () => {
+        currentPage = 1;
         applyPagination();
-
-        searchInput.on("keyup", () => {
-          currentPage = 1;
-          applyPagination();
-        });
-
-        entriesSelect.on("change", () => {
-          currentPage = 1;
-          entriesPerPage = parseInt(entriesSelect.val());
-          applyPagination();
-        });
-
-        $("#logoutBtn").on("click", function (e) {
-          e.preventDefault();
-          logout();
-        });
-
-        function logout() {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          document.cookie =
-            "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
-          window.location.href = "index.html";
-        }
-
-        // Paginación botones
-        $("#firstPage").on("click", async () => await changePage(1));
-        $("#prevPage").on(
-          "click",
-          async () => await changePage(Math.max(1, currentPage - 1))
-        );
-        $("#nextPage").on("click", async () => {
-          const last = Math.max(
-            1,
-            Math.ceil(cachedCompanies.length / entriesPerPage)
-          );
-          await changePage(Math.min(last, currentPage + 1));
-        });
-        $("#lastPage").on("click", async () => {
-          const last = Math.max(
-            1,
-            Math.ceil(cachedCompanies.length / entriesPerPage)
-          );
-          await changePage(last);
-        });
       });
 
-      // --- API FUNCTIONS ---
-      async function getCompanies() {
-        try {
-          const res = await axios.get(API_URL);
-          return res.data;
-        } catch (err) {
-          console.error(err);
-          return [];
-        }
+      entriesSelect.on("change", () => {
+        currentPage = 1;
+        entriesPerPage = parseInt(entriesSelect.val());
+        applyPagination();
+      });
+
+      $("#logoutBtn").on("click", function (e) {
+        e.preventDefault();
+        logout();
+      });
+
+      function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        document.cookie =
+          "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
+        window.location.href = "index.html";
       }
 
-      async function getCompanyById(id) {
-        try {
-          const res = await axios.get(`${API_URL}?id=${id}`);
-          return res.data;
-        } catch (err) {
-          console.error(err);
-          return null;
-        }
-      }
-
-      async function addCompany(company) {
-        try {
-          await axios.post(API_URL, company);
-        } catch (err) {
-          console.error(err);
-          alert("Error al agregar empresa");
-        }
-      }
-
-      async function updateCompany(company) {
-        try {
-          await axios.put(API_URL, company);
-        } catch (err) {
-          console.error(err);
-          alert("Error al actualizar empresa");
-        }
-      }
-
-      async function removeCompany(id) {
-        try {
-          await axios.delete(API_URL, { data: { id } });
-        } catch (err) {
-          console.error(err);
-          alert("Error al eliminar empresa");
-        }
-      }
-
-      // --- CACHÉ Y PAGINACIÓN ---
-      async function loadCompaniesCache() {
-        cachedCompanies = await getCompanies();
-      }
-
-      function applyPagination() {
-        const term = searchInput.val().toLowerCase().trim();
-        const filtered = cachedCompanies.filter(
-          (c) =>
-            c.nombre.toLowerCase().includes(term) ||
-            c.contacto.toLowerCase().includes(term)
+      // Paginación botones
+      $("#firstPage").on("click", async () => await changePage(1));
+      $("#prevPage").on(
+        "click",
+        async () => await changePage(Math.max(1, currentPage - 1))
+      );
+      $("#nextPage").on("click", async () => {
+        const last = Math.max(
+          1,
+          Math.ceil(cachedCompanies.length / entriesPerPage)
         );
+        await changePage(Math.min(last, currentPage + 1));
+      });
+      $("#lastPage").on("click", async () => {
+        const last = Math.max(
+          1,
+          Math.ceil(cachedCompanies.length / entriesPerPage)
+        );
+        await changePage(last);
+      });
+    });
 
-        const total = filtered.length;
-        const lastPage = Math.max(1, Math.ceil(total / entriesPerPage));
-        if (currentPage > lastPage) currentPage = lastPage;
-        if (currentPage < 1) currentPage = 1;
+    function loadUserInfo() {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          $("#userEmail").text(user.mail || "Usuario");
+          $("#userRole").text(`Nivel: ${user.nivel}`);
+        } catch (e) {
+          console.error("Error parsing user data:", e);
+        }
+      } else {
+        console.warn("No se encontró información del usuario");
+      }
+    }
 
-        const start = (currentPage - 1) * entriesPerPage;
-        const pageItems = filtered.slice(start, start + entriesPerPage);
+    // --- API FUNCTIONS ---
+    async function getCompanies() {
+      try {
+        const res = await axios.get(API_URL);
+        return res.data;
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    }
 
-        tbody.empty();
-        if (pageItems.length === 0) {
-          tbody.append(
-            `<tr><td colspan="4" class="text-center text-muted">No se encontraron registros</td></tr>`
-          );
-        } else {
-          pageItems.forEach((c) => {
-            tbody.append(`
+    async function getCompanyById(id) {
+      try {
+        const res = await axios.get(`${API_URL}?id=${id}`);
+        return res.data;
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    }
+
+    async function addCompany(company) {
+      try {
+        await axios.post(API_URL, company);
+      } catch (err) {
+        console.error(err);
+        alert("Error al agregar empresa");
+      }
+    }
+
+    async function updateCompany(company) {
+      try {
+        await axios.put(API_URL, company);
+      } catch (err) {
+        console.error(err);
+        alert("Error al actualizar empresa");
+      }
+    }
+
+    async function removeCompany(id) {
+      try {
+        await axios.delete(API_URL, { data: { id } });
+      } catch (err) {
+        console.error(err);
+        alert("Error al eliminar empresa");
+      }
+    }
+
+    // --- CACHÉ Y PAGINACIÓN ---
+    async function loadCompaniesCache() {
+      cachedCompanies = await getCompanies();
+    }
+
+    function applyPagination() {
+      const term = searchInput.val().toLowerCase().trim();
+      const filtered = cachedCompanies.filter(
+        (c) =>
+          c.nombre.toLowerCase().includes(term) ||
+          c.contacto.toLowerCase().includes(term)
+      );
+
+      const total = filtered.length;
+      const lastPage = Math.max(1, Math.ceil(total / entriesPerPage));
+      if (currentPage > lastPage) currentPage = lastPage;
+      if (currentPage < 1) currentPage = 1;
+
+      const start = (currentPage - 1) * entriesPerPage;
+      const pageItems = filtered.slice(start, start + entriesPerPage);
+
+      tbody.empty();
+      if (pageItems.length === 0) {
+        tbody.append(
+          `<tr><td colspan="4" class="text-center text-muted">No se encontraron registros</td></tr>`
+        );
+      } else {
+        pageItems.forEach((c) => {
+          tbody.append(`
           <tr>
             <td>${c.idemp}</td>
             <td>${c.nombre}</td>
@@ -414,135 +364,136 @@
             </td>
           </tr>
         `);
-          });
-        }
-
-        tableInfo.text(
-          `Mostrando ${start + 1 <= total ? start + 1 : 0} a ${Math.min(
-            start + entriesPerPage,
-            total
-          )} de ${total} registros`
-        );
-        $("#currentPage").text(currentPage);
+        });
       }
 
-      async function changePage(page) {
-        const btn = document.activeElement;
-        toggleButtonLoading(btn, true);
-        currentPage = page;
+      tableInfo.text(
+        `Mostrando ${start + 1 <= total ? start + 1 : 0} a ${Math.min(
+          start + entriesPerPage,
+          total
+        )} de ${total} registros`
+      );
+      $("#currentPage").text(currentPage);
+    }
+
+    async function changePage(page) {
+      const btn = document.activeElement;
+      toggleButtonLoading(btn, true);
+      currentPage = page;
+      applyPagination();
+      toggleButtonLoading(btn, false);
+    }
+
+    // --- MODAL ---
+    async function openCompanyModal(id = null) {
+      $("#companyForm")[0].reset();
+      if (id) {
+        const company =
+          cachedCompanies.find((c) => c.idemp == id) ||
+          (await getCompanyById(id));
+        $("#companyModalTitle").text("Editar Empresa");
+        $("#companyId").val(company.idemp);
+        $("#companyName").val(company.nombre);
+        $("#companyContact").val(company.contacto);
+      } else {
+        $("#companyModalTitle").text("Crear Empresa");
+        $("#companyId").val("");
+      }
+      new bootstrap.Modal(document.getElementById("companyModal")).show();
+    }
+
+    // --- CRUD ---
+    async function saveCompany() {
+      const btn = document.querySelector("#companyModal .btn-primary");
+      toggleButtonLoading(btn, true);
+
+      const id = $("#companyId").val();
+      const nombre = $("#companyName").val().trim();
+      const contacto = $("#companyContact").val().trim();
+
+      // Validación campos vacíos
+      if (!nombre || !contacto) {
+        alert("Todos los campos son obligatorios");
+        toggleButtonLoading(btn, false);
+        return;
+      }
+
+      const company = { nombre, contacto };
+      try {
+        if (id) {
+          company.id = parseInt(id);
+          await updateCompany(company);
+          const index = cachedCompanies.findIndex((c) => c.idemp == id);
+          if (index >= 0) cachedCompanies[index] = company;
+          alert("Empresa actualizada");
+        } else {
+          await addCompany(company);
+          cachedCompanies.push({
+            idemp: cachedCompanies.length
+              ? Math.max(...cachedCompanies.map((c) => c.idemp)) + 1
+              : 1,
+            ...company,
+          });
+          alert("Empresa creada");
+        }
+
+        const modalEl = document.getElementById("companyModal");
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open").css("padding-right", "");
+
         applyPagination();
+      } catch (err) {
+        console.error(err);
+        alert("Error al guardar empresa");
+      } finally {
         toggleButtonLoading(btn, false);
       }
+    }
 
-      // --- MODAL ---
-      async function openCompanyModal(id = null) {
-        $("#companyForm")[0].reset();
-        if (id) {
-          const company =
-            cachedCompanies.find((c) => c.idemp == id) ||
-            (await getCompanyById(id));
-          $("#companyModalTitle").text("Editar Empresa");
-          $("#companyId").val(company.idemp);
-          $("#companyName").val(company.nombre);
-          $("#companyContact").val(company.contacto);
-        } else {
-          $("#companyModalTitle").text("Crear Empresa");
-          $("#companyId").val("");
-        }
-        new bootstrap.Modal(document.getElementById("companyModal")).show();
+    async function editCompany(id) {
+      await openCompanyModal(id);
+    }
+
+    async function deleteCompany(id) {
+      if (!confirm("¿Eliminar empresa?")) return;
+      await removeCompany(id);
+      cachedCompanies = cachedCompanies.filter((c) => c.idemp != id);
+      applyPagination();
+      alert("Empresa eliminada");
+    }
+
+    // --- BOTÓN SPINNER ---
+    function toggleButtonLoading(btn, loading = true) {
+      if (!btn) return;
+      let spinner = btn.querySelector(".spinner-border");
+      if (!spinner) {
+        spinner = document.createElement("span");
+        spinner.className = "spinner-border spinner-border-sm me-1 d-none";
+        btn.prepend(spinner);
+      }
+      if (!btn.querySelector(".btn-text")) {
+        const text = document.createElement("span");
+        text.className = "btn-text";
+        text.textContent = btn.innerText;
+        btn.appendChild(text);
+        btn.childNodes[1].remove(); // quitar texto duplicado
       }
 
-      // --- CRUD ---
-      async function saveCompany() {
-        const btn = document.querySelector("#companyModal .btn-primary");
-        toggleButtonLoading(btn, true);
+      const textSpan = btn.querySelector(".btn-text");
 
-        const id = $("#companyId").val();
-        const nombre = $("#companyName").val().trim();
-        const contacto = $("#companyContact").val().trim();
-
-        // Validación campos vacíos
-        if (!nombre || !contacto) {
-          alert("Todos los campos son obligatorios");
-          toggleButtonLoading(btn, false);
-          return;
-        }
-
-        const company = { nombre, contacto };
-        try {
-          if (id) {
-            company.id = parseInt(id);
-            await updateCompany(company);
-            const index = cachedCompanies.findIndex((c) => c.idemp == id);
-            if (index >= 0) cachedCompanies[index] = company;
-            alert("Empresa actualizada");
-          } else {
-            await addCompany(company);
-            cachedCompanies.push({
-              idemp: cachedCompanies.length
-                ? Math.max(...cachedCompanies.map((c) => c.idemp)) + 1
-                : 1,
-              ...company,
-            });
-            alert("Empresa creada");
-          }
-
-          const modalEl = document.getElementById("companyModal");
-          const modal = bootstrap.Modal.getInstance(modalEl);
-          modal.hide();
-          $(".modal-backdrop").remove();
-          $("body").removeClass("modal-open").css("padding-right", "");
-
-          applyPagination();
-        } catch (err) {
-          console.error(err);
-          alert("Error al guardar empresa");
-        } finally {
-          toggleButtonLoading(btn, false);
-        }
+      if (loading) {
+        btn.disabled = true;
+        spinner.classList.remove("d-none");
+        textSpan.classList.add("d-none");
+      } else {
+        btn.disabled = false;
+        spinner.classList.add("d-none");
+        textSpan.classList.remove("d-none");
       }
+    }
+  </script>
+</body>
 
-      async function editCompany(id) {
-        await openCompanyModal(id);
-      }
-
-      async function deleteCompany(id) {
-        if (!confirm("¿Eliminar empresa?")) return;
-        await removeCompany(id);
-        cachedCompanies = cachedCompanies.filter((c) => c.idemp != id);
-        applyPagination();
-        alert("Empresa eliminada");
-      }
-
-      // --- BOTÓN SPINNER ---
-      function toggleButtonLoading(btn, loading = true) {
-        if (!btn) return;
-        let spinner = btn.querySelector(".spinner-border");
-        if (!spinner) {
-          spinner = document.createElement("span");
-          spinner.className = "spinner-border spinner-border-sm me-1 d-none";
-          btn.prepend(spinner);
-        }
-        if (!btn.querySelector(".btn-text")) {
-          const text = document.createElement("span");
-          text.className = "btn-text";
-          text.textContent = btn.innerText;
-          btn.appendChild(text);
-          btn.childNodes[1].remove(); // quitar texto duplicado
-        }
-
-        const textSpan = btn.querySelector(".btn-text");
-
-        if (loading) {
-          btn.disabled = true;
-          spinner.classList.remove("d-none");
-          textSpan.classList.add("d-none");
-        } else {
-          btn.disabled = false;
-          spinner.classList.add("d-none");
-          textSpan.classList.remove("d-none");
-        }
-      }
-    </script>
-  </body>
 </html>

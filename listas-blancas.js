@@ -26,6 +26,21 @@ function logout() {
   window.location.href = "index.html";
 }
 
+function loadUserInfo() {
+  const userData = localStorage.getItem("user");
+  if (userData) {
+    try {
+      const user = JSON.parse(userData);
+      $("#userEmail").text(user.mail || "Usuario");
+      $("#userRole").text(`Nivel: ${user.nivel}`);
+    } catch (e) {
+      console.error("Error parsing user data:", e);
+    }
+  } else {
+    console.warn("No se encontró información del usuario");
+  }
+}
+
 /* --- API FUNCTIONS --- */
 async function getWhitelist() {
   try {
@@ -326,6 +341,7 @@ $(document).ready(async () => {
   const whitelist = await getWhitelist();
   cachedWL = Array.isArray(whitelist) ? whitelist : [];
   filterAndPaginate();
+  loadUserInfo();
 
   $("#logoutBtn").on("click", function (e) {
     e.preventDefault();

@@ -309,8 +309,24 @@ function logout() {
   window.location.href = "../dashboard.html";
 }
 
+function loadUserInfo() {
+  const userData = localStorage.getItem("user");
+  if (userData) {
+    try {
+      const user = JSON.parse(userData);
+      $("#userEmail").text(user.mail || "Usuario");
+      $("#userRole").text(`Nivel: ${user.nivel}`);
+    } catch (e) {
+      console.error("Error parsing user data:", e);
+    }
+  } else {
+    console.warn("No se encontró información del usuario");
+  }
+}
+
 $(document).ready(function () {
   loadUsersTable();
+  loadUserInfo();
 
   // Event listeners
   $("#searchInput").on("keyup", loadUsersTable);
