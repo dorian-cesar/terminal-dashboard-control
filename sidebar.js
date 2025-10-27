@@ -72,8 +72,8 @@ function filterSectionsByPermission() {
       }
     });
     
-    // Manejar la sección de CONFIGURACIÓN
-    handleConfigSection(seccionesPermitidas);
+    // Manejar la sección de CONFIGURACIÓN - COMPLETA para nivel 10 o superior
+    handleConfigSection(user.nivel);
     
     // Mostrar dashboard SIEMPRE, incluso si no está en las secciones permitidas
     $('.components li[data-seccion="dashboard"]').show();
@@ -87,27 +87,33 @@ function filterSectionsByPermission() {
   }
 }
 
-function handleConfigSection(seccionesPermitidas) {
+function handleConfigSection(userNivel) {
   const seccionesConfig = [
     'empresas', 'destinos', 'usuarios', 
     'listas-blancas', 'entradas-salidas'
   ];
   
-  // Verificar si el usuario tiene acceso a ALGUNA sección de configuración
-  const tieneAccesoConfig = seccionesConfig.some(seccion => 
-    seccionesPermitidas.includes(seccion)
-  );
-  
   const configSectionTitle = $('.components li[data-seccion="configuracion"]');
   
-  if (tieneAccesoConfig) {
+  // Verificar si el usuario tiene nivel 10 o superior
+  if (userNivel >= 10) {
+    console.log("🔧 Usuario con nivel 10+ - mostrando CONFIGURACIÓN completa");
+    
     // Mostrar el título de CONFIGURACIÓN
     configSectionTitle.show();
-    console.log("🔧 Mostrando sección CONFIGURACIÓN");
+    
+    // Mostrar TODAS las secciones de configuración
+    seccionesConfig.forEach(seccion => {
+      $(`.components li[data-seccion="${seccion}"]`).show();
+    });
+    
   } else {
-    // Ocultar toda la sección de configuración
+    // Usuario con nivel inferior a 10 - OCULTAR toda la sección de configuración
     configSectionTitle.hide();
-    console.log("🔧 Ocultando sección CONFIGURACIÓN");
+    seccionesConfig.forEach(seccion => {
+      $(`.components li[data-seccion="${seccion}"]`).hide();
+    });
+    console.log("🔧 Ocultando sección CONFIGURACIÓN - nivel insuficiente");
   }
 }
 
