@@ -188,29 +188,19 @@
         const teclado = document.querySelector("virtual-keyboard");
         const campos = document.querySelectorAll("#email, #password");
 
-        // 🔹 Ocultar inmediatamente al cargar
-        setTimeout(() => teclado.hide(), 0);
+        // Ocultar inmediatamente al cargar
+        teclado.hide();
 
-        // 🔹 SOLUCIÓN: Usar mousedown en lugar de click para los inputs
+        // Mostrar teclado al hacer focus en los inputs
         campos.forEach((input) => {
-          input.addEventListener("mousedown", (e) => {
-            e.stopPropagation();
-            // Mostrar el teclado después de un pequeño delay
-            setTimeout(() => {
-              teclado.show(input);
-            }, 50);
-          });
-          
-          // También mantener focus para navegación con teclado
           input.addEventListener("focus", () => {
             teclado.show(input);
           });
         });
 
-        // 🔹 Ocultar teclado SOLO cuando se hace clic fuera
-        document.addEventListener("mousedown", (e) => {
-          const esInput = e.target.matches("#email, #password") || 
-                        e.target.closest("#email, #password");
+        // Ocultar teclado cuando se hace clic fuera
+        document.addEventListener("click", (e) => {
+          const esInput = e.target.matches("#email, #password");
           const esTeclado = e.target.closest("virtual-keyboard");
           
           if (!esInput && !esTeclado) {
@@ -218,7 +208,7 @@
           }
         });
 
-        // 🔹 También ocultar al presionar ESC
+        // Ocultar con ESC
         document.addEventListener("keydown", (e) => {
           if (e.key === "Escape") {
             teclado.hide();

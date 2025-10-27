@@ -12,15 +12,15 @@ vkTemplate.innerHTML = `
       position: fixed;
       left: 0;
       right: 0;
-      bottom: 10px; /* 🔹 CAMBIO: De 0 a 10px para separar del borde */
+      bottom: 10px;
       z-index: 9999;
       display: none;
       justify-content: center;
-      align-items: flex-end; /* 🔹 NUEVO: Alinear al fondo */
+      align-items: flex-end;
       pointer-events: none;
       -webkit-tap-highlight-color: transparent;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      padding: 0 10px; /* 🔹 NUEVO: Padding lateral */
+      padding: 0 10px;
       box-sizing: border-box;
     }
     
@@ -30,7 +30,7 @@ vkTemplate.innerHTML = `
     }
     
     .vk-container {
-      width: min(1100px, 100%); /* 🔹 CAMBIO: 100% en lugar de calc */
+      width: min(1100px, 100%);
       background: linear-gradient(180deg,var(--vk-bg), #fff);
       border-radius: var(--vk-radius);
       box-shadow: 
@@ -40,8 +40,8 @@ vkTemplate.innerHTML = `
       margin: 0 auto;
       user-select: none;
       pointer-events: auto;
-      max-height: 350px; /* 🔹 NUEVO: Limitar altura máxima */
-      overflow-y: auto; /* 🔹 NUEVO: Scroll si es necesario */
+      max-height: 350px;
+      overflow-y: auto;
     }
     
     .vk-row { 
@@ -54,7 +54,7 @@ vkTemplate.innerHTML = `
       background: var(--vk-key-bg);
       border: 1px solid var(--vk-key-border);
       border-radius: 10px;
-      padding: 12px 8px; /* 🔹 AJUSTE: Padding horizontal reducido */
+      padding: 12px 8px;
       font-size: 1.05rem;
       min-height: 48px;
       box-shadow: 0 2px 0 rgba(0,0,0,0.02) inset;
@@ -65,7 +65,7 @@ vkTemplate.innerHTML = `
       justify-content: center;
       border: none;
       outline: none;
-      min-width: 0; /* 🔹 NUEVO: Permitir que se reduzca */
+      min-width: 0;
     }
     
     button.key:active { 
@@ -117,7 +117,7 @@ vkTemplate.innerHTML = `
       }
       
       .key.space {
-        grid-column: span 4; /* 🔹 AJUSTE: Space más pequeño en móvil */
+        grid-column: span 4;
       }
     }
     
@@ -130,7 +130,7 @@ vkTemplate.innerHTML = `
       .vk-container {
         padding: 8px;
         max-height: 280px;
-        border-radius: 10px 10px 0 0; /* 🔹 CAMBIO: Solo redondeo arriba en móvil */
+        border-radius: 10px 10px 0 0;
       }
       
       button.key {
@@ -145,7 +145,6 @@ vkTemplate.innerHTML = `
       }
     }
 
-    /* 🔹 NUEVO: Para pantallas muy pequeñas */
     @media(max-width: 360px){
       .vk-container {
         max-height: 250px;
@@ -168,7 +167,6 @@ vkTemplate.innerHTML = `
     </div>
     <div class="vk-rows"></div>
   </div>
-  <div aria-live="polite" class="vk-live" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"></div>
 `;
 
 class VirtualKeyboard extends HTMLElement {
@@ -177,20 +175,14 @@ class VirtualKeyboard extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.appendChild(vkTemplate.content.cloneNode(true));
     this.rowsHost = this.shadowRoot.querySelector(".vk-rows");
-    this.live = this.shadowRoot.querySelector(".vk-live");
     this.shift = false;
     this.altGr = false;
     this.targetSelector = this.getAttribute("data-target") || null;
-    this.mode = this.getAttribute("data-mode") || "dock";
     this.layouts = this._createLayouts();
     this.isVisible = false;
-    this.ignoreNextClick = false;
   }
 
   connectedCallback() {
-    // SOLUCIÓN: Usar setTimeout para manejar el orden de eventos
-    document.addEventListener("focusin", (e) => this._onFocus(e));
-    
     // Eventos del teclado - PREVENIR PROPAGACIÓN
     this.shadowRoot.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -207,18 +199,6 @@ class VirtualKeyboard extends HTMLElement {
     
     this._render();
     
-    // Botones de control
-    this.shadowRoot.querySelector('[data-action="hide"]').onclick = (e) => {
-      e.stopPropagation();
-      this.hide();
-    };
-    
-    this.shadowRoot.querySelector('[data-action="toggle-mode"]').onclick = (e) => {
-      e.stopPropagation();
-      this.mode = this.mode === "dock" ? "float" : "dock";
-      this.live.textContent = `Modo ${this.mode}`;
-    };
-    
     // Ocultar inicialmente
     this.hide();
   }
@@ -226,24 +206,24 @@ class VirtualKeyboard extends HTMLElement {
   _createLayouts() {
     const base = [
       ["`","1","2","3","4","5","6","7","8","9","0","-","=","⌫"],
-      ["Tab","q","w","e","r","t","y","u","i","o","p","[","]","\\\\"],
-      ["Caps","a","s","d","f","g","h","j","k","l","ñ",";","'","Enter"],
+      ["q","w","e","r","t","y","u","i","o","p","[","]","\\\\"],
+      ["a","s","d","f","g","h","j","k","l","ñ",";","'","Enter"],
       ["Shift","z","x","c","v","b","n","m",",",".","/","Shift"],
-      ["Ctrl","@","Alt","Space"]
+      ["@","Space","."]
     ];
     const shift = [
       ["~","!","@","#","$","%","^","&","*","(",")","_","+","⌫"],
-      ["Tab","Q","W","E","R","T","Y","U","I","O","P","{","}","|"],
-      ["Caps","A","S","D","F","G","H","J","K","L","Ñ",":","\"","Enter"],
+      ["Q","W","E","R","T","Y","U","I","O","P","{","}","|"],
+      ["A","S","D","F","G","H","J","K","L","Ñ",":","\"","Enter"],
       ["Shift","Z","X","C","V","B","N","M","<",">","?","Shift"],
-      ["Ctrl","Win","Alt","Space","AltGr","Menu","Ctrl"]
+      ["@","Space","."]
     ];
     const alt = [
       ["º","1","2","3","4","5","6","7","8","9","0","-","=","⌫"],
-      ["Tab","q","w","e","r","t","y","u","i","o","p","[","]","\\\\"],
-      ["Caps","á","é","í","ó","ú","ü","¿","¡","°","ç",";","'","Enter"],
+      ["q","w","e","r","t","y","u","i","o","p","[","]","\\\\"],
+      ["á","é","í","ó","ú","ü","¿","¡","°","ç",";","'","Enter"],
       ["Shift","ß","ñ","œ","@","#","$","¢","€","£","/","Shift"],
-      ["Ctrl","Win","Alt","Space","AltGr","Menu","Ctrl"]
+      ["@","Space","."]
     ];
     return { base, shift, alt };
   }
@@ -261,9 +241,11 @@ class VirtualKeyboard extends HTMLElement {
         b.className = "key";
         b.dataset.key = key;
         b.textContent = key;
-        if(["Backspace","Enter","Shift","Tab","Caps","Space","AltGr","Ctrl","Win","Alt","Menu"].includes(key)) b.classList.add("small");
-        if(key==="Enter") b.classList.add("primary");
-        if(key==="Space") b.classList.add("space");
+        
+        // Aplicar estilos especiales
+        if(key === "Enter") b.classList.add("primary");
+        if(key === "Space") b.classList.add("space");
+        if(["Shift", "⌫", "Enter"].includes(key)) b.classList.add("small");
         
         // Prevenir propagación en cada tecla
         b.addEventListener("mousedown", (e) => e.stopPropagation());
@@ -275,37 +257,25 @@ class VirtualKeyboard extends HTMLElement {
     });
   }
 
-  _onFocus(e) {
-    const el = e.target;
-    if(el.matches("input[type=text],input[type=email],input[type=password],input[type=search],textarea")) {
-      // SOLUCIÓN: Usar setTimeout para permitir que el click se procese primero
-      setTimeout(() => {
-        this.show(el);
-      }, 10);
-    } else if(this.mode === "dock" && !this.contains(e.target)) {
-      this.hide();
-    }
-  }
-
   _onClick(e) {
     const key = e.composedPath().find(n=>n.dataset && n.dataset.key)?.dataset.key;
     if(!key) return;
     
-    if(key==="Shift"){ 
-      this.shift=!this.shift; 
+    if(key === "Shift"){ 
+      this.shift = !this.shift; 
       this._render(); 
       return; 
     }
     
-    if(key==="AltGr"){ 
-      this.altGr=!this.altGr; 
+    if(key === "AltGr"){ 
+      this.altGr = !this.altGr; 
       this._render(); 
       return; 
     }
     
-    if(key==="⌫") return this._send("Backspace");
-    if(key==="Enter") return this._send("Enter");
-    if(key==="Space") return this._send(" ");
+    if(key === "⌫") return this._send("Backspace");
+    if(key === "Enter") return this._send("Enter");
+    if(key === "Space") return this._send(" ");
     
     this._send(key);
   }
@@ -317,24 +287,24 @@ class VirtualKeyboard extends HTMLElement {
     const start = el.selectionStart ?? el.value.length;
     const end = el.selectionEnd ?? el.value.length;
     
-    if(key==="Backspace") {
+    if(key === "Backspace") {
       if (start > 0) {
-        el.value = el.value.slice(0,start-1)+el.value.slice(end);
-        this._setCaret(el,start-1);
+        el.value = el.value.slice(0, start - 1) + el.value.slice(end);
+        this._setCaret(el, start - 1);
       }
     } else {
-      el.value = el.value.slice(0,start)+key+el.value.slice(end);
-      this._setCaret(el,start+key.length);
+      el.value = el.value.slice(0, start) + key + el.value.slice(end);
+      this._setCaret(el, start + key.length);
     }
     
-    el.dispatchEvent(new Event("input",{bubbles:true}));
+    el.dispatchEvent(new Event("input", {bubbles: true}));
   }
 
-  _setCaret(el,pos){ 
+  _setCaret(el, pos){ 
     try{ 
-      el.setSelectionRange(pos,pos); 
+      el.setSelectionRange(pos, pos); 
       el.focus(); 
-    }catch{} 
+    } catch{} 
   }
 
   show(target){ 
