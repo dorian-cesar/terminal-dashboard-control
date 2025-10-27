@@ -716,6 +716,7 @@ function listarAndenesEmpresas() {
     })
     .catch((error) => {
       console.error("Error al listar empresas:", error);
+      showToast("Error al listar empresas.", "error");
     });
 }
 
@@ -788,8 +789,7 @@ async function andGetEmpresas() {
     return data;
   } catch (error) {
     console.error("Error al obtener empresas:", error);
-    // Redirigir al index.html
-    window.location.href = "index.html";
+    showToast("Error al obtener empresas.", "error");
     return null;
   }
 }
