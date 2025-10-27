@@ -40,7 +40,7 @@ vkTemplate.innerHTML = `
       margin: 0 auto;
       user-select: none;
       pointer-events: auto;
-      max-height: 350px;
+      max-height: 320px;
       overflow-y: auto;
     }
     
@@ -74,7 +74,7 @@ vkTemplate.innerHTML = `
     
     .key.wide { grid-column: span 2; }
     .key.extra-wide { grid-column: span 3; }
-    .key.space { grid-column: span 6; }
+    .key.space { grid-column: span 1; }
     .key.primary { background: var(--vk-accent); color: #fff; font-weight: 600; }
     
     .vk-topbar { 
@@ -95,7 +95,7 @@ vkTemplate.innerHTML = `
       
       .vk-container {
         padding: 10px;
-        max-height: 320px;
+        max-height: 300px;
       }
       
       button.key {
@@ -107,17 +107,13 @@ vkTemplate.innerHTML = `
     
     @media(max-width: 768px){
       .vk-container {
-        max-height: 300px;
+        max-height: 280px;
       }
       
       button.key {
         font-size: 0.95rem;
         min-height: 42px;
         padding: 8px 4px;
-      }
-      
-      .key.space {
-        grid-column: span 4;
       }
     }
     
@@ -129,7 +125,7 @@ vkTemplate.innerHTML = `
       
       .vk-container {
         padding: 8px;
-        max-height: 280px;
+        max-height: 260px;
         border-radius: 10px 10px 0 0;
       }
       
@@ -147,16 +143,12 @@ vkTemplate.innerHTML = `
 
     @media(max-width: 360px){
       .vk-container {
-        max-height: 250px;
+        max-height: 240px;
       }
       
       button.key {
         font-size: 0.85rem;
         min-height: 38px;
-      }
-      
-      .key.space {
-        grid-column: span 3;
       }
     }
   </style>
@@ -204,26 +196,27 @@ class VirtualKeyboard extends HTMLElement {
   }
 
   _createLayouts() {
+    // 🔹 ELIMINAR DUPLICADOS: Solo un Shift y un Enter
     const base = [
       ["`","1","2","3","4","5","6","7","8","9","0","-","=","⌫"],
       ["q","w","e","r","t","y","u","i","o","p","[","]","\\\\"],
-      ["a","s","d","f","g","h","j","k","l","ñ",";","'","Enter"],
-      ["Shift","z","x","c","v","b","n","m",",",".","/","Shift"],
-      ["@","Space","."]
+      ["a","s","d","f","g","h","j","k","l","ñ",";","'"],
+      ["Shift","z","x","c","v","b","n","m",",",".","/","Enter"],
+      ["@",".","Space","⌫"]
     ];
     const shift = [
       ["~","!","@","#","$","%","^","&","*","(",")","_","+","⌫"],
       ["Q","W","E","R","T","Y","U","I","O","P","{","}","|"],
-      ["A","S","D","F","G","H","J","K","L","Ñ",":","\"","Enter"],
-      ["Shift","Z","X","C","V","B","N","M","<",">","?","Shift"],
-      ["@","Space","."]
+      ["A","S","D","F","G","H","J","K","L","Ñ",":","\""],
+      ["Shift","Z","X","C","V","B","N","M","<",">","?","Enter"],
+      ["@",".","Space","⌫"]
     ];
     const alt = [
       ["º","1","2","3","4","5","6","7","8","9","0","-","=","⌫"],
       ["q","w","e","r","t","y","u","i","o","p","[","]","\\\\"],
-      ["á","é","í","ó","ú","ü","¿","¡","°","ç",";","'","Enter"],
-      ["Shift","ß","ñ","œ","@","#","$","¢","€","£","/","Shift"],
-      ["@","Space","."]
+      ["á","é","í","ó","ú","ü","¿","¡","°","ç",";","'"],
+      ["Shift","ß","ñ","œ","@","#","$","¢","€","£","/","Enter"],
+      ["@",".","Space","⌫"]
     ];
     return { base, shift, alt };
   }
@@ -292,12 +285,27 @@ class VirtualKeyboard extends HTMLElement {
         el.value = el.value.slice(0, start - 1) + el.value.slice(end);
         this._setCaret(el, start - 1);
       }
+    } else if (key === "Enter") {
+      // 🔹 CORRECCIÓN: En lugar de escribir "Enter", simulamos un Enter real
+      // Para formularios, envía el formulario; para textareas, hace salto de línea
+      if (el.form && el.type !== 'textarea') {
+        // Si es un input dentro de un formulario, envía el formulario
+        el.form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      } else if (el.tagName === 'TEXTAREA' || el.type === 'textarea') {
+        // Si es un textarea, inserta un salto de línea
+        el.value = el.value.slice(0, start) + '\n' + el.value.slice(end);
+        this._setCaret(el, start + 1);
+        el.dispatchEvent(new Event("input", {bubbles: true}));
+      } else {
+        // Para otros inputs, simplemente pierde el foco (comportamiento estándar)
+        el.blur();
+      }
     } else {
+      // Para teclas normales
       el.value = el.value.slice(0, start) + key + el.value.slice(end);
       this._setCaret(el, start + key.length);
+      el.dispatchEvent(new Event("input", {bubbles: true}));
     }
-    
-    el.dispatchEvent(new Event("input", {bubbles: true}));
   }
 
   _setCaret(el, pos){ 
