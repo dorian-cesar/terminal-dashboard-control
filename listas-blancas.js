@@ -6,6 +6,36 @@ const API_EMP = BASE + "/empresas/api.php"; // GET empresas
 /* RegEx de patentes */
 const patRegEx = /^[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}$/;
 
+function verificarNivelMinimo(nivelMinimoRequerido = 10) {
+    try {
+        const userData = localStorage.getItem('user');
+        
+        if (!userData) {
+            alert('Usuario no autenticado. Será redirigido al login.');
+            window.location.href = 'index.html';
+            return false;
+        }
+
+        const usuario = JSON.parse(userData);
+        
+        if (usuario.nivel < nivelMinimoRequerido) {
+            window.location.href = 'index.html';
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error verificando nivel:', error);
+        alert('Error de permisos. Será redirigido al login.');
+        window.location.href = 'index.html';
+        return false;
+    }
+}
+
+function verificarNivel10() {
+    return verificarNivelMinimo(10);
+}
+
 /* Paginación simple */
 let currentPage = 1;
 let entriesPerPage = parseInt($("#entriesPerPage").val() || 10);
@@ -337,6 +367,9 @@ searchInput.on("keyup", () => {
 
 /* --- INIT --- */
 $(document).ready(async () => {
+  if (!verificarNivel10()) {
+    return; // Detener ejecución si no tiene permisos
+  }
   await loadEmpresasSelect();
   const whitelist = await getWhitelist();
   cachedWL = Array.isArray(whitelist) ? whitelist : [];
