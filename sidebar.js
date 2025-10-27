@@ -22,17 +22,93 @@ $(document).ready(function () {
 });
 
 function initializeSidebarComplete() {
-  // 1. Cargar info del usuario
-  loadUserInfo();
+  // 1. Filtrar secciones por permisos (LO MÁS IMPORTANTE)
+  filterSectionsByPermission();
   
-  // 2. Aplicar permisos
-  applyUserPermissions();
+  // 2. Cargar info del usuario
+  loadUserInfo();
   
   // 3. Resaltar página actual
   highlightCurrentPage();
   
-  // 4. Configurar eventos (DE ÚLTIMO, después de que todo esté listo)
+  // 4. Configurar eventos
   setupSidebarEvents();
+}
+
+function filterSectionsByPermission() {
+  const userData = localStorage.getItem('user');
+  
+  if (!userData) {
+    console.warn("No hay información de usuario, mostrando sidebar básico");
+    return;
+  }
+
+  try {
+    const user = JSON.parse(userData);
+    const seccionesPermitidas = user.secciones || [];
+    
+    console.log("🔐 Usuario:", user.mail);
+    console.log("📊 Nivel:", user.nivel);
+    console.log("✅ Secciones permitidas:", seccionesPermitidas);
+    
+    // Si el usuario es administrador (nivel 0), mostrar todas las secciones
+    if (user.nivel === 0) {
+      console.log("👑 Usuario administrador - mostrando todas las secciones");
+      return; // No filtrar nada
+    }
+    
+    // Ocultar TODAS las secciones primero
+    $(".components li[data-seccion]").hide();
+    
+    // Mostrar SOLO las secciones que están en el array seccionesPermitidas
+    seccionesPermitidas.forEach(seccionPermitida => {
+      const seccionElement = $(`.components li[data-seccion="${seccionPermitida}"]`);
+      
+      if (seccionElement.length) {
+        seccionElement.show();
+        console.log(`👉 Mostrando sección: ${seccionPermitida}`);
+      } else {
+        console.warn(`⚠️ Sección no encontrada en el sidebar: ${seccionPermitida}`);
+      }
+    });
+    
+    // Manejar la sección de CONFIGURACIÓN
+    handleConfigSection(seccionesPermitidas);
+    
+    // Mostrar dashboard SIEMPRE, incluso si no está en las secciones permitidas
+    $('.components li[data-seccion="dashboard"]').show();
+    
+    // Contar secciones visibles
+    const seccionesVisibles = $(".components li[data-seccion]:visible").length;
+    console.log(`📈 Secciones visibles en total: ${seccionesVisibles}`);
+    
+  } catch (error) {
+    console.error("❌ Error filtrando secciones:", error);
+  }
+}
+
+function handleConfigSection(seccionesPermitidas) {
+  const seccionesConfig = [
+    'empresas', 'destinos', 'usuarios', 
+    'listas-blancas', 'entradas-salidas'
+  ];
+  
+  // Verificar si el usuario tiene acceso a ALGUNA sección de configuración
+  const tieneAccesoConfig = seccionesConfig.some(seccion => 
+    seccionesPermitidas.includes(seccion)
+  );
+  
+  const configSectionTitle = $('.components li[data-seccion="configuracion"]');
+  
+  if (tieneAccesoConfig) {
+    // Mostrar el título de CONFIGURACIÓN
+    configSectionTitle.show();
+    console.log("🔧 Mostrando sección CONFIGURACIÓN");
+  } else {
+    // Ocultar toda la sección de configuración
+    configSectionTitle.hide();
+    console.log("🔧 Ocultando sección CONFIGURACIÓN");
+  }
 }
 
 function setupSidebarEvents() {
@@ -53,14 +129,6 @@ function setupSidebarEvents() {
     e.preventDefault();
     logout();
   });
-  
-  // Verificar que el botón existe y tiene el evento
-  setTimeout(() => {
-    const logoutBtn = $("#logoutBtn");
-    if (logoutBtn.length) {
-    } else {
-    }
-  }, 300);
 }
 
 function loadUserInfo() {
@@ -79,33 +147,8 @@ function loadUserInfo() {
 }
 
 function applyUserPermissions() {
-  const userData = localStorage.getItem("user");
-  if (userData) {
-    try {
-      const user = JSON.parse(userData);
-      
-      // Buscar elementos de configuración
-      const configElements = $(".config-section");
-      
-      if (user.nivel === 1) {
-        configElements.hide();
-        
-        // Verificación
-        setTimeout(() => {
-          const remaining = $(".config-section:visible").length;
-          if (remaining === 0) {
-          } else {
-            $(".config-section").css('display', 'none');
-          }
-        }, 300);
-        
-      } else {
-        configElements.show();
-      }
-    } catch (e) {
-      console.error("Error aplicando permisos:", e);
-    }
-  }
+  // Esta función ya no es necesaria, se reemplaza por filterSectionsByPermission
+  console.log("applyUserPermissions está obsoleta");
 }
 
 function highlightCurrentPage() {
@@ -116,8 +159,8 @@ function highlightCurrentPage() {
   // Remover clase active de todos los elementos
   $(".components li").removeClass("active");
   
-  // Buscar y marcar como activo el elemento correspondiente
-  $(".components li a").each(function() {
+  // Buscar y marcar como activo el elemento correspondiente (solo entre los visibles)
+  $(".components li:visible a").each(function() {
     const linkHref = $(this).attr('href');
     
     // Comparar si el href coincide con la página actual
@@ -132,7 +175,7 @@ function highlightCurrentPage() {
   
   // Si no se encontró coincidencia, activar dashboard por defecto
   if ($(".components li.active").length === 0) {
-    $(".components li:first").addClass("active");
+    $('.components li[data-seccion="dashboard"]').addClass("active");
   }
 }
 
