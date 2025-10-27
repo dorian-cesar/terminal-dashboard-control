@@ -196,6 +196,35 @@
       "https://andenes.terminal-calama.com/parkingCalama/php/empresas/api.php";
     // const API_URL = "http://localhost/parkingCalama/php/empresas/api.php";
 
+    // 🔹 MOVER LAS FUNCIONES DE VERIFICACIÓN FUERA DEL document.ready
+    function verificarNivelMinimo(nivelMinimoRequerido = 10) {
+        try {
+            const userData = localStorage.getItem('user');
+            
+            if (!userData) {
+                window.location.href = 'index.html';
+                return false;
+            }
+
+            const usuario = JSON.parse(userData);
+            
+            if (usuario.nivel < nivelMinimoRequerido) {
+                window.location.href = 'index.html';
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error verificando nivel:', error);
+            window.location.href = 'index.html';
+            return false;
+        }
+    }
+
+    function verificarNivel10() {
+        return verificarNivelMinimo(10);
+    }
+
     let cachedCompanies = [];
     let currentPage = 1;
     let entriesPerPage = parseInt($("#entriesPerPage").val() || 10);
@@ -206,6 +235,11 @@
     const entriesSelect = $("#entriesPerPage");
 
     $(document).ready(async () => {
+      // 🔹 VERIFICACIÓN AL INICIO del document.ready
+      if (!verificarNivel10()) {
+        return;
+      }
+
       await loadCompaniesCache();
       applyPagination();
       loadUserInfo();
@@ -256,6 +290,7 @@
       });
     });
 
+    // 🔹 EL RESTO DE TUS FUNCIONES (loadUserInfo, getCompanies, etc.) permanecen igual
     function loadUserInfo() {
       const userData = localStorage.getItem("user");
       if (userData) {
