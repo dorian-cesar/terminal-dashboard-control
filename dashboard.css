@@ -266,108 +266,6 @@ body {
   /* width: 100%; */
 }
 
-/* Top Bar - Mejorada para congruencia */
-.top-bar {
-  background: var(--gray-800);
-  border-bottom: 1px solid var(--gray-700);
-  padding: 1.25rem 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  position: relative;
-}
-
-.top-bar::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--accent-primary),
-    transparent
-  );
-}
-
-.top-bar h4 {
-  color: var(--gray-200);
-  font-weight: 600;
-  margin: 0;
-}
-
-.top-bar-actions {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.search-box {
-  position: relative;
-}
-
-.search-box input {
-  background: var(--gray-700);
-  border: 1px solid var(--gray-600);
-  color: var(--gray-100);
-  padding: 0.5rem 1rem 0.5rem 2.5rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  width: 250px;
-  transition: all 0.3s ease;
-}
-
-.search-box input:focus {
-  background: var(--gray-600);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-  outline: none;
-}
-
-.search-box i {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--gray-500);
-}
-
-.notification-bell {
-  position: relative;
-  color: var(--gray-300);
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-
-.notification-bell:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--accent-primary);
-}
-
-.notification-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: var(--accent-danger);
-  color: white;
-  font-size: 0.7rem;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .mobile-menu-toggle {
   display: none;
   background: none;
@@ -1017,12 +915,6 @@ body {
   color: var(--accent-danger);
 }
 
-/* Asegurar que el sidebar tenga flexbox para el posicionamiento */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
 
 .logout-section {
   position: relative;
