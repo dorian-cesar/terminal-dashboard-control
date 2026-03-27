@@ -97,7 +97,7 @@ function actualizarValoresServicios() {
       console.log("Valor Baño actualizado:", window.restroom.Baño);
     } else {
       console.warn(
-        "No se pudo cargar el valor del Baño, usando valor por defecto"
+        "No se pudo cargar el valor del Baño, usando valor por defecto",
       );
       valorBaño.textContent = "$500"; // Valor por defecto
     }
@@ -111,7 +111,7 @@ function actualizarValoresServicios() {
       console.log("Valor Ducha actualizado:", window.restroom.Ducha);
     } else {
       console.warn(
-        "No se pudo cargar el valor de la Ducha, usando valor por defecto"
+        "No se pudo cargar el valor de la Ducha, usando valor por defecto",
       );
       valorDucha.textContent = "$4000"; // Valor por defecto
     }
@@ -160,7 +160,7 @@ async function seleccionarMetodoPago(metodo) {
   metodoPagoSeleccionado = metodo;
 
   const btnSeleccionado = document.getElementById(
-    `btnPago${metodo.charAt(0).toUpperCase() + metodo.slice(1)}`
+    `btnPago${metodo.charAt(0).toUpperCase() + metodo.slice(1)}`,
   );
   if (!btnSeleccionado) return;
 
@@ -194,7 +194,7 @@ function manejarSeleccionServicio(tipoServicio) {
   if (!id_caja) {
     showToast(
       "Por favor, primero debe abrir la caja antes de realizar un pago.",
-      "warning"
+      "warning",
     );
     return;
   }
@@ -249,9 +249,11 @@ async function procesarPagoEfectivo(tipoServicio) {
     const codigo = await generarQRParaServicio(tipoServicio);
 
     // Generar boleta para efectivo y mostrar folio
-    const folio = await generarBoleta(tipoServicio);
-    console.log("Folio generado:", folio);
-    await printQR(folio);
+    // const folio = await generarBoleta(tipoServicio);
+    // console.log("Folio generado:", folio);
+    // await printQR(folio);
+
+    await printQR(codigo);
 
     showToast("Pago en efectivo registrado correctamente.", "success");
     cerrarModal();
@@ -271,13 +273,13 @@ async function procesarPagoTarjeta(tipoServicio) {
     // 2. Usar ese código como ticketNumber para Transbank
     const resultadoTransbank = await procesarConTransbank(
       tipoServicio,
-      codigoQR
+      codigoQR,
     );
 
     if (!resultadoTransbank.success) {
       showToast(
         "Error en pago con tarjeta: " + resultadoTransbank.error,
-        "error"
+        "error",
       );
       return;
     }
@@ -376,7 +378,7 @@ function generarQRParaServicio(tipoServicio) {
     if (!id_caja) {
       showToast(
         "Por favor, primero debe abrir la caja antes de generar un código QR.",
-        "warning"
+        "warning",
       );
       return reject("Caja no abierta");
     }
@@ -451,7 +453,7 @@ function generarQRParaServicio(tipoServicio) {
       console.error("Error al generar QR:", error);
       showToast(
         "Ocurrió un error al generar el QR. Por favor, intente nuevamente.",
-        "error"
+        "error",
       );
       reject(error);
     }
@@ -538,7 +540,7 @@ function aplicarFiltros() {
             <td>${item.tipo}</td>
             <td>${item.date}</td>
             <td>${item.time}</td>
-        </tr>`
+        </tr>`,
     )
     .join("");
   tablaBody.innerHTML = filasHTML;
@@ -805,7 +807,7 @@ async function renderHistory() {
                 <td>${t.tipo}</td>
                 <td>${t.date}</td>
                 <td>${t.time}</td>
-            </tr>`
+            </tr>`,
       )
       .join("");
   } catch (error) {
