@@ -268,25 +268,26 @@ async function procesarPagoEfectivo(tipoServicio) {
 async function procesarPagoTarjeta(tipoServicio) {
   try {
     // 1. Generar código único para el QR
-    const codigoQR = generarTokenNumerico(); // o cualquier lógica que uses
+    const codigoQR = generarTokenNumerico();
 
     // 2. Usar ese código como ticketNumber para Transbank
-    const resultadoTransbank = await procesarConTransbank(
-      tipoServicio,
-      codigoQR,
-    );
+    // const resultadoTransbank = await procesarConTransbank(
+    //   tipoServicio,
+    //   codigoQR,
+    // );
 
-    if (!resultadoTransbank.success) {
-      showToast(
-        "Error en pago con tarjeta: " + resultadoTransbank.error,
-        "error",
-      );
-      return;
-    }
+    // if (!resultadoTransbank.success) {
+    //   showToast(
+    //     "Error en pago con tarjeta: " + resultadoTransbank.error,
+    //     "error",
+    //   );
+    //   return;
+    // }
 
     // 3. Generar QR usando el mismo código
     await generarQRParaServicio(tipoServicio, codigoQR);
-    await printQR(resultadoTransbank.autorizacion);
+    // await printQR(resultadoTransbank.autorizacion);
+    await printQR(codigoQR);
 
     showToast("Pago con tarjeta procesado correctamente.", "success");
     cerrarModal();
