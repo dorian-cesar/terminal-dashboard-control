@@ -10,7 +10,14 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
   const BASE_URL = window.BASE_URL;
   const urlLocal = window.URL_LOCAL;
   // const VALOR_MINUTO = window.VALOR_MINUTO;
-  const VALOR_MINUTO = 30;
+  // const VALOR_MINUTO = 30; // ← reemplazado por tarifas por tramos
+
+  // --- Tarifas por tramos ---
+  const TARIFA_TRAMO_INICIAL = 800; // Costo fijo por los primeros 30 min (o fracción)
+  const MINUTOS_TRAMO_INICIAL = 30; // Duración del tramo inicial en minutos
+  const TARIFA_TRAMO_ADICIONAL = 200; // Costo por cada 10 min adicionales vencidos
+  const MINUTOS_TRAMO_ADICIONAL = 10; // Tamaño del tramo adicional en minutos
+  const TOPE_MAXIMO_DIARIO = 9600; // Cobro máximo permitido por día
 
   // URL para pago en efectivo
   const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
@@ -39,6 +46,28 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
     const fin = new Date(`${fechaSal}T${horaSal}`);
     const diffMs = fin - inicio;
     return Math.max(1, Math.floor(diffMs / (1000 * 60)));
+  }
+
+  // --- Calcula el valor a cobrar según tramos ---
+  function calcularValor(minutos) {
+    // Tramo inicial: primeros 30 min (o cualquier fracción) = $800 fijo
+    if (minutos <= MINUTOS_TRAMO_INICIAL) {
+      return TARIFA_TRAMO_INICIAL;
+    }
+
+    // Tramos adicionales: minutos que exceden el tramo inicial
+    const minutosAdicionales = minutos - MINUTOS_TRAMO_INICIAL;
+
+    // Math.floor: solo se cobra el tramo una vez que los 10 min han VENCIDO
+    const tramosAdicionales = Math.floor(
+      minutosAdicionales / MINUTOS_TRAMO_ADICIONAL,
+    );
+
+    const total =
+      TARIFA_TRAMO_INICIAL + tramosAdicionales * TARIFA_TRAMO_ADICIONAL;
+
+    // Aplicar tope máximo diario
+    return Math.min(total, TOPE_MAXIMO_DIARIO);
   }
 
   function mostrarErrorUsuario(msg) {
@@ -142,7 +171,8 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
         fechaSalida,
         horaSalida,
       );
-      let valor = minutos * VALOR_MINUTO;
+      // let valor = minutos * VALOR_MINUTO;
+      let valor = calcularValor(minutos);
 
       // 4) UI: si whitelist => exento
       if (estaEnWhitelist) {
