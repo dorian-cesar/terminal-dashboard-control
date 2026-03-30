@@ -1,4 +1,4 @@
-const BASE = "https://andenes.terminal-calama.com/parkingCalama/php";
+const BASE = window.BASE_URL + "parkingCalama/php";
 // const BASE = "http://localhost/parkingCalama/php";
 const API_URL = BASE + "/whitelist/api.php"; // GET, POST, PUT, DELETE
 const API_EMP = BASE + "/empresas/api.php"; // GET empresas
@@ -7,33 +7,33 @@ const API_EMP = BASE + "/empresas/api.php"; // GET empresas
 const patRegEx = /^[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}-?[a-zA-Z\d]{2}$/;
 
 function verificarNivelMinimo(nivelMinimoRequerido = 10) {
-    try {
-        const userData = localStorage.getItem('user');
-        
-        if (!userData) {
-            alert('Usuario no autenticado. Será redirigido al login.');
-            window.location.href = 'index.html';
-            return false;
-        }
+  try {
+    const userData = localStorage.getItem("user");
 
-        const usuario = JSON.parse(userData);
-        
-        if (usuario.nivel < nivelMinimoRequerido) {
-            window.location.href = 'index.html';
-            return false;
-        }
-
-        return true;
-    } catch (error) {
-        console.error('Error verificando nivel:', error);
-        alert('Error de permisos. Será redirigido al login.');
-        window.location.href = 'index.html';
-        return false;
+    if (!userData) {
+      alert("Usuario no autenticado. Será redirigido al login.");
+      window.location.href = "index.html";
+      return false;
     }
+
+    const usuario = JSON.parse(userData);
+
+    if (usuario.nivel < nivelMinimoRequerido) {
+      window.location.href = "index.html";
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error verificando nivel:", error);
+    alert("Error de permisos. Será redirigido al login.");
+    window.location.href = "index.html";
+    return false;
+  }
 }
 
 function verificarNivel10() {
-    return verificarNivelMinimo(10);
+  return verificarNivelMinimo(10);
 }
 
 /* Paginación simple */
@@ -175,7 +175,7 @@ function filterAndPaginate() {
   tbody.empty();
   if (pageItems.length === 0) {
     tbody.append(
-      `<tr><td colspan="4" class="text-center text-muted">No se encontraron registros</td></tr>`
+      `<tr><td colspan="4" class="text-center text-muted">No se encontraron registros</td></tr>`,
     );
   } else {
     pageItems.forEach((w, idx) => {
@@ -206,8 +206,8 @@ function filterAndPaginate() {
   tableInfo.text(
     `Mostrando ${start + 1 <= total ? start + 1 : 0} a ${Math.min(
       start + entriesPerPage,
-      total
-    )} de ${total} registros`
+      total,
+    )} de ${total} registros`,
   );
 }
 
@@ -272,7 +272,7 @@ async function saveWhitelist() {
     // Verificar si hay otros campos requeridos vacíos en el formulario
     const form = document.getElementById("whitelistForm");
     const emptyFields = Array.from(form.elements).filter(
-      (el) => el.required && !el.value.trim()
+      (el) => el.required && !el.value.trim(),
     );
     if (emptyFields.length > 0) {
       alert("Todos los campos requeridos deben estar completos.");
