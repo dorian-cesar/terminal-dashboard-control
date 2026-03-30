@@ -953,6 +953,35 @@ async function imprimirBoletaTermicaAndenes(datos) {
   const medio_pago = datos.medio_pago?.toUpperCase() || "EFECTIVO";
 
   // HTML del ticket térmico con fuente legible
+  // const ticketHTML = `
+  //   <div id="ticketImpresion" style="
+  //       width:200px;
+  //       text-align:center;
+  //       font-family:'Arial', 'Helvetica', sans-serif;
+  //       color:#000;
+  //       font-size:13px;
+  //       line-height:1.35;
+  //       padding:6px;
+  //   ">
+  //     <h3 style="font-size:15px; font-weight:700; margin-bottom:2px;">TERMINAL CALAMA</h3>
+  //     <div style="margin:2px 0;">BOLETA DE ANDÉN</div>
+  //     <div style="margin:2px 0;">${fechaStr} ${horaStr}</div>
+  //     <div style="margin:4px 0;">----------------------------------</div>
+  //     <div style="margin:2px 0;">PATENTE: <b>${patente}</b></div>
+  //     <div style="margin:2px 0;">EMPRESA: <b>${datos.empresaNombre}</b></div>
+  //     <div style="margin:2px 0;">DESTINO: <b>${destino}</b></div>
+  //     <div style="margin:2px 0;">VALOR TOTAL: <b>$${datos.valor}</b></div>
+  //     <div style="margin:2px 0;">MÉTODO PAGO: <b>${medio_pago}</b></div>
+  //     ${
+  //       datos.autorizacion_tarjeta
+  //         ? `<div style="margin:2px 0;">BOLETA: <b>${datos.autorizacion_tarjeta}</b></div>`
+  //         : ""
+  //     }
+  //     <div style="margin:4px 0;">----------------------------------</div>
+  //     <div style="margin-top:4px; font-size:12px; font-weight:600;">VÁLIDO COMO BOLETA</div>
+  //     <div style="margin-top:6px; font-size:12px;">¡GRACIAS POR SU VISITA!</div>
+  //   </div>`;
+
   const ticketHTML = `
     <div id="ticketImpresion" style="
         width:200px;
@@ -964,7 +993,7 @@ async function imprimirBoletaTermicaAndenes(datos) {
         padding:6px;
     ">
       <h3 style="font-size:15px; font-weight:700; margin-bottom:2px;">TERMINAL CALAMA</h3>
-      <div style="margin:2px 0;">BOLETA DE ANDÉN</div>
+      <div style="margin:2px 0;">TICKET DE ANDÉN</div>
       <div style="margin:2px 0;">${fechaStr} ${horaStr}</div>
       <div style="margin:4px 0;">----------------------------------</div>
       <div style="margin:2px 0;">PATENTE: <b>${patente}</b></div>
@@ -972,13 +1001,7 @@ async function imprimirBoletaTermicaAndenes(datos) {
       <div style="margin:2px 0;">DESTINO: <b>${destino}</b></div>
       <div style="margin:2px 0;">VALOR TOTAL: <b>$${datos.valor}</b></div>
       <div style="margin:2px 0;">MÉTODO PAGO: <b>${medio_pago}</b></div>
-      ${
-        datos.autorizacion_tarjeta
-          ? `<div style="margin:2px 0;">BOLETA: <b>${datos.autorizacion_tarjeta}</b></div>`
-          : ""
-      }
       <div style="margin:4px 0;">----------------------------------</div>
-      <div style="margin-top:4px; font-size:12px; font-weight:600;">VÁLIDO COMO BOLETA</div>
       <div style="margin-top:6px; font-size:12px;">¡GRACIAS POR SU VISITA!</div>
     </div>`;
 

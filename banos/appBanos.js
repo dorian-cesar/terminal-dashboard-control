@@ -577,6 +577,31 @@ async function printQR(voucher) {
       : "No definido";
 
   // Ticket HTML con fuente mejorada
+  // const ticketHTML = `
+  //   <div id="ticketImpresion" style="
+  //       width:200px;
+  //       text-align:center;
+  //       font-family:'Arial', 'Helvetica', sans-serif;
+  //       color:#000;
+  //       font-size:14px;
+  //       line-height:1.35;
+  //       padding:5px;
+  //   ">
+  //     <h3 style="font-size:16px; margin-bottom:2px;">TICKET DE ACCESO</h3>
+  //     <div style="margin:2px 0;">${fechaStr} ${horaStr}</div>
+  //     <div style="margin:2px 0;">SERVICIO: <b>${tipoSeleccionado}</b></div>
+  //     <div style="margin:2px 0;">VALOR: <b>${precio}</b></div>
+  //     <div style="margin:6px 0; font-size:13px; font-weight:bold;">${codigoQR}</div>
+  //     <div style="margin:10px auto; width:140px;">
+  //       <div style="transform:scale(1); transform-origin:center;">
+  //         ${contenedorQR.innerHTML}
+  //       </div>
+  //     </div>
+  //     <div style="margin-top:4px; font-size:12px; font-weight:bold;">VÁLIDO COMO BOLETA</div>
+  //     <div style="margin-top:2px; font-size:12px;">N° de Boleta: <b>${voucher}</b></div>
+  //     <div style="margin-top:8px; font-size:12px;">¡GRACIAS POR SU PREFERENCIA!</div>
+  //   </div>`;
+
   const ticketHTML = `
     <div id="ticketImpresion" style="
         width:200px;
@@ -597,8 +622,6 @@ async function printQR(voucher) {
           ${contenedorQR.innerHTML}
         </div>
       </div>
-      <div style="margin-top:4px; font-size:12px; font-weight:bold;">VÁLIDO COMO BOLETA</div>
-      <div style="margin-top:2px; font-size:12px;">N° de Boleta: <b>${voucher}</b></div>
       <div style="margin-top:8px; font-size:12px;">¡GRACIAS POR SU PREFERENCIA!</div>
     </div>`;
 

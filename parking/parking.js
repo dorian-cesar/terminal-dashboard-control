@@ -842,10 +842,65 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
         ? `Folio: ${resultadoPago.folio || "N/A"}`
         : `Transacción: ${resultadoPago.codigoTransaccion || "N/A"}`;
 
+    // ventanaImpr.document.write(`
+    //     <html>
+    //     <head>
+    //         <title>Boleta de Parking</title>
+    //         <style>
+    //             body {
+    //                 font-family: 'Courier New', monospace;
+    //                 text-align: center;
+    //                 width: 280px;
+    //                 margin: 0 auto;
+    //                 padding: 10px;
+    //                 font-size: 12px;
+    //             }
+    //             h1, h3 { margin: 5px 0; }
+    //             .line { border-bottom: 1px dashed #000; margin: 8px 0; }
+    //             .text-left { text-align: left; }
+    //             .text-center { text-align: center; }
+    //             .text-right { text-align: right; }
+    //             .bold { font-weight: bold; }
+    //         </style>
+    //     </head>
+    //     <body>
+    //         <h1>WIT.LA</h1>
+    //         <h3>Boleta de Pago (Parking)</h3>
+    //         <div class="line"></div>
+
+    //         <div class="text-left">
+    //             <div><strong>Patente:</strong> ${datosParking.patente}</div>
+    //             <div><strong>Empresa:</strong> ${datosParking.empresa}</div>
+    //             <div><strong>Fecha Entrada:</strong> ${datosParking.fechaent}</div>
+    //             <div><strong>Hora Entrada:</strong> ${datosParking.horaent}</div>
+    //             <div><strong>Fecha Salida:</strong> ${datosParking._fechaSalida}</div>
+    //             <div><strong>Hora Salida:</strong> ${datosParking._horaSalida}</div>
+    //             <div><strong>Tiempo:</strong> ${datosParking._minutos} min.</div>
+    //         </div>
+
+    //         <div class="line"></div>
+
+    //         <div class="text-left">
+    //             <div><strong>Método de Pago:</strong> ${resultadoPago.metodo.toUpperCase()}</div>
+    //             <div>${infoPago}</div>
+    //         </div>
+
+    //         <div class="line"></div>
+
+    //         <h2 class="bold">TOTAL: $${datosParking._valorCalculado.toLocaleString("es-CL")}</h2>
+
+    //         <div class="line"></div>
+
+    //         <h3>¡Gracias por su visita!</h3>
+    //         <div>${new Date().toLocaleString("es-CL")}</div>
+    //     </body>
+    //     </html>
+    // `);
+
     ventanaImpr.document.write(`
         <html>
         <head>
-            <title>Boleta de Parking</title>
+            <title>Ticket de Parking</title>
             <style>
                 body { 
                     font-family: 'Courier New', monospace; 
@@ -865,7 +920,7 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
         </head>
         <body>
             <h1>WIT.LA</h1>
-            <h3>Boleta de Pago (Parking)</h3>
+            <h3>Ticket de Pago (Parking)</h3>
             <div class="line"></div>
             
             <div class="text-left">
