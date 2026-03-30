@@ -21,12 +21,12 @@ const verificarAccesoSeccion = (seccionRequerida) => {
 
     // Verificar si tiene acceso a la sección requerida
     const tieneAcceso = seccionesPermitidas.some(
-      (seccion) => seccion.toLowerCase() === seccionRequerida.toLowerCase()
+      (seccion) => seccion.toLowerCase() === seccionRequerida.toLowerCase(),
     );
 
     if (!tieneAcceso) {
       alert(
-        `No tienes permisos para acceder a la sección: ${seccionRequerida}`
+        `No tienes permisos para acceder a la sección: ${seccionRequerida}`,
       );
       window.location.href = "dashboard.html";
       return false;
@@ -144,7 +144,7 @@ async function seleccionarMetodoPago(metodo) {
   metodoPagoSeleccionado = metodo;
 
   const btnSeleccionado = document.getElementById(
-    `btnPago${metodo.charAt(0).toUpperCase() + metodo.slice(1)}`
+    `btnPago${metodo.charAt(0).toUpperCase() + metodo.slice(1)}`,
   );
   if (!btnSeleccionado) return;
 
@@ -189,7 +189,7 @@ function procesarPago(metodoPago) {
 
 async function procesarPagoEfectivo() {
   try {
-    const folio = await generarBoleta();
+    const folio = generarTokenNumerico();
     console.log("Folio generado:", folio);
     if (!folio) {
       showToast("No se pudo generar el folio de boleta.", "error");
@@ -233,18 +233,20 @@ async function generarBoleta() {
 async function procesarPagoTarjeta() {
   try {
     // Procesar con Transbank
-    const resultadoTransbank = await procesarConTransbank();
+    // const resultadoTransbank = await procesarConTransbank();
 
-    if (!resultadoTransbank.success) {
-      showToast(
-        "Error en pago con tarjeta: " + resultadoTransbank.error,
-        "error"
-      );
-      return;
-    }
+    // if (!resultadoTransbank.success) {
+    //   showToast(
+    //     "Error en pago con tarjeta: " + resultadoTransbank.error,
+    //     "error",
+    //   );
+    //   return;
+    // }
+
+    const codigo = generarTokenNumerico();
 
     // Si el pago con tarjeta fue exitoso, procesar el pago
-    await pagarAndenConMetodo("tarjeta", resultadoTransbank.autorizacion);
+    await pagarAndenConMetodo("tarjeta", codigo);
 
     showToast("Pago con tarjeta procesado correctamente.", "success");
     cerrarModal();
@@ -435,7 +437,7 @@ function deshabilitarBotonesPago(deshabilitar = true) {
 
 function generarTokenNumerico() {
   let token = (Math.floor(Math.random() * 9) + 1).toString();
-  for (let i = 1; i < 10; i++) {
+  for (let i = 1; i < 7; i++) {
     token += Math.floor(Math.random() * 10);
   }
   return token;
@@ -447,7 +449,7 @@ async function calcAndenes() {
   if (!id_caja) {
     showToast(
       "Por favor, primero debe abrir la caja antes de realizar un pago.",
-      "warning"
+      "warning",
     );
     return;
   }
@@ -567,20 +569,20 @@ async function calcAndenes() {
             <div class="payment-breakdown">
               <div class="payment-breakdown-title">Desglose de Costos</div>
               <div class="payment-breakdown-item"><span class="payment-breakdown-label">Tarifa base (${bloques} bloques)</span><span class="payment-breakdown-value">$${valorBase.toFixed(
-              0
-            )}</span></div>
+                0,
+              )}</span></div>
               <div class="payment-breakdown-item"><span class="payment-breakdown-label">IVA (${(
                 configuracion.iva * 100
               ).toFixed(
-                0
+                0,
               )}%)</span><span class="payment-breakdown-value">$${iva.toFixed(
-              0
-            )}</span></div>
+                0,
+              )}</span></div>
             </div>
             <div class="payment-summary clickable" id="proceedToPayment">
-              <div class="payment-summary-title">Total a Pagar</div>
+              <div class="payment-summary-title">Total a Registrar</div>
               <div class="payment-total-amount">$${valorConIVA.toFixed(0)}</div>
-              <div class="payment-total-label">Haga clic para seleccionar método de pago</div>
+              <div class="payment-total-label">Haga clic para registrar método de pago</div>
             </div>
           `
           : `
@@ -625,7 +627,7 @@ async function calcAndenes() {
             if (response.ok) {
               showToast(
                 "Salida registrada correctamente (Lista Blanca).",
-                "success"
+                "success",
               );
               cont.innerHTML = `<div class="empty-state"><h3>Registro completado</h3><p>Vehículo en lista blanca registrado con éxito.</p></div>`;
             } else {
@@ -667,7 +669,7 @@ async function getWLByPatente(patIn) {
       method: "GET",
       mode: "cors",
       headers: { Authorization: `Bearer ${getCookie("jwt")}` },
-    }
+    },
   )
     .then((reply) => reply.json())
     .then((data) => data)
@@ -683,7 +685,7 @@ async function getMovByPatente(patente) {
         method: "GET",
         mode: "cors",
         headers: { Authorization: `Bearer ${getCookie("jwt")}` },
-      }
+      },
     )
       .then((reply) => reply.json())
       .then((data) => data)
@@ -757,12 +759,26 @@ async function listarAndenesDestinos() {
     return;
   }
 
-  await cargarDestinos(tipoDest, lista);
+  try {
+    // 🔒 Deshabilitar select antes de la llamada
+    lista.disabled = true;
 
-  for (let option of lista.options) {
-    if (option.value && option.text.includes(" - ")) {
-      option.text = option.text.split(" - ")[0].trim();
+    // (opcional) limpiar y mostrar loading
+    lista.innerHTML = `<option>Cargando destinos...</option>`;
+
+    await cargarDestinos(tipoDest, lista);
+
+    // Limpieza de texto (lo que ya hacías)
+    for (let option of lista.options) {
+      if (option.value && option.text.includes(" - ")) {
+        option.text = option.text.split(" - ")[0].trim();
+      }
     }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    // 🔓 Habilitar nuevamente pase lo que pase
+    lista.disabled = false;
   }
 }
 
@@ -829,7 +845,7 @@ async function pagarAnden(valorTot = valorTotGlobal) {
   if (!id_caja) {
     showToast(
       "Por favor, primero debe abrir la caja antes de realizar un pago.",
-      "warning"
+      "warning",
     );
     return; // Detiene la ejecución si no hay id_caja
   }
@@ -919,7 +935,7 @@ async function pagarAnden(valorTot = valorTotGlobal) {
     } else {
       showToast(
         "La patente pertenece a un tipo distinto de movimiento.",
-        "warning"
+        "warning",
       );
     }
   } catch (error) {
