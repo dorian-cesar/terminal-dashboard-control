@@ -108,8 +108,8 @@
           const user = JSON.parse(userData);
           const seccionesPermitidas = user.secciones || [];
 
-          console.log("🔐 Filtrando acciones rápidas para:", user.mail);
-          console.log("✅ Secciones permitidas:", seccionesPermitidas);
+          // console.log("🔐 Filtrando acciones rápidas para:", user.mail);
+          // console.log("✅ Secciones permitidas:", seccionesPermitidas);
 
           // Si el usuario es administrador (nivel 0), mostrar todas las acciones
           if (user.nivel === 0) {
@@ -128,9 +128,9 @@
 
             if (accionElement.length) {
               accionElement.show();
-              console.log(`👉 Mostrando acción: ${seccionPermitida}`);
+              // console.log(`👉 Mostrando acción: ${seccionPermitida}`);
             } else {
-              console.warn(`⚠️ Acción no encontrada: ${seccionPermitida}`);
+              // console.warn(`⚠️ Acción no encontrada: ${seccionPermitida}`);
             }
           });
 
@@ -138,7 +138,7 @@
           const accionesVisibles = $(
             ".action-btn[data-seccion]:visible",
           ).length;
-          console.log(`📈 Acciones rápidas visibles: ${accionesVisibles}`);
+          // console.log(`📈 Acciones rápidas visibles: ${accionesVisibles}`);
 
           // Si no hay acciones visibles, mostrar un mensaje
           if (accionesVisibles === 0) {
