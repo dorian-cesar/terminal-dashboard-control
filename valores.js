@@ -1,5 +1,5 @@
 window.restroom = {
-  Baño: 500,
+  Baño: 600,
   Ducha: 4000,
 };
 

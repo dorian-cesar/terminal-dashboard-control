@@ -97,6 +97,7 @@ function handleConfigSection(userNivel) {
     "empresas",
     "destinos",
     "usuarios",
+    "servicios",
     "listas-blancas",
     "entradas-salidas",
   ];

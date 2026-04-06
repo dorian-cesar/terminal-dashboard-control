@@ -14,8 +14,7 @@ const urlPaymentEfectivo = window.URL_PAYMENT_EFECTIVO;
 // URLs específicas de ESTA página
 const API_BANOS_BASE = `${BASE_URL}TerminalCalama/PHP/Restroom/`;
 const urlLoad = `${API_BANOS_BASE}load.php`;
-const urlLoadToday =
-  "https://andenes.terminal-calama.com/TerminalCalama/PHP/Restroom/loadToday.php";
+const urlLoadToday = `${API_BANOS_BASE}loadToday.php`;
 const urlSave = `${API_BANOS_BASE}save.php`;
 const urlAddUser = `${API_BANOS_BASE}addUser.php`;
 const urlLevelUser = `${API_BANOS_BASE}addLevelUser.php`;
@@ -99,7 +98,7 @@ function actualizarValoresServicios() {
       console.warn(
         "No se pudo cargar el valor del Baño, usando valor por defecto",
       );
-      valorBaño.textContent = "$500"; // Valor por defecto
+      valorBaño.textContent = "$600"; // Valor por defecto
     }
   } else {
     console.log("Elemento valorBaño no encontrado en esta página");
