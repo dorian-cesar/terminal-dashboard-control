@@ -27,6 +27,16 @@ const urlPaymentTarjeta = urlLocal + "/api/payment";
 let servicioSeleccionado = null;
 let metodoPagoSeleccionado = null;
 
+function getPreciosServicios() {
+  try {
+    const data = localStorage.getItem("preciosServicios");
+    return data ? JSON.parse(data) : {};
+  } catch (e) {
+    console.error("Error leyendo preciosServicios:", e);
+    return {};
+  }
+}
+
 // Inicialización
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM cargado - Inicializando página...");
@@ -38,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
   //   return;
   // }
 
-  console.log("Valores de servicios disponibles:", window.restroom);
+  // console.log("Valores de servicios disponibles:", window.restroom);
 
   // Si tiene acceso, continuar con la inicialización normal
   initializePage();
@@ -84,38 +94,21 @@ function initializePage() {
 
 // Función específica para actualizar los valores de los servicios
 function actualizarValoresServicios() {
-  console.log("Actualizando valores de servicios...", window.restroom);
+  console.log("Actualizando valores desde localStorage...");
+
+  const precios = getPreciosServicios();
 
   const valorBaño = document.getElementById("valorBaño");
   const valorDucha = document.getElementById("valorDucha");
 
-  // Verificar si los elementos existen antes de intentar actualizarlos
   if (valorBaño) {
-    if (window.restroom && window.restroom.Baño) {
-      valorBaño.textContent = `$${window.restroom.Baño}`;
-      console.log("Valor Baño actualizado:", window.restroom.Baño);
-    } else {
-      console.warn(
-        "No se pudo cargar el valor del Baño, usando valor por defecto",
-      );
-      valorBaño.textContent = "$600"; // Valor por defecto
-    }
-  } else {
-    console.log("Elemento valorBaño no encontrado en esta página");
+    const precio = precios.banos ?? 600;
+    valorBaño.textContent = `$${precio}`;
   }
 
   if (valorDucha) {
-    if (window.restroom && window.restroom.Ducha) {
-      valorDucha.textContent = `$${window.restroom.Ducha}`;
-      console.log("Valor Ducha actualizado:", window.restroom.Ducha);
-    } else {
-      console.warn(
-        "No se pudo cargar el valor de la Ducha, usando valor por defecto",
-      );
-      valorDucha.textContent = "$4000"; // Valor por defecto
-    }
-  } else {
-    console.log("Elemento valorDucha no encontrado en esta página");
+    const precio = precios.duchas ?? 4000;
+    valorDucha.textContent = `$${precio}`;
   }
 }
 
@@ -210,8 +203,16 @@ function mostrarModalPago(tipoServicio) {
   // Actualizar información del servicio con los valores de valores.js
   if (modalServiceName) modalServiceName.textContent = tipoServicio;
 
-  // OBTENER EL VALOR DESDE window.restroom
-  const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+  // OBTENER EL VALOR DESDE localStorage
+  const precios = getPreciosServicios();
+
+  const precio =
+    tipoServicio === "Baño"
+      ? precios.banos
+      : tipoServicio === "Ducha"
+        ? precios.duchas
+        : 0;
+
   if (modalServicePrice) {
     modalServicePrice.textContent = `$${precio}`;
     console.log(`Mostrando modal para ${tipoServicio}: $${precio}`);
@@ -230,7 +231,14 @@ function procesarPago(metodoPago) {
   const tipoServicio = servicioSeleccionado;
   if (!tipoServicio) return Promise.reject("No hay servicio seleccionado");
 
-  const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+  const precios = getPreciosServicios();
+
+  const precio =
+    tipoServicio === "Baño"
+      ? precios.banos
+      : tipoServicio === "Ducha"
+        ? precios.duchas
+        : 0;
   console.log(`Procesando pago ${metodoPago} para ${tipoServicio}: $${precio}`);
 
   if (metodoPago === "efectivo") {
@@ -301,7 +309,14 @@ async function procesarPagoTarjeta(tipoServicio) {
 // Función para procesar con Transbank
 async function procesarConTransbank(tipoServicio, ticketNumber) {
   try {
-    const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+    // const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+    const precios = getPreciosServicios();
+    const precio =
+      tipoServicio === "Baño"
+        ? precios.banos
+        : tipoServicio === "Ducha"
+          ? precios.duchas
+          : 0;
 
     // Llamada al backend que integra Transbank (URL específica, no usa BASE_URL)
     const response = await fetch(urlPaymentTarjeta, {
@@ -338,7 +353,14 @@ async function procesarConTransbank(tipoServicio, ticketNumber) {
 
 // Función para generar boleta
 async function generarBoleta(tipoServicio) {
-  const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+  // const precio = window.restroom ? window.restroom[tipoServicio] : 0;
+  const precios = getPreciosServicios();
+  const precio =
+    tipoServicio === "Baño"
+      ? precios.banos
+      : tipoServicio === "Ducha"
+        ? precios.duchas
+        : 0;
   const nombre = tipoServicio === "Baño" ? "Bano" : tipoServicio;
 
   try {
@@ -612,10 +634,18 @@ async function printQR(voucher) {
   const dateAct = new Date();
   const horaStr = dateAct.toLocaleTimeString("es-CL");
   const fechaStr = dateAct.toLocaleDateString("es-CL");
+  // const precio =
+  //   window.restroom?.[tipoSeleccionado] !== undefined
+  //     ? `$${window.restroom[tipoSeleccionado]}`
+  //     : "No definido";
+
+  const precios = getPreciosServicios();
   const precio =
-    window.restroom?.[tipoSeleccionado] !== undefined
-      ? `$${window.restroom[tipoSeleccionado]}`
-      : "No definido";
+    tipoSeleccionado === "Baño"
+      ? `$${precios.banos}`
+      : tipoSeleccionado === "Ducha"
+        ? `$${precios.duchas}`
+        : "$0";
 
   // Ticket HTML con fuente mejorada
   // const ticketHTML = `
