@@ -1,6 +1,6 @@
 // config.js - CONFIGURACIÓN CENTRALIZADA
-// const ENVIRONMENT = "dev";
-const ENVIRONMENT = "prod";
+const ENVIRONMENT = "dev";
+// const ENVIRONMENT = "prod";
 
 const CONFIG = {
   dev: {

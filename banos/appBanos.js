@@ -785,23 +785,47 @@ async function loadServerData() {
 // Función para actualizar estadísticas con datos del día
 async function updateStats() {
   try {
-    // Llamar a la API que devuelve los totales del día
-    const response = await fetch(urlLoadToday);
-    if (!response.ok)
+    // Obtener id_caja desde localStorage
+    const id_caja = localStorage.getItem("id_caja");
+
+    // Validaciones
+    if (!id_caja) {
+      console.warn("id_caja no encontrado en localStorage");
+      return;
+    }
+
+    // Llamada POST a la API
+    const response = await fetch(urlLoadToday, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id_caja }),
+    });
+
+    if (!response.ok) {
       throw new Error("Error al obtener estadísticas del servidor");
+    }
+
     const stats = await response.json();
 
-    // Actualizar UI solo si los elementos existen
+    // Validar respuesta del backend
+    if (stats.error) {
+      console.error("Error backend:", stats.error);
+      return;
+    }
+
+    // Actualizar UI
     const totalDay = document.getElementById("totalDay");
     const totalTransactions = document.getElementById("totalTransactions");
     const totalBanosElem = document.getElementById("totalBanos");
     const totalDuchasElem = document.getElementById("totalDuchas");
 
-    if (totalDay) totalDay.textContent = `$${stats.totalAmount}`;
+    if (totalDay) totalDay.textContent = `$${stats.totalAmount ?? 0}`;
     if (totalTransactions)
-      totalTransactions.textContent = stats.totalTransactions;
-    if (totalBanosElem) totalBanosElem.textContent = stats.totalBanos;
-    if (totalDuchasElem) totalDuchasElem.textContent = stats.totalDuchas;
+      totalTransactions.textContent = stats.totalTransactions ?? 0;
+    if (totalBanosElem) totalBanosElem.textContent = stats.totalBanos ?? 0;
+    if (totalDuchasElem) totalDuchasElem.textContent = stats.totalDuchas ?? 0;
   } catch (error) {
     console.error("Error al actualizar estadísticas:", error);
   }
