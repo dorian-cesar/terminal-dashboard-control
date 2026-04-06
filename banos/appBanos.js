@@ -505,14 +505,56 @@ function generarTokenNumerico() {
 }
 
 function leerDatosServer() {
-  fetch(urlLoad)
-    .then((response) => response.json())
+  // Obtener id_caja
+  const rawIdCaja = localStorage.getItem("id_caja");
+
+  // Validaciones
+  if (!rawIdCaja) {
+    console.error("id_caja no encontrado en localStorage");
+    return;
+  }
+
+  const id_caja = parseInt(rawIdCaja, 10);
+
+  if (!Number.isInteger(id_caja) || id_caja <= 0) {
+    console.error("id_caja inválido:", rawIdCaja);
+    return;
+  }
+
+  // Request POST
+  fetch(urlLoad, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id_caja }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Error HTTP al obtener datos");
+      }
+      return response.json();
+    })
     .then((data) => {
-      datosGlobales = data;
+      // Validar error backend
+      if (data?.error) {
+        console.error("Error backend:", data.error);
+        return;
+      }
+
+      // Validar formato esperado
+      if (!Array.isArray(data)) {
+        console.warn("Respuesta inesperada:", data);
+        datosGlobales = [];
+      } else {
+        datosGlobales = data;
+      }
+
       aplicarFiltros();
     })
     .catch((error) => {
       console.error("Error al obtener datos:", error);
+      datosGlobales = []; // fallback seguro
     });
 }
 
@@ -773,8 +815,49 @@ function cerrarTablaFunc() {
 // Función para cargar datos del servidor
 async function loadServerData() {
   try {
-    const response = await fetch(urlLoad);
+    // Obtener id_caja
+    const rawIdCaja = localStorage.getItem("id_caja");
+
+    // Validaciones
+    if (!rawIdCaja) {
+      console.error("id_caja no encontrado en localStorage");
+      return [];
+    }
+
+    const id_caja = parseInt(rawIdCaja, 10);
+
+    if (!Number.isInteger(id_caja) || id_caja <= 0) {
+      console.error("id_caja inválido:", rawIdCaja);
+      return [];
+    }
+
+    // Request POST
+    const response = await fetch(urlLoad, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id_caja }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error HTTP al cargar datos");
+    }
+
     const data = await response.json();
+
+    // Validar error backend
+    if (data?.error) {
+      console.error("Error backend:", data.error);
+      return [];
+    }
+
+    // Asegurar que siempre sea array
+    if (!Array.isArray(data)) {
+      console.warn("Respuesta inesperada:", data);
+      return [];
+    }
+
     return data;
   } catch (error) {
     console.error("Error al cargar datos del servidor:", error);
