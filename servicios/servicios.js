@@ -1,13 +1,5 @@
-// ------------------------- CONFIGURACIÓN DEL BACKEND -------------------------
-// 🔁 CAMBIA ESTA URL CUANDO TENGAS TU BACKEND REAL CON BASE DE DATOS.
-const API_BASE_URL = window.BASE_URL; // Si está vacío, usamos Mock (simulación local)
-// Si quieres pruebas con backend falso, dejamos vacío y se simula.
-// Para usar backend real, asigna: const API_BASE_URL = 'https://tudominio.com/api';
-// Se asume que los endpoints:
-// GET  /precios  -> devuelve ARRAY [{ id, nombre, precio_actual }]
-// POST /actualizar_precio.php -> recibe { id, precio_actual } (form-data)
+const API_BASE_URL = window.BASE_URL;
 
-// DEFINICIÓN DE SERVICIOS (IDs internos y nombres amigables)
 const SERVICIOS = [
   {
     id: "banos",
@@ -91,28 +83,19 @@ function showToast(message, isError = false) {
 // Función para obtener precios desde el backend (GET)
 async function fetchPrices() {
   try {
-    // Si no hay URL base, simulamos datos mock (respuesta local)
+    // Validación obligatoria de backend
     if (!API_BASE_URL) {
-      console.log("Modo simulación (mock): cargando precios por defecto");
-      const mockPrices = {
-        banos: 600,
-        duchas: 4000,
-        andenes_precio_base: 2500,
-        andenes_bloque: 4200,
-        parking_base: 1800,
-        parking_bloque: 3000,
-      };
-      currentPrices = { ...mockPrices };
-      renderPricesToGrid();
-      showToast("Precios cargados (modo demostración local)");
-      return;
+      throw new Error("API_BASE_URL no está configurado");
     }
 
     // Llamada real GET (ARRAY)
     const response = await fetch(
       `${API_BASE_URL}parkingCalama/php/servicios/servicios.php`,
     );
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
 
     const data = await response.json();
 
@@ -137,36 +120,42 @@ async function fetchPrices() {
     data.forEach((item) => {
       const id = Number(item.id);
       const precio = Number(item.precio_actual);
+
+      if (isNaN(id) || isNaN(precio)) {
+        console.warn("Dato inválido recibido:", item);
+        return;
+      }
+
       const key = idMap[id];
       if (key) preciosMap[key] = precio;
     });
 
     currentPrices = preciosMap;
+    syncPricesToLocalStorage();
 
     renderPricesToGrid();
     showToast("Precios actualizados desde servidor");
   } catch (error) {
     console.error("Error GET /precios:", error);
-    showToast("Error al obtener precios. Usando datos locales.", true);
 
-    if (Object.values(currentPrices).every((v) => v === 0)) {
-      currentPrices = {
-        banos: 1000,
-        duchas: 1300,
-        andenes_precio_base: 2000,
-        andenes_bloque: 3500,
-        parking_base: 1500,
-        parking_bloque: 2800,
-      };
-    }
-
+    showToast(`Error al obtener precios: ${error.message}`, true);
     renderPricesToGrid();
+  }
+}
+
+function syncPricesToLocalStorage() {
+  try {
+    localStorage.setItem("preciosServicios", JSON.stringify(currentPrices));
+    console.log("💾 preciosServicios actualizado:", currentPrices);
+  } catch (error) {
+    console.error("Error guardando en localStorage:", error);
   }
 }
 
 // Enviar actualización de precio por POST
 async function updatePrice(servicioId, nuevoPrecio) {
   const precioNumerico = parseFloat(nuevoPrecio);
+
   if (isNaN(precioNumerico) || precioNumerico < 0) {
     showToast("Ingrese un precio válido (número positivo)", true);
     return false;
@@ -192,16 +181,10 @@ async function updatePrice(servicioId, nuevoPrecio) {
 
   try {
     if (!API_BASE_URL) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      currentPrices[backendKey] = precioFinal;
-      renderPricesToGrid();
-      showToast(
-        `Precio actualizado: ${servicioConfig.nombre} = $${precioFinal} (simulado)`,
-      );
-      return true;
+      throw new Error("API_BASE_URL no está configurado");
     }
 
-    // 🔥 POST REAL CORREGIDO
+    // POST PRECIOS
     const formData = new FormData();
     formData.append("id", servicioConfig.idBackend);
     formData.append("precio_actual", precioFinal);
@@ -214,13 +197,18 @@ async function updatePrice(servicioId, nuevoPrecio) {
       },
     );
 
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
     const data = await response.json();
 
-    if (!response.ok || data.status !== "success") {
+    if (data.status !== "success") {
       throw new Error(data.message || "Error en el servidor");
     }
 
     currentPrices[backendKey] = precioFinal;
+    syncPricesToLocalStorage();
 
     renderPricesToGrid();
     showToast(`${servicioConfig.nombre} actualizado a $${precioFinal}`);
@@ -228,10 +216,12 @@ async function updatePrice(servicioId, nuevoPrecio) {
     return true;
   } catch (error) {
     console.error("Error POST actualizar precio:", error);
+
     showToast(
       `Falló la actualización de ${servicioConfig.nombre}: ${error.message}`,
       true,
     );
+
     renderPricesToGrid();
     return false;
   }
