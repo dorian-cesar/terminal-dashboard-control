@@ -11,11 +11,12 @@ import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
   const urlLocal = window.URL_LOCAL;
   // const VALOR_MINUTO = window.VALOR_MINUTO;
   // const VALOR_MINUTO = 30; // ← reemplazado por tarifas por tramos
+  const precios = JSON.parse(localStorage.getItem("preciosServicios")) || {};
 
   // --- Tarifas por tramos ---
-  const TARIFA_TRAMO_INICIAL = 800; // Costo fijo por los primeros 30 min (o fracción)
+  const TARIFA_TRAMO_INICIAL = parseInt(precios.parking_base) || 0;
   const MINUTOS_TRAMO_INICIAL = 30; // Duración del tramo inicial en minutos
-  const TARIFA_TRAMO_ADICIONAL = 200; // Costo por cada 10 min adicionales vencidos
+  const TARIFA_TRAMO_ADICIONAL = parseInt(precios.parking_bloque) || 0;
   const MINUTOS_TRAMO_ADICIONAL = 10; // Tamaño del tramo adicional en minutos
   const TOPE_MAXIMO_DIARIO = 9600; // Cobro máximo permitido por día
 
