@@ -9,15 +9,15 @@ const VOLVER_URL = `../dashboard.html`;
 const API_URL = `${BASE_URL}caja-calama/`;
 const API_CAJA = `${URL_LOCAL}/api/info-caja`;
 
-// Importar el middleware 
-import { verificarAccesoSeccion } from '../middlewares/seccionesMiddleware.js';
+// Importar el middleware
+import { verificarAccesoSeccion } from "../middlewares/seccionesMiddleware.js";
 
 // --- VERIFICACIÓN DE ACCESO AL CARGAR LA PÁGINA ---
 $(document).ready(function () {
   // Verificar acceso a la sección "caja" antes de cualquier operación
-  if (!verificarAccesoSeccion('caja')) {
-      // Si no tiene acceso, el middleware ya redirige automáticamente
-      return;
+  if (!verificarAccesoSeccion("caja")) {
+    // Si no tiene acceso, el middleware ya redirige automáticamente
+    return;
   }
 
   // Si tiene acceso, continuar con la inicialización normal
@@ -75,19 +75,21 @@ class ToastSystem {
       $("body").append('<div class="toast-container"></div>');
     }
 
-    const icon = {
-      success: "✅",
-      error: "❌",
-      warning: "⚠️",
-      info: "ℹ️",
-    }[type] || "ℹ️";
+    const icon =
+      {
+        success: "✅",
+        error: "❌",
+        warning: "⚠️",
+        info: "ℹ️",
+      }[type] || "ℹ️";
 
-    const title = {
-      success: "Éxito",
-      error: "Error",
-      warning: "Advertencia",
-      info: "Información",
-    }[type] || "Información";
+    const title =
+      {
+        success: "Éxito",
+        error: "Error",
+        warning: "Advertencia",
+        info: "Información",
+      }[type] || "Información";
 
     const toast = $(`
       <div class="toast toast-${type}">
@@ -127,7 +129,7 @@ class UIStateManager {
     if (isOpen && data) {
       statusElement.removeClass("caja-cerrada").addClass("caja-abierta");
       statusElement.html(
-        `<i class="fas fa-circle"></i> Caja Abierta - ID: ${data.id}`
+        `<i class="fas fa-circle"></i> Caja Abierta - ID: ${data.id}`,
       );
 
       abrirBtn.prop("disabled", true);
@@ -150,7 +152,7 @@ class UIStateManager {
 
       this.resetStats();
       this.stopTurnTimer();
-      
+
       // Limpiar también cualquier loading state
       this.setLoading("#btnCerrarCaja", false);
       this.setLoading("#btnRefresh", false);
@@ -189,7 +191,7 @@ class UIStateManager {
 
   static resetStats() {
     $(
-      "#statMontoInicial, #statBanos, #statCustodia, #statParking, #statAndenes, #statTotal"
+      "#statMontoInicial, #statBanos, #statCustodia, #statParking, #statAndenes, #statTotal",
     ).text("$0");
   }
 
@@ -208,7 +210,7 @@ class UIStateManager {
       $("#progressTime").text(
         `${hours.toString().padStart(2, "0")}:${minutes
           .toString()
-          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`,
       );
 
       // Calcular progreso basado en 8 horas de turno
@@ -254,28 +256,54 @@ function horaActualChile() {
   });
 }
 
+// async function obtenerNumeroCaja() {
+//   try {
+//     const controller = new AbortController();
+//     const timeout = setTimeout(() => controller.abort(), 4000);
+
+//     const res = await fetch(API_CAJA, { signal: controller.signal });
+//     clearTimeout(timeout);
+
+//     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+//     const data = await res.json();
+//     return data.numero_caja || "SIN_NUMERO";
+//   } catch (err) {
+//     console.error("Error al obtener NUMERO_CAJA:", err);
+
+//     ToastSystem.show(
+//       "No se pudo conectar con el servidor de identificación de terminal.<br>Verifique la red o contacte a soporte técnico.",
+//       "error",
+//       8000
+//     );
+
+//     alert("⚠️ Error: no se pudo conectar con el servidor de caja.\n\nVerifique la red o contacte a soporte.");
+
+//     return "SIN_NUMERO";
+//   }
+// }
+
 async function obtenerNumeroCaja() {
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const numeroCaja = localStorage.getItem("num_caja");
 
-    const res = await fetch(API_CAJA, { signal: controller.signal });
-    clearTimeout(timeout);
+    if (!numeroCaja) {
+      throw new Error("num_caja no encontrado en localStorage");
+    }
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const data = await res.json();
-    return data.numero_caja || "SIN_NUMERO";
+    return numeroCaja;
   } catch (err) {
-    console.error("Error al obtener NUMERO_CAJA:", err);
+    console.error("Error al obtener NUMERO_CAJA desde localStorage:", err);
 
     ToastSystem.show(
-      "No se pudo conectar con el servidor de identificación de terminal.<br>Verifique la red o contacte a soporte técnico.",
+      "No se pudo obtener el número de caja desde el almacenamiento local.<br>Verifique la configuración o contacte a soporte técnico.",
       "error",
-      8000
+      8000,
     );
 
-    alert("⚠️ Error: no se pudo conectar con el servidor de caja.\n\nVerifique la red o contacte a soporte.");
+    alert(
+      "⚠️ Error: no se pudo obtener el número de caja.\n\nVerifique la configuración o contacte a soporte.",
+    );
 
     return "SIN_NUMERO";
   }
@@ -351,7 +379,7 @@ function actualizarTablaConMovimientos(movimientos) {
 
 function actualizarEstadisticas(movimientos) {
   const monto_inicial = parseFloat(
-    $("#statMontoInicial").text().replace("$", "").replace(/\./g, "") || 0
+    $("#statMontoInicial").text().replace("$", "").replace(/\./g, "") || 0,
   );
   const total =
     monto_inicial +
@@ -361,16 +389,16 @@ function actualizarEstadisticas(movimientos) {
     parseFloat(movimientos.monto_andenes || 0);
 
   $("#statBanos").text(
-    `$${UIStateManager.formatCurrency(movimientos.monto_bano || 0)}`
+    `$${UIStateManager.formatCurrency(movimientos.monto_bano || 0)}`,
   );
   $("#statCustodia").text(
-    `$${UIStateManager.formatCurrency(movimientos.monto_custodia || 0)}`
+    `$${UIStateManager.formatCurrency(movimientos.monto_custodia || 0)}`,
   );
   $("#statParking").text(
-    `$${UIStateManager.formatCurrency(movimientos.monto_parking || 0)}`
+    `$${UIStateManager.formatCurrency(movimientos.monto_parking || 0)}`,
   );
   $("#statAndenes").text(
-    `$${UIStateManager.formatCurrency(movimientos.monto_andenes || 0)}`
+    `$${UIStateManager.formatCurrency(movimientos.monto_andenes || 0)}`,
   );
   $("#statTotal").text(`$${UIStateManager.formatCurrency(total)}`);
 }
@@ -382,11 +410,13 @@ function mostrarCaja(data) {
   const monto_parking = parseFloat(data.monto_parking || 0);
   const monto_andenes = parseFloat(data.monto_andenes || 0);
   const monto_inicial = parseFloat(data.monto_inicial || 0);
-  const total = monto_inicial + monto_bano + monto_custodia + monto_parking + monto_andenes;
+  const total =
+    monto_inicial + monto_bano + monto_custodia + monto_parking + monto_andenes;
 
-  const estadoBadge = data.estado === "abierta"
-    ? '<span class="badge badge-abierta"><i class="fas fa-play-circle me-1"></i>Abierta</span>'
-    : '<span class="badge badge-cerrada"><i class="fas fa-stop-circle me-1"></i>Cerrada</span>';
+  const estadoBadge =
+    data.estado === "abierta"
+      ? '<span class="badge badge-abierta"><i class="fas fa-play-circle me-1"></i>Abierta</span>'
+      : '<span class="badge badge-cerrada"><i class="fas fa-stop-circle me-1"></i>Cerrada</span>';
 
   $("#tablaCaja tbody").html(`
         <tr>
@@ -459,24 +489,26 @@ function mostrarCaja(data) {
 function limpiarEstadoCaja() {
   // Limpiar localStorage
   localStorage.removeItem("id_caja");
-  
+
   // Restaurar botón cerrar caja a estado normal (pero disabled)
   $("#btnCerrarCaja").prop("disabled", true);
   $("#btnCerrarCaja").html(`
     <i class="fas fa-lock me-2"></i>
     Cerrar Caja
   `);
-  
+
   $("#btnImprimir").prop("disabled", true);
   $("#btnAbrirCaja").prop("disabled", false);
-  
-  $("#cajaStatus").removeClass("caja-abierta").addClass("caja-cerrada")
-                 .html('<i class="fas fa-circle"></i> Caja Cerrada');
-  
+
+  $("#cajaStatus")
+    .removeClass("caja-abierta")
+    .addClass("caja-cerrada")
+    .html('<i class="fas fa-circle"></i> Caja Cerrada');
+
   // Resetear estadísticas
   UIStateManager.resetStats();
   UIStateManager.stopTurnTimer();
-  
+
   // Mostrar tabla vacía
   $("#noDataRow").show();
   $("#registrosCount").text("0 registros");
@@ -493,19 +525,19 @@ function limpiarEstadoCaja() {
 
 function verificarEstadoCaja() {
   const id_caja_local = localStorage.getItem("id_caja");
-  
+
   // Si NO hay id_caja en localStorage → caja cerrada
   if (!id_caja_local) {
     limpiarEstadoCaja();
     return;
   }
-  
+
   // Si hay id_caja, verificar en el servidor si sigue abierta
   $.post(API_URL + "caja.php", { accion: "mostrar", id_caja: id_caja_local })
     .done(function (res) {
       try {
         const data = JSON.parse(res);
-        
+
         if (data.success && data.estado === "abierta") {
           // Caja existe y está abierta → mostrar datos
           mostrarCaja(data);
@@ -561,36 +593,41 @@ $("#formInicioCaja").on("submit", async function (e) {
     monto_inicial: monto,
     id_usuario: id_usuario,
     numero_caja: numeroCaja,
-    hora_inicio: hora_inicio
+    hora_inicio: hora_inicio,
   })
-  .done(function (res) {
-    let data;
-    try { data = JSON.parse(res); } catch (e) { throw new Error("Respuesta inválida"); }
+    .done(function (res) {
+      let data;
+      try {
+        data = JSON.parse(res);
+      } catch (e) {
+        throw new Error("Respuesta inválida");
+      }
 
-    if (data.success) {
-      localStorage.setItem("id_caja", data.id);
-      mostrarCaja(data);
-      UIStateManager.updateCajaStatus(true, data);
-      cargarMovimientosCaja(data.id);
+      if (data.success) {
+        localStorage.setItem("id_caja", data.id);
+        mostrarCaja(data);
+        UIStateManager.updateCajaStatus(true, data);
+        cargarMovimientosCaja(data.id);
 
-      $("#modalInicio").modal("hide");
-      $("#formInicioCaja")[0].reset();
+        $("#modalInicio").modal("hide");
+        $("#formInicioCaja")[0].reset();
 
-      ToastSystem.show(data.reutilizada ? 
-        "Se ha retomado correctamente la caja abierta." : 
-        "Caja abierta correctamente.", 
-        "success"
-      );
-    } else {
-      throw new Error(data.error || "Error al abrir caja");
-    }
-  })
-  .fail(function (xhr, status, error) {
-    ToastSystem.show("Error de conexión: " + error, "error");
-  })
-  .always(function () {
-    UIStateManager.setLoading("#btnSubmitAbrir", false);
-  });
+        ToastSystem.show(
+          data.reutilizada
+            ? "Se ha retomado correctamente la caja abierta."
+            : "Caja abierta correctamente.",
+          "success",
+        );
+      } else {
+        throw new Error(data.error || "Error al abrir caja");
+      }
+    })
+    .fail(function (xhr, status, error) {
+      ToastSystem.show("Error de conexión: " + error, "error");
+    })
+    .always(function () {
+      UIStateManager.setLoading("#btnSubmitAbrir", false);
+    });
 });
 
 $("#btnCerrarCaja").on("click", function () {
@@ -604,7 +641,7 @@ $("#btnCerrarCaja").on("click", function () {
 
   const $btn = $(this);
   const originalText = $btn.html();
-  
+
   $btn.prop("disabled", true);
   $btn.html(`
     <span class="spinner"></span>
@@ -613,29 +650,29 @@ $("#btnCerrarCaja").on("click", function () {
 
   const hora_cierre = horaActualChile();
 
-  $.post(API_URL + "caja.php", { 
-    accion: "cerrar", 
+  $.post(API_URL + "caja.php", {
+    accion: "cerrar",
     id_caja: id,
-    hora_cierre: hora_cierre
+    hora_cierre: hora_cierre,
   })
-  .done(function (res) {
-    try {
-      const data = JSON.parse(res);
-      if (data.success) {
+    .done(function (res) {
+      try {
+        const data = JSON.parse(res);
+        if (data.success) {
+          limpiarEstadoCaja();
+          ToastSystem.show("Caja cerrada correctamente", "success");
+        } else {
+          throw new Error(data.error || "Error al cerrar caja");
+        }
+      } catch (e) {
+        ToastSystem.show("Error al procesar respuesta: " + e.message, "error");
         limpiarEstadoCaja();
-        ToastSystem.show("Caja cerrada correctamente", "success");
-      } else {
-        throw new Error(data.error || "Error al cerrar caja");
       }
-    } catch (e) {
-      ToastSystem.show("Error al procesar respuesta: " + e.message, "error");
+    })
+    .fail(function (xhr, status, error) {
+      ToastSystem.show("Error de conexión: " + error, "error");
       limpiarEstadoCaja();
-    }
-  })
-  .fail(function (xhr, status, error) {
-    ToastSystem.show("Error de conexión: " + error, "error");
-    limpiarEstadoCaja();
-  });
+    });
 });
 
 $("#btnImprimir").on("click", function () {
