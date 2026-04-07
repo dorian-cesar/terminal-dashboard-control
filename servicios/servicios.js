@@ -233,7 +233,13 @@ function renderPricesToGrid() {
   if (!gridContainer) return;
 
   gridContainer.innerHTML = "";
-  for (const servicio of SERVICIOS) {
+
+  // filtro para no mostrar andenes
+  const serviciosVisibles = SERVICIOS.filter((s) => !s.id.includes("andenes"));
+
+  // comentado para usar serviciosVisibles en vez de SERVICIOS
+  // for (const servicio of SERVICIOS) {
+  for (const servicio of serviciosVisibles) {
     const precioActual = currentPrices[servicio.claveApi] ?? 0;
 
     const precioFormateado = new Intl.NumberFormat("es-CL", {
