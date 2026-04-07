@@ -256,54 +256,56 @@ function horaActualChile() {
   });
 }
 
-// async function obtenerNumeroCaja() {
-//   try {
-//     const controller = new AbortController();
-//     const timeout = setTimeout(() => controller.abort(), 4000);
-
-//     const res = await fetch(API_CAJA, { signal: controller.signal });
-//     clearTimeout(timeout);
-
-//     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-//     const data = await res.json();
-//     return data.numero_caja || "SIN_NUMERO";
-//   } catch (err) {
-//     console.error("Error al obtener NUMERO_CAJA:", err);
-
-//     ToastSystem.show(
-//       "No se pudo conectar con el servidor de identificación de terminal.<br>Verifique la red o contacte a soporte técnico.",
-//       "error",
-//       8000
-//     );
-
-//     alert("⚠️ Error: no se pudo conectar con el servidor de caja.\n\nVerifique la red o contacte a soporte.");
-
-//     return "SIN_NUMERO";
-//   }
-// }
-
 async function obtenerNumeroCaja() {
   try {
-    const numeroCaja = localStorage.getItem("num_caja");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
 
-    if (!numeroCaja) {
-      throw new Error("num_caja no encontrado en localStorage");
-    }
+    const res = await fetch(API_CAJA, { signal: controller.signal });
+    clearTimeout(timeout);
 
-    return numeroCaja;
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    return data.numero_caja || "SIN_NUMERO";
   } catch (err) {
-    console.error("Error al obtener NUMERO_CAJA desde localStorage:", err);
+    console.error("Error al obtener NUMERO_CAJA:", err);
 
     ToastSystem.show(
-      "No se pudo obtener el número de caja desde el almacenamiento local.<br>Verifique la configuración o contacte a soporte técnico.",
+      "No se pudo conectar con el servidor de identificación de terminal.<br>Verifique la red o contacte a soporte técnico.",
       "error",
       8000,
+    );
+
+    alert(
+      "⚠️ Error: no se pudo conectar con el servidor de caja.\n\nVerifique la red o contacte a soporte.",
     );
 
     return "SIN_NUMERO";
   }
 }
+
+// async function obtenerNumeroCaja() {
+//   try {
+//     const numeroCaja = localStorage.getItem("num_caja");
+
+//     if (!numeroCaja) {
+//       throw new Error("num_caja no encontrado en localStorage");
+//     }
+
+//     return numeroCaja;
+//   } catch (err) {
+//     console.error("Error al obtener NUMERO_CAJA desde localStorage:", err);
+
+//     ToastSystem.show(
+//       "No se pudo obtener el número de caja desde el almacenamiento local.<br>Verifique la configuración o contacte a soporte técnico.",
+//       "error",
+//       8000,
+//     );
+
+//     return "SIN_NUMERO";
+//   }
+// }
 
 // --- Funciones para Movimientos en Tiempo Real ---
 function cargarMovimientosCaja(idCaja) {
