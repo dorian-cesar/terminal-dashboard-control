@@ -301,10 +301,6 @@ async function obtenerNumeroCaja() {
       8000,
     );
 
-    alert(
-      "⚠️ Error: no se pudo obtener el número de caja.\n\nVerifique la configuración o contacte a soporte.",
-    );
-
     return "SIN_NUMERO";
   }
 }
