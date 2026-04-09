@@ -17,7 +17,7 @@ const urlLoad = `${API_BANOS_BASE}loadCalama.php`;
 const urlLoadToday = `${API_BANOS_BASE}loadTodayCalama.php`;
 const urlSave = `${API_BANOS_BASE}saveCalama.php`;
 const urlAddUser = `${API_BANOS_BASE}addUser.php`;
-const urlLevelUser = `${API_BANOS_BASE}addLevelUser.php`;
+const urlLevelUser = `${API_BANOS_BASE}addLevelUser2.php`;
 const urlBoleto = `${API_BANOS_BASE}estadoBoleto.php`;
 
 // URLs locales (impresión y transbank)
@@ -467,8 +467,12 @@ function generarQRParaServicio(tipoServicio) {
 
       // Otros procesos
       leerDatosServer();
-      addUser(numeroT);
-      addUserAccessLevel(numeroT.substring(0, 6));
+      try {
+        await addUser(numeroT);
+        await addUserAccessLevel(numeroT.substring(0, 6));
+      } catch (err) {
+        console.error("Error en flujo de usuario:", err);
+      }
 
       resolve(numeroT);
     } catch (error) {
@@ -743,40 +747,46 @@ async function addUser(token) {
     pin: token,
     idNo: token,
   };
-  try {
-    let response = await fetch(urlAddUser, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
-    let result = await response.text();
-    console.log("Respuesta de addUser:", result);
-  } catch (error) {
-    console.error("Error al agregar usuario:", error);
+
+  const response = await fetch(urlAddUser, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error en addUser");
   }
+
+  const result = await response.text();
+  console.log("Respuesta de addUser:", result);
+
+  return result;
 }
 
 async function addUserAccessLevel(token) {
   const accessData = {
     pin: token,
   };
-  try {
-    let response = await fetch(urlLevelUser, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(accessData),
-    });
-    let result = await response.text();
-    console.log("Respuesta de addLevelUser:", result);
-  } catch (error) {
-    console.error("Error al asignar niveles de acceso:", error);
+
+  const response = await fetch(urlLevelUser, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(accessData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error en addUserAccessLevel");
   }
+
+  const result = await response.text();
+  console.log("Respuesta de addLevelUser:", result);
+
+  return result;
 }
 
 function verificarCodigo() {
