@@ -16,7 +16,7 @@ const API_BANOS_BASE = `${BASE_URL}TerminalCalama/PHP/Restroom/`;
 const urlLoad = `${API_BANOS_BASE}loadCalama.php`;
 const urlLoadToday = `${API_BANOS_BASE}loadTodayCalama.php`;
 const urlSave = `${API_BANOS_BASE}saveCalama.php`;
-const urlAddUser = `${API_BANOS_BASE}addUser.php`;
+const urlAddUser = `${API_BANOS_BASE}addUserCalama.php`;
 const urlLevelUser = `${API_BANOS_BASE}addLevelUser.php`;
 const urlBoleto = `${API_BANOS_BASE}estadoBoleto.php`;
 
