@@ -19,6 +19,7 @@ const urlSave = `${API_BANOS_BASE}saveCalama.php`;
 const urlAddUser = `${API_BANOS_BASE}addUserCalama.php`;
 const urlLevelUser = `${API_BANOS_BASE}addLevelUser.php`;
 const urlBoleto = `${API_BANOS_BASE}estadoBoleto.php`;
+const urlCheckUserExist = "https://andenes.terminal-calama.com/TerminalCalama/PHP/Restroom/getUser.php";
 
 // URLs locales (impresión y transbank)
 const urlImpresion = urlLocal + "/api/imprimir";
@@ -274,23 +275,14 @@ async function procesarPagoEfectivo(tipoServicio) {
 
 async function procesarPagoTarjeta(tipoServicio) {
   try {
-    // 1. Generar código único para el QR
-    const codigoQR = generarTokenNumerico();
+    // 1. Generar código único para el QR (verificando que no exista en ZKTeco)
+    const codigoQR = await generarTokenNumericoUnico();
 
     // 2. Usar ese código como ticketNumber para Transbank
     // const resultadoTransbank = await procesarConTransbank(
     //   tipoServicio,
     //   codigoQR,
     // );
-
-    // if (!resultadoTransbank.success) {
-    //   showToast(
-    //     "Error en pago con tarjeta: " + resultadoTransbank.error,
-    //     "error",
-    //   );
-    //   return;
-    // }
-
     // 3. Generar QR usando el mismo código
     await generarQRParaServicio(tipoServicio, codigoQR);
     // await printQR(resultadoTransbank.autorizacion);
@@ -391,7 +383,7 @@ function cerrarModal() {
 }
 
 // Función para generar QR específico para servicio
-function generarQRParaServicio(tipoServicio) {
+function generarQRParaServicio(tipoServicio, token = null) {
   return new Promise(async (resolve, reject) => {
     const contenedorQR = document.getElementById("contenedorQR");
     const contenedorContador = document.getElementById("keycont");
@@ -417,14 +409,22 @@ function generarQRParaServicio(tipoServicio) {
 
     // USAR EL VALOR DESDE window.restroom
     const valor = window.restroom ? window.restroom[tipoServicio] : 0;
-    const numeroT = generarTokenNumerico();
+
+    // Si no se proporciona un token, generar uno único
+    let numeroT;
+    try {
+      numeroT = token || await generarTokenNumericoUnico();
+    } catch (err) {
+      console.error(err);
+      showToast("Error al generar código: " + err.message, "error");
+      return reject(err);
+    }
 
     const datos = {
       Codigo: numeroT,
       hora: horaStr,
       fecha: fechaStr,
       tipo: tipoStr,
-      valor: valor, // Usar el valor dinámico
       id_caja: id_caja,
       medio_pago: metodoPagoSeleccionado || "efectivo",
     };
@@ -528,6 +528,41 @@ async function callApi(datos) {
 
 function generarTokenNumerico() {
   return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+async function checkUserExist(pin) {
+  try {
+    const response = await fetch(urlCheckUserExist, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin }),
+    });
+    const data = await response.json();
+    // Según el usuario: code 0 = éxito (existe), code -22 = no existe
+    return data.code === 0;
+  } catch (error) {
+    console.error("Error al verificar existencia de PIN:", error);
+    return false; // Si falla la API, asumimos que no existe para no bloquear
+  }
+}
+
+async function generarTokenNumericoUnico() {
+  let pin;
+  let existe = true;
+  let intentos = 0;
+  const maxIntentos = 10;
+
+  while (existe && intentos < maxIntentos) {
+    pin = generarTokenNumerico();
+    existe = await checkUserExist(pin);
+    intentos++;
+  }
+
+  if (existe) {
+    throw new Error("No se pudo generar un PIN único después de varios intentos");
+  }
+
+  return pin;
 }
 
 function leerDatosServer() {
