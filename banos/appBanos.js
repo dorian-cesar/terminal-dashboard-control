@@ -38,21 +38,23 @@ function getPreciosServicios() {
 }
 
 // Inicialización
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("DOM cargado - Inicializando página...");
-
-  // --- VERIFICACIÓN DE ACCESO AL CARGAR LA PÁGINA ---
-  // Verificar acceso a la sección "baños" antes de cualquier operación
-  // if (!verificarAccesoSeccion("banos")) {
-  //   // Si no tiene acceso, el middleware ya redirige automáticamente
-  //   return;
-  // }
-
-  // console.log("Valores de servicios disponibles:", window.restroom);
-
-  // Si tiene acceso, continuar con la inicialización normal
+function startInitialization() {
+  console.log("[Banos] Iniciando inicialización...");
+  if (window.isInitialized) {
+    console.log("[Banos] Ya inicializado, omitiendo.");
+    return;
+  }
+  window.isInitialized = true;
   initializePage();
-});
+}
+
+// Inicialización robusta
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startInitialization);
+} else {
+  // Si ya cargó o está interactivo, ejecutar inmediatamente
+  startInitialization();
+}
 
 function initializePage() {
   console.log("Inicializando página...");
@@ -94,21 +96,27 @@ function initializePage() {
 
 // Función específica para actualizar los valores de los servicios
 function actualizarValoresServicios() {
-  console.log("Actualizando valores desde localStorage...");
+  console.log("[Banos] Actualizando valores de servicios...");
 
   const precios = getPreciosServicios();
+  console.log("[Banos] Precios desde localStorage:", precios);
+  console.log("[Banos] Precios desde valores.js (window.restroom):", window.restroom);
 
-  const valorBaño = document.getElementById("valorBaño");
+  const valorBano = document.getElementById("valorBano");
   const valorDucha = document.getElementById("valorDucha");
 
-  if (valorBaño) {
-    const precio = precios.banos ?? 600;
-    valorBaño.textContent = `$${precio}`;
+  if (valorBano) {
+    // 1. Intentar localStorage, 2. Intentar window.restroom, 3. Default 600
+    const precio = precios.banos ?? (window.restroom ? window.restroom.Baño : 600);
+    valorBano.textContent = `$${precio}`;
+    console.log(`[Banos] Valor Baño establecido en: $${precio}`);
   }
 
   if (valorDucha) {
-    const precio = precios.duchas ?? 4000;
+    // 1. Intentar localStorage, 2. Intentar window.restroom, 3. Default 4000
+    const precio = precios.duchas ?? (window.restroom ? window.restroom.Ducha : 4000);
     valorDucha.textContent = `$${precio}`;
+    console.log(`[Banos] Valor Ducha establecido en: $${precio}`);
   }
 }
 
